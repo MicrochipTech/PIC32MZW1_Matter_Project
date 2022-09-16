@@ -1,0 +1,129 @@
+# Copyright (c) 2020 Project CHIP Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/wfi32_sdk.gni")
+
+template("wfi32_sdk_target") {
+  print("XXXwfi32 sdk, target name = ${target_name}")
+  wfi32_sdk_target_name = target_name
+
+  _freertos_root = "${wfi32_sdk_root}/rtos/FreeRTOS/Source"
+  _h3_library_root = "${wfi32_sdk_root}/config/pic32mz_w1_curiosity"
+
+  config("${wfi32_sdk_target_name}_config") {
+    include_dirs = [ 
+      "${_freertos_root}/include",
+      "${_freertos_root}/portable/MPLAB/PIC32MZ", 
+    ]
+    include_dirs += [
+      "${wfi32_sdk_root}", 
+      "${_h3_library_root}",
+      "${_h3_library_root}/bsp",
+      "${_h3_library_root}/driver",
+      "${_h3_library_root}/osal",
+      "${_h3_library_root}/peripheral/clk",
+      "${_h3_library_root}/peripheral/evic",
+      "${_h3_library_root}/peripheral/gpio",
+      "${_h3_library_root}/peripheral/uart",
+      "${_h3_library_root}/system",
+      "${_h3_library_root}/system/console",
+      "${_h3_library_root}/system/console/src",
+      "${_h3_library_root}/system/debug",
+      "${_h3_library_root}/system/debug/src",
+      "${_h3_library_root}/system/int",
+      "/opt/microchip/xc32/v4.10/pic32mx/include/proc/PIC32MZ-W/",
+    ]
+
+    defines = [
+      "__PIC32MZ__",
+      "CHIP_HAVE_CONFIG_H=1",
+      #"MBEDTLS_CONFIG_FILE=<matter_mbedtls_config.h>",
+    ] 
+
+  }
+
+  source_set(wfi32_sdk_target_name) {
+    forward_variables_from(invoker, "*")
+
+    if (!defined(sources)) {
+      sources = []
+    }
+
+    sources += [
+      "${_freertos_root}/croutine.c",
+      "${_freertos_root}/event_groups.c",
+      "${_freertos_root}/list.c",
+      "${_freertos_root}/queue.c",
+      "${_freertos_root}/stream_buffer.c",
+      #"${_freertos_root}/tasks.c",
+      "${_freertos_root}/timers.c",
+      "${_freertos_root}/FreeRTOS_tasks.c",
+      "${_freertos_root}/portable/MemMang/heap_3.c",
+      "${_freertos_root}/portable/MPLAB/PIC32MZ/port.c",
+      "${_freertos_root}/portable/MPLAB/PIC32MZ/port_asm.S",
+    ]
+
+    sources += [
+      "${_h3_library_root}/initialization.c",
+      "${_h3_library_root}/interrupts.c",
+      "${_h3_library_root}/exceptions.c",
+      "${_h3_library_root}/pmu_init.c",
+      "${_h3_library_root}/bsp/bsp.c",
+      "${_h3_library_root}/osal/osal_freertos.c",
+      "${_h3_library_root}/peripheral/clk/plib_clk.c",
+      "${_h3_library_root}/peripheral/evic/plib_evic.c",
+      "${_h3_library_root}/peripheral/gpio/plib_gpio.c",
+      "${_h3_library_root}/peripheral/uart/plib_uart1.c",
+      "${_h3_library_root}/peripheral/uart/plib_uart3.c",
+      "${_h3_library_root}/system/console/src/sys_console.c",
+      "${_h3_library_root}/system/console/src/sys_console_uart.c",
+      "${_h3_library_root}/system/debug/src/sys_debug.c",
+      "${_h3_library_root}/system/int/src/sys_int.c",
+      "${_h3_library_root}/stdio/xc32_monitor.c",
+      "${_h3_library_root}/interrupts_a.S",
+    ]
+
+    if (!defined(configs)) {
+      configs = []
+    }
+
+    if (!defined(public_configs)) {
+      public_configs = []
+    }
+
+    public_configs += [ ":${wfi32_sdk_target_name}_config" ]
+  }
+
+  source_set("h3_library") {
+    forward_variables_from(invoker, "*")
+
+    if (!defined(sources)) {
+      sources = []
+    }
+
+    sources += [
+      "${_h3_library_root}/interrupts.c",
+      "${_h3_library_root}/bsp/bsp.c",
+    ]
+
+    include_dirs = [ 
+    ]
+
+    defines = [
+      "__PIC32MZ__",
+    ] 
+
+  }
+
+}

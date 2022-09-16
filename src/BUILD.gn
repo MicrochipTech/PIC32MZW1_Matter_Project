@@ -105,6 +105,7 @@ if (chip_build_tests) {
     # On nrfconnect, the controller tests run into
     # https://github.com/project-chip/connectedhomeip/issues/9630
     if (chip_device_platform != "nrfconnect" &&
+        chip_device_platform != "wfi32" &&
         chip_device_platform != "efr32") {
       # TODO(#10447): Controller test has HF on EFR32.
       deps += [

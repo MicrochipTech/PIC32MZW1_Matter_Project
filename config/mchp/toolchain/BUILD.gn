@@ -1,0 +1,147 @@
+# Copyright (c) 2020 Project CHIP Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/build.gni")
+import("//build_overrides/chip.gni")
+import("//build_overrides/wfi32_sdk.gni")
+
+#import("//build//toolchain/gcc_toolchain.gni")
+import("${build_root}/toolchain/gcc_toolchain.gni")
+
+declare_args() {
+  mchp_ar = "xc32-ar"
+  mchp_cc = "xc32-gcc"
+  mchp_cxx = "xc32-g++"
+  mchp_cpu = "P32MZ1025W104132"
+}
+
+toolchain("wfi32") {
+  tool("cc") {
+    depfile = "{{output}}.d"
+    #command = "$mchp_cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    #command = "$mchp_cc -g -x c -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    #command = "$mchp_cc -g2 -x c -c -mprocessor=32MZ1025W104132 -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_pic32mz_w1_curiosity_freertos=pic32mz_w1_curiosity_freertos  -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed"
+    command = "$mchp_cxx -g -x c -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type    -G 0 -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    depsformat = "gcc"
+    description = "CC123 {{output}}"
+    outputs = [
+      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+    ]
+  }
+  tool("cxx") {
+    depfile = "{{output}}.d"
+    command = "$mchp_cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    #command = "$mchp_cxx -g -x c++ -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    #command = "$mchp_cxx -g2 -x c++ -c -mprocessor=32MZ1025W104132 -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_pic32mz_w1_curiosity_freertos=pic32mz_w1_curiosity_freertos  -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed"
+    command = "$mchp_cxx -g -x c++ -c -mprocessor=32MZ1025W104132 -frtti -fexceptions -fno-check-new -fenforce-eh-specs -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default  -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type   -G 0 -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    depsformat = "gcc"
+    description = "CXX {{output}}"
+    outputs = [
+      "{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+    ]
+  }
+  tool("asm") {
+    depfile = "{{output}}.d"
+    #command = "$mchp_cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$mchp_cxx -c -mprocessor=32MZ1025W104132 {{include_dirs}} -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -Wa,--defsym=__MPLAB_BUILD=1,--gdwarf-2 -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    #command = "$mchp_cc -g2 -x c -c -mprocessor=32MZ1025W104132 -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_pic32mz_w1_curiosity_freertos=pic32mz_w1_curiosity_freertos  -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed"
+    #command = "$mchp_cc -g -x c -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default  -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type    -G 0 -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    depsformat = "gcc"
+    description = "as {{output}}"
+    outputs = [
+      "{{source_out_dir}}/{{target_output_name}}.{{source_file_part}}.o",
+      #"{{source_out_dir}}/{{target_output_name}}.{{source_name_part}}.o",
+    ]
+  }
+  
+  tool("alink") {
+    rspfile = "{{output}}.rsp"
+    command = "rm -f {{output}} && $mchp_ar rcs {{output}} @$rspfile"
+    description = "AR {{target_output_name}}{{output_extension}}"
+    rspfile_content = "{{inputs}}"
+    outputs = [
+      "{{target_out_dir}}/{{target_output_name}}{{output_extension}}",
+    ]
+    default_output_extension = ".a"
+    output_prefix = "lib"
+  }
+  tool("solink") {
+    soname = "{{target_output_name}}{{output_extension}}"
+    # e.g. "libfoo.so".
+    rspfile = soname + ".rsp"
+    command = "$mchp_cxx -shared xxx {{ldflags}} -o $soname -Wl,-soname=$soname @$rspfile"
+    rspfile_content = "-Wl,--whole-archive {{inputs}} {{solibs}} -Wl,--no-whole-archive {{libs}}"
+    description = "SOLINK $soname"
+    # Use this
+    #for {
+    #  {
+    #    output_extension
+    #  }
+    #}
+    #expansions unless a target manually
+    # overrides it( in which
+    #    case {
+    #      {
+     #       output_extension
+    #      }
+    #    }
+    #    will be what the target # specifies)
+    #  .
+    default_output_extension = ".so"
+    outputs = [
+      soname,
+    ]
+    link_output = soname
+    depend_output = soname
+    output_prefix = "lib"
+  }
+print("XXXLINK=${wfi32_sdk_root}")
+  tool("link") {
+    outfile = "{{target_output_name}}{{output_extension}}"
+    rspfile = "$outfile.rsp"
+    linker_script = "${wfi32_sdk_root}/config/pic32mz_w1_curiosity/p32MZ1025W104132.ld"
+    linker_script_path = rebase_path(linker_script, root_build_dir) 
+    #command = "$mchp_cxx {{ldflags}} -o $outfile, --script=\"../p32MZ1025W104132.ld\", -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}}"
+    #command = "$mchp_cxx -mprocessor=32MZ1025W104132 -mreserve=prog@0x100ff000:0x100fffff -o $outfile {{inputs}} -DXPRJ_default=default -Wl,--defsym=__MPLAB_BUILD=1,--script=${linker_script_path},--defsym=_min_heap_size=130000,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./matterLib_Test1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    command = "$mchp_cxx -mprocessor=32MZ1025W104132 -o $outfile {{inputs}} -DXPRJ_default=default -Wl,--defsym=__MPLAB_BUILD=1,--script=${linker_script_path},--defsym=_min_heap_size=130000,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./matterLib_Test1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    #command = "$mchp_cxx -mprocessor=32MZ1025W104132 -mreserve=prog@0x100ff000:0x100fffff -o $outfile {{inputs}} -DXPRJ_default=default    -Wl,--defsym=__MPLAB_BUILD=1,--script=\"../p32MZ1025W104132.ld\",--defsym=_min_heap_size=130000,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./matterLib_Test1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    description = "LINK $outfile"
+    rspfile_content = "{{inputs}}"
+    outputs = [
+      outfile,
+    ]
+  }
+  tool("stamp") {
+    command = "touch {{output}}"
+    description = "STAMP {{output}}"
+  }
+  tool("copy") {
+    command = "cp -af {{source}} {{output}}"
+    description = "COPY {{source}} {{output}}"
+  }
+}
+
+#gcc_toolchain("wfi32") {
+#  ar = mchp_ar
+#  cc = mchp_cc
+#  cxx = mchp_cxx
+#
+#  toolchain_args = {
+#    current_os = "freertos"
+#    current_cpu = mchp_cpu
+#    is_clang = false
+#    #import("//config/mchp/args.gni")
+#    import("${chip_root}/config/mchp/args.gni")
+#  }
+#}

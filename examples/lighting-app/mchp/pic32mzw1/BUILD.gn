@@ -1,0 +1,113 @@
+# Copyright (c) 2021 Project CHIP Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/build.gni")
+import("//build_overrides/chip.gni")
+import("//build_overrides/wfi32_sdk.gni")
+
+import("${build_root}/config/defaults.gni")
+import("${chip_root}/src/platform/device.gni")
+import("${wfi32_sdk_root}/wfi32_executable.gni")
+import("${wfi32_sdk_root}/wfi32_sdk.gni")
+
+assert(current_os == "freertos")
+
+pic32mzw1_project_dir = "${chip_root}/examples/lighting-app/mchp/pic32mzw1"
+examples_plat_dir = "${chip_root}/examples/platform/mchp/pic32mzw1"
+wfi32_sdk_dir = "${wfi32_sdk_root}/config/pic32mz_w1_curiosity"
+
+declare_args() {
+  # Dump memory usage at link time.
+  chip_print_memory_usage = true
+
+  # PIN code for PASE session establishment.
+  setup_pin_code = 20202021
+
+  # Monitor & log memory usage at runtime.
+  enable_heap_monitoring = false
+
+  # Build update app
+  build_update_image = false
+}
+
+
+#wfi32_executable("lighting_app") {
+executable("lighting_app") {
+  include_dirs = []
+  defines = []
+  ldflags = []
+  output_name = "chip-wfi32-lighting-example.elf"
+
+  sources = [
+    "${examples_plat_dir}/LEDWidget.cpp",
+    "${examples_plat_dir}/init_wfi32Platform.cpp",
+    "src/AppTask.cpp",
+    "src/ButtonHandler.cpp",
+    "src/LightingManager.cpp",
+    "src/ZclCallbacks.cpp",
+    "src/main.cpp",
+    #"src/freertos_hooks.c",
+  ]
+  deps = [
+ #   ":lighting_app_sdk_sources",
+    "${chip_root}/examples/common/QRCode",
+    "${chip_root}/examples/lighting-app/lighting-common",
+    "${chip_root}/src/lib",
+    "${chip_root}/src/setup_payload",
+  ]
+
+  include_dirs += [
+    "include",
+    "${examples_plat_dir}",
+    "${pic32mzw1_project_dir}/include",
+    "${wfi32_sdk_root}",
+    "${wfi32_sdk_dir}",
+    "${wfi32_sdk_root}/rtos/FreeRTOS/Source/include",
+
+  ]
+
+  defines = []
+
+  #defines += [ "MBEDTLS_CONFIG_FILE=<matter_mbedtls_config.h>" ]
+
+  if (enable_heap_monitoring) {
+    sources += [ "${examples_plat_dir}/MemMonitoring.cpp" ]
+    defines += [ "HEAP_MONITORING" ]
+  }
+  ldflags += [
+    "-mprocessor=32MZ1025W104132",
+    "-mreserve=prog@0x100ff000:0x100fffff",
+    #"--script=\"..\/p32MZ1025W104132.ld\"",
+  ]
+
+  #ldflags -= [
+  #  "-fdiagnostics-color",
+  #]
+  if (chip_print_memory_usage) {
+    ldflags += [
+      "-Wl,--print-memory-usage",
+      "-fstack-usage",
+    ]
+  }
+
+  #output_dir = root_out_dir
+}
+
+group("wfi32") {
+  deps = [ ":lighting_app" ]
+}
+
+group("default") {
+  deps = [ ":wfi32" ]
+}

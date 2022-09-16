@@ -227,7 +227,7 @@ config("warnings_common") {
   }
 
   if (current_os != "mac" && current_os != "ios" && current_os != "linux" &&
-      current_os != "win" && current_os != "tizen" && current_os != "webos") {
+      current_os != "win" && current_os != "tizen" && current_os != "webos" && current_cpu != "wfi32") {
     cflags += [ "-Wstack-usage=8192" ]
   }
 }
@@ -544,5 +544,23 @@ config("specs_default") {
     libs = [ "nosys" ]
 
     ldflags = cflags
+  }
+  else if (current_cpu == "wfi32" && current_os == "freertos" && !is_clang) {
+    print("XXX specs_default log2")
+    cflags = [
+      "-no-legacy-libc",
+      "-Wno-sign-compare",
+      "-Wno-conversion",
+      "-mprocessor=32MZ1025W104132",
+      #"-Wno-old-style-declaration",
+      "-Os",
+      "-mmicromips",
+      "-minterlink-compressed",
+      "-G",
+      "0",
+    ]
+
+   #defines = [ "MBEDTLS_CONFIG_FILE=<matter_mbedtls_config.h>", ]
+    #ldflags = cflags
   }
 }
