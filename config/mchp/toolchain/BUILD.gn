@@ -29,10 +29,10 @@ declare_args() {
 toolchain("wfi32") {
   tool("cc") {
     depfile = "{{output}}.d"
-    #command = "$mchp_cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -c {{source}} -o {{output}}"
+    command = "$mchp_cc -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_c}} -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -Wno-incompatible-pointer-types -Wno-unused-function -Wno-implicit-int -Wno-implicit-fallthrough -Wno-type-limits -Wno-implicit-function-declaration -Wno-shadow -Wno-old-style-declaration -Wno-psabi -Wno-cast-function-type -c {{source}} -o {{output}}"
     #command = "$mchp_cc -g -x c -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
     #command = "$mchp_cc -g2 -x c -c -mprocessor=32MZ1025W104132 -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_pic32mz_w1_curiosity_freertos=pic32mz_w1_curiosity_freertos  -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed"
-    command = "$mchp_cxx -g -x c -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type    -G 0 -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    ##command = "$mchp_cxx -g -x c -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -fdata-sections -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type    -G 0 -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
     depsformat = "gcc"
     description = "CC123 {{output}}"
     outputs = [
@@ -41,10 +41,10 @@ toolchain("wfi32") {
   }
   tool("cxx") {
     depfile = "{{output}}.d"
-    command = "$mchp_cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -c {{source}} -o {{output}}"
+    command = "$mchp_cxx -MMD -MF $depfile {{defines}} {{include_dirs}} {{cflags}} {{cflags_cc}} -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-format-nonliteral -Wno-psabi -Wno-cast-function-type -c {{source}} -o {{output}}"
     #command = "$mchp_cxx -g -x c++ -c -mprocessor=32MZ1025W104132  -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
     #command = "$mchp_cxx -g2 -x c++ -c -mprocessor=32MZ1025W104132 -fno-common -ffunction-sections -fdata-sections -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_pic32mz_w1_curiosity_freertos=pic32mz_w1_curiosity_freertos  -no-legacy-libc -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -minterlink-compressed"
-    command = "$mchp_cxx -g -x c++ -c -mprocessor=32MZ1025W104132 -frtti -fexceptions -fno-check-new -fenforce-eh-specs -ffunction-sections -mmicromips -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default  -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type   -G 0 -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    ##command = "$mchp_cxx -g -x c++ -c -mprocessor=32MZ1025W104132 -frtti -fexceptions -fno-check-new -fenforce-eh-specs -ffunction-sections -mmicromips -fdata-sections -Os {{defines}} {{include_dirs}} -Wall -MP -MMD -MF $depfile -o {{output}} {{source}} -DXPRJ_default=default  -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type   -G 0 -minterlink-compressed -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
     depsformat = "gcc"
     description = "CXX {{output}}"
     outputs = [
@@ -112,9 +112,11 @@ print("XXXLINK=${wfi32_sdk_root}")
     rspfile = "$outfile.rsp"
     linker_script = "${wfi32_sdk_root}/config/pic32mz_w1_curiosity/p32MZ1025W104132.ld"
     linker_script_path = rebase_path(linker_script, root_build_dir) 
+    wifi_lib = "${wfi32_sdk_root}/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/lib/pic32mzw1.a"
+    wifi_lib_path = rebase_path(wifi_lib, root_build_dir) 
     #command = "$mchp_cxx {{ldflags}} -o $outfile, --script=\"../p32MZ1025W104132.ld\", -Wl,--start-group @$rspfile {{solibs}} -Wl,--end-group {{libs}}"
     #command = "$mchp_cxx -mprocessor=32MZ1025W104132 -mreserve=prog@0x100ff000:0x100fffff -o $outfile {{inputs}} -DXPRJ_default=default -Wl,--defsym=__MPLAB_BUILD=1,--script=${linker_script_path},--defsym=_min_heap_size=130000,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./matterLib_Test1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
-    command = "$mchp_cxx -mprocessor=32MZ1025W104132 -o $outfile {{inputs}} -DXPRJ_default=default -Wl,--defsym=__MPLAB_BUILD=1,--script=${linker_script_path},--defsym=_min_heap_size=130000,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./matterLib_Test1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
+    command = "$mchp_cxx -mprocessor=32MZ1025W104132 -o $outfile {{inputs}} ${wifi_lib_path} -DXPRJ_default=default -Wl,--defsym=__MPLAB_BUILD=1,--script=${linker_script_path},--defsym=_min_heap_size=2300,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./matterLib_Test1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
     #command = "$mchp_cxx -mprocessor=32MZ1025W104132 -mreserve=prog@0x100ff000:0x100fffff -o $outfile {{inputs}} -DXPRJ_default=default    -Wl,--defsym=__MPLAB_BUILD=1,--script=\"../p32MZ1025W104132.ld\",--defsym=_min_heap_size=130000,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./matterLib_Test1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"/opt/microchip/mplabx/v6.00/packs/Microchip/PIC32MZ-W_DFP/1.5.203\""
     description = "LINK $outfile"
     rspfile_content = "{{inputs}}"
@@ -130,6 +132,10 @@ print("XXXLINK=${wfi32_sdk_root}")
     command = "cp -af {{source}} {{output}}"
     description = "COPY {{source}} {{output}}"
   }
+  #toolchain_args = {
+    #import("//config/mchp/args.gni")
+    #import("${chip_root}/config/mchp/args.gni")
+  #}
 }
 
 #gcc_toolchain("wfi32") {

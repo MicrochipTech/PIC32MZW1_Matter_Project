@@ -12,19 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build_overrides/mbedtls.gni")
+import("${mbedtls_root}/mbedtls.gni")
+import("//build_overrides/chip.gni")
+
 declare_args() {
   # Use a different target, such as a prebuilt FreeRTOS
   wfi32_sdk_target = ""
 }
-print("XXXWFI32_SDK BUilD log1")
 if (wfi32_sdk_target != "") {
+
   group("wfi32_sdk") {
     public_deps = [ wfi32_sdk_target ]
   }
 } else {
-  print("XXXWFI32_SDK BUilD log2")
   import("wfi32_sdk.gni")
 
   wfi32_sdk_target("wfi32_sdk") {
   }
+
+  mbedtls_target("mbedtls") {
+    defines = [ "MBEDTLS_CONFIG_FILE=\"pic32mzw1-mbedtls-config.h\"" ]
+    include_dirs = [
+      "${chip_root}/src/platform/wfi32",
+    ]
+  }
+  
 }

@@ -28,15 +28,63 @@
 #include <crypto/CHIPCryptoPAL.h>
 #include <platform/PlatformManager.h>
 #include <platform/internal/GenericPlatformManagerImpl_FreeRTOS.ipp>
+#include "definitions.h"
+
+#include <lwip/tcpip.h>
+
+#include <ctype.h>
+# define TOLOWER(Ch) tolower (Ch)
+
+int strcasecmp (const char *s1, const char *s2)
+{
+  const unsigned char *p1 = (const unsigned char *) s1;
+  const unsigned char *p2 = (const unsigned char *) s2;
+  int result;
+  
+  if (p1 == p2)
+    return 0;
+
+  while ((result = TOLOWER (*p1) - TOLOWER (*p2++)) == 0)
+    if (*p1++ == '\0')
+      break;
+
+  return result;
+}
 
 
-// To Do:
 extern "C" int mbedtls_hardware_poll(void * data, unsigned char * output, size_t len, size_t * olen)
 {
     (void) data;
-    char test[] = "123456"; 
-    
-    memcpy(output,test, sizeof(test));
+
+    ChipLogError(DeviceLayer, "mbedtls_hardware_poll In\r\n");
+
+    union
+    {
+        uint64_t    v64;
+        uint8_t     v8[8];
+    }suint_64;
+
+    int n8Chunks = len / 8;
+    int nLeft = len % 8;
+
+    while(n8Chunks--)
+    {
+        suint_64.v64 = RNG_NumGen1Get();
+        suint_64.v64 = suint_64.v64 << 32;
+        suint_64.v64 |= RNG_NumGen2Get();
+        memcpy(output, suint_64.v8, sizeof(suint_64.v8));
+        output += sizeof(suint_64.v8);
+    }
+
+    if (nLeft)
+    {
+        suint_64.v64 = RNG_NumGen1Get();
+        suint_64.v64 = suint_64.v64 << 32;
+        suint_64.v64 |= RNG_NumGen2Get();
+        memcpy(output, suint_64.v8, nLeft);
+        
+    }
+
     *olen = len;
     
     return 0;
@@ -54,23 +102,21 @@ PlatformManagerImpl PlatformManagerImpl::sInstance;
 CHIP_ERROR PlatformManagerImpl::_InitChipStack(void)
 {
     CHIP_ERROR err;
-    ChipLogError(DeviceLayer, "log1\r\n");
     
     // Make sure the LwIP core lock has been initialized
     err = Internal::InitLwIPCoreLock();
-    //ChipLogError(DeviceLayer, "log2,err = %d\r\n", err);
     SuccessOrExit(err);
-    ChipLogError(DeviceLayer, "log3\r\n");
     	
     mStartTime = System::SystemClock().GetMonotonicTimestamp();
-    //ChipLogError(DeviceLayer, "log4, mStartTime = %d\r\n", mStartTime);
-    //return err;
+    
+    // Initialize LwIP.
+    tcpip_init(NULL, NULL);
+    
     // Call _InitChipStack() on the generic implementation base class
     // to finish the initialization process.
     err = Internal::GenericPlatformManagerImpl_FreeRTOS<PlatformManagerImpl>::_InitChipStack();
-    //ChipLogError(DeviceLayer, "log4,err = %d\r\n", err);
+
     SuccessOrExit(err);
-    ChipLogError(DeviceLayer, "log6\r\n");
 exit:
     return err;
 }

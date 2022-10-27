@@ -52,6 +52,7 @@
 
 #include "configuration.h"
 #include "definitions.h"
+#include "network.h"
 
 
 // *****************************************************************************
@@ -59,6 +60,32 @@
 // Section: RTOS "Tasks" Routine
 // *****************************************************************************
 // *****************************************************************************
+
+void _DRV_BA414E_Tasks(  void *pvParameters  )
+{
+    while(1)
+    {
+        DRV_BA414E_Tasks(sysObj.ba414e);
+    }
+}
+
+static void _WDRV_PIC32MZW1_Tasks(  void *pvParameters  )
+{
+    while(1)
+    {
+        SYS_STATUS status;
+
+        WDRV_PIC32MZW_Tasks(sysObj.drvWifiPIC32MZW1);
+
+        status = WDRV_PIC32MZW_Status(sysObj.drvWifiPIC32MZW1);
+
+        if ((SYS_STATUS_ERROR == status) || (SYS_STATUS_UNINITIALIZED == status))
+        {
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }
+    }
+}
+
 /* Handle for the APP_Tasks. */
 TaskHandle_t xAPP_Tasks;
 
@@ -66,7 +93,18 @@ void _APP_Tasks(  void *pvParameters  )
 {   
     while(1)
     {
-        APP_Tasks();
+    Network_Tasks();
+        vTaskDelay(50 / portTICK_PERIOD_MS);
+    }
+}
+
+
+void _TCPIP_STACK_Task(  void *pvParameters  )
+{
+    while(1)
+    {
+        TCPIP_STACK_Task(sysObj.tcpip);
+        vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
 
@@ -93,10 +131,39 @@ void SYS_Tasks ( void )
 
 
     /* Maintain Device Drivers */
-    
+        xTaskCreate( _WDRV_PIC32MZW1_Tasks,
+        "WDRV_PIC32MZW1_Tasks",
+        1024,
+        (void*)NULL,
+        1,
+        (TaskHandle_t*)NULL
+    );
+
+
+
 
     /* Maintain Middleware & Other Libraries */
     
+    xTaskCreate( _DRV_BA414E_Tasks,
+        "DRV_BA414E_Tasks",
+        DRV_BA414E_RTOS_STACK_SIZE,
+        (void*)NULL,
+        DRV_BA414E_RTOS_TASK_PRIORITY,
+        (TaskHandle_t*)NULL
+    );
+
+
+
+    xTaskCreate( _TCPIP_STACK_Task,
+        "TCPIP_STACK_Tasks",
+        TCPIP_RTOS_STACK_SIZE,
+        (void*)NULL,
+        TCPIP_RTOS_PRIORITY,
+        (TaskHandle_t*)NULL
+    );
+
+
+
 
     /* Maintain the application's state machine. */
         /* Create OS Thread for APP_Tasks. */
@@ -115,7 +182,7 @@ void SYS_Tasks ( void )
      /**********************************************************************
      * Create all Threads for APP Tasks before starting FreeRTOS Scheduler *
      ***********************************************************************/
-    vTaskStartScheduler(); /* This function never returns. */
+    ///vTaskStartScheduler(); /* This function never returns. */
 
 }
 

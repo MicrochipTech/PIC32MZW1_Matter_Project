@@ -21,6 +21,8 @@ import("//build_overrides/wfi32_sdk.gni")
 import("//build_overrides/mbedtls.gni")
 
 import("${chip_root}/src/platform/device.gni")
+import("${chip_root}/config/mchp/args.gni")
+
 print("XXX WFI32 Platform")
 assert(chip_device_platform == "wfi32")
 
@@ -53,15 +55,17 @@ static_library("wfi32") {
     "LwIPCoreLock.cpp",
     "NetworkCommissioningWiFiDriver.cpp",
     "Logging.cpp",
+    "CHIPMem-Platform.cpp",
+    "PIC32MZW1Config.cpp",
+    "PIC32MZW1Utils.cpp",
   ]
   
   #include_dirs = [ "${chip_root}/third_party/freertos/repo/include/" ]
-
   public_deps = [
     "${wfi32_sdk_root}:wfi32_sdk",
     "${chip_root}/src/lib/dnssd:platform_header",
     "${chip_root}/src/platform:platform_base",
-    "${mbedtls_root}:mbedtls",
+    ##"${mbedtls_root}:mbedtls",
     #"${freertos_root}:freertos",
     #":freertos",
   ]
@@ -72,5 +76,6 @@ static_library("wfi32") {
   include_dirs = [ 
     "${chip_root}/src/platform/wfi32",
     "${wfi32_sdk_root}", 
+    "${wfi32_sdk_root}/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1", 
   ]
 }

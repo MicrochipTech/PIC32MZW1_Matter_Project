@@ -1,0 +1,150 @@
+format_version: v1.0
+type: UniqueComponent
+attributes: {id: lib_wolfcrypt}
+children:
+- type: Symbols
+  children:
+  - type: Boolean
+    attributes: {id: cryptoCrya_03710}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: lib_wolfcrypt, value: 'false'}
+  - type: Boolean
+    attributes: {id: cryptoCrya_U2803}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: lib_wolfcrypt, value: 'false'}
+  - type: Boolean
+    attributes: {id: cryptoCrya_U2805}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: lib_wolfcrypt, value: 'false'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_aes_hw}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_hashdrng}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_hkdf}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_hmac}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_hw}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_md5_hw}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_random}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: lib_wolfcrypt, value: 'true'}
+      - type: User
+        attributes: {value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_randomtest}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_sha1_hw}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_sha224}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_sha264_hw}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+  - type: Boolean
+    attributes: {id: wolfcrypt_tdes_hw}
+    children:
+    - type: Attributes
+      children:
+      - type: Boolean
+        attributes: {id: visible}
+        children:
+        - {type: Value, value: 'true'}
+- type: Attachments
+  children:
+  - type: DirectDependency
+    attributes: {id: LIB_CRYPTO_BA414E_Dependency}
+    children:
+    - type: Attributes
+      children:
+      - type: String
+        attributes: {id: targetComponentID}
+        children:
+        - {type: Value, value: drv_ba414e}
+      - type: String
+        attributes: {id: targetAttachmentID}
+        children:
+        - {type: Value, value: drv_ba414e}
+- type: ElementPosition
+  attributes: {x: '29', y: '240', id: lib_wolfcrypt}

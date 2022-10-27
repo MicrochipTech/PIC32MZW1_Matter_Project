@@ -49,7 +49,7 @@
 #define configMINIMAL_STACK_SIZE                ( 128 )
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
 #define configSUPPORT_STATIC_ALLOCATION         0
-#define configTOTAL_HEAP_SIZE                   ( ( size_t ) 28000 )
+#define configTOTAL_HEAP_SIZE                   ( ( size_t ) 92000 )
 #define configMAX_TASK_NAME_LEN                 ( 16 )
 #define configUSE_16_BIT_TICKS                  0
 #define configIDLE_SHOULD_YIELD                 1
@@ -81,9 +81,9 @@
 
 /* Software timer related definitions. */
 #define configUSE_TIMERS                        1
-#define configTIMER_TASK_PRIORITY               0
-#define configTIMER_QUEUE_LENGTH                0
-#define configTIMER_TASK_STACK_DEPTH            0
+#define configTIMER_TASK_PRIORITY               1
+#define configTIMER_QUEUE_LENGTH                5
+#define configTIMER_TASK_STACK_DEPTH            512
 #define configUSE_DAEMON_TASK_STARTUP_HOOK      0
 
 /* Misc */
@@ -91,7 +91,7 @@
 
 
 /* Interrupt nesting behaviour configuration. */
-#define configPERIPHERAL_CLOCK_HZ               ( 100000000UL )
+#define configPERIPHERAL_CLOCK_HZ               ( 50000000UL )
 #define configISR_STACK_SIZE                    ( 512 )
 /* The priority at which the tick interrupt runs.  This should probably be kept at lowest priority. */
 #define configKERNEL_INTERRUPT_PRIORITY         (1)

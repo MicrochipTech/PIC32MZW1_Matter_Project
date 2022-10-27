@@ -19,6 +19,7 @@
 #include <lib/support/SafeInt.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/wfi32/NetworkCommissioningDriver.h>
+#include <platform/wfi32/PIC32MZW1Utils.h>
 
 #include <limits>
 #include <string>
@@ -47,7 +48,14 @@ CHIP_ERROR PIC32WiFiDriver::Init(NetworkStatusChangeCallback * networkStatusChan
     mpConnectCallback      = nullptr;
     mpStatusChangeCallback = networkStatusChangeCallback;
 
-    printf("PIC32WiFiDriver::Init In \r\n");
+    ChipLogProgress(NetworkProvisioning, "PIC32WiFiDriver:: Init...");
+/*
+    err = PIC32MZW1Utils::pic32mzw1_wifi_init();
+    if (err != CHIP_NO_ERROR)
+    {
+        return err;
+    }
+*/
     err = PersistedStorage::KeyValueStoreMgr().Get(kWiFiCredentialsKeyName, mSavedNetwork.credentials,
                                                    sizeof(mSavedNetwork.credentials), &credentialsLen);
     if (err == CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
@@ -364,7 +372,7 @@ void PIC32WiFiDriver::OnNetworkStatusChange()
 {
     Network configuredNetwork;
     bool staEnabled = false, staConnected = false;
-    //VerifyOrReturn(PIC32Utils::IsStationEnabled(staEnabled) == CHIP_NO_ERROR);
+    ///VerifyOrReturn(PIC32Utils::IsStationEnabled(staEnabled) == CHIP_NO_ERROR);
     VerifyOrReturn(staEnabled && mpStatusChangeCallback != nullptr);
     CHIP_ERROR err = GetConnectedNetwork(configuredNetwork);
     if (err != CHIP_NO_ERROR)
@@ -372,17 +380,21 @@ void PIC32WiFiDriver::OnNetworkStatusChange()
         ChipLogError(DeviceLayer, "Failed to get configured network when updating network status: %s", err.AsString());
         return;
     }
-    //VerifyOrReturn(PIC32Utils::IsStationConnected(staConnected) == CHIP_NO_ERROR);
+    ///VerifyOrReturn(PIC32MZW1Utils::IsStationConnected(staConnected) == CHIP_NO_ERROR);
     if (staConnected)
     {
         mpStatusChangeCallback->OnNetworkingStatusChange(
             Status::kSuccess, MakeOptional(ByteSpan(configuredNetwork.networkID, configuredNetwork.networkIDLen)),
             MakeOptional(GetLastDisconnectReason()));
-        return;
+        
     }
-    mpStatusChangeCallback->OnNetworkingStatusChange(
-        Status::kUnknownError, MakeOptional(ByteSpan(configuredNetwork.networkID, configuredNetwork.networkIDLen)),
-        MakeOptional(GetLastDisconnectReason()));
+    else
+    {
+        mpStatusChangeCallback->OnNetworkingStatusChange(
+            Status::kUnknownError, MakeOptional(ByteSpan(configuredNetwork.networkID, configuredNetwork.networkIDLen)),
+            MakeOptional(GetLastDisconnectReason()));
+    }
+    return;
 }
 
 CHIP_ERROR PIC32WiFiDriver::SetLastDisconnectReason(int32_t reason)

@@ -61,7 +61,7 @@
 /*** FBCFG0 ***/
 #pragma config BUHSWEN =    OFF
 #pragma config PCSCMODE =    DUAL
-#pragma config BOOTISA =    MIPS32//MICROMIPS //MIPS32
+#pragma config BOOTISA =    MIPS32
 
 
 
@@ -149,6 +149,14 @@
 // Section: Driver Initialization Data
 // *****************************************************************************
 // *****************************************************************************
+static CRYPT_RNG_CTX wdrvRngCtx;
+static const WDRV_PIC32MZW_SYS_INIT wdrvPIC32MZW1InitData = {
+    .pCryptRngCtx  = &wdrvRngCtx,
+    .pRegDomName   = "GEN",
+    .powerSaveMode = WDRV_PIC32MZW_POWERSAVE_RUN_MODE,
+    .powerSavePICCorrelation = WDRV_PIC32MZW_POWERSAVE_PIC_ASYNC_MODE
+};
+
 
 
 // *****************************************************************************
@@ -166,11 +174,192 @@ SYSTEM_OBJECTS sysObj;
 // *****************************************************************************
 
 
+static const DRV_BA414E_INIT_DATA ba414eInitData = 
+{
+};
+  
+ 
+
+
+// <editor-fold defaultstate="collapsed" desc="TCP/IP Stack Initialization Data">
+// *****************************************************************************
+// *****************************************************************************
+// Section: TCPIP Data
+// *****************************************************************************
+// *****************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+static void * _malloc( size_t nBytes )
+    {
+        return pvPortMalloc( nBytes );
+    }
+
+    /*-----------------------------------------------------------*/
+
+    static void * _calloc( size_t nElems,
+                           size_t elemSize )
+    {
+        size_t nBytes = nElems * elemSize;
+
+        void * ptr = pvPortMalloc( nBytes );
+
+        if( ptr != 0 )
+        {
+            memset( ptr, 0, nBytes );
+        }
+
+        return ptr;
+    }
+
+    /*-----------------------------------------------------------*/
+
+    static void _free( void * pBuff )
+    {
+        vPortFree( pBuff );
+    }
+
+
+
+
+
+
+TCPIP_STACK_HEAP_EXTERNAL_CONFIG tcpipHeapConfig =
+{
+    .heapType = TCPIP_STACK_HEAP_TYPE_EXTERNAL_HEAP,
+    .heapFlags = TCPIP_STACK_HEAP_USE_FLAGS,
+    .heapUsage = TCPIP_STACK_HEAP_USAGE_CONFIG,
+    .malloc_fnc = _malloc,//TCPIP_STACK_MALLOC_FUNC,
+    .calloc_fnc = _calloc,//TCPIP_STACK_CALLOC_FUNC,
+    .free_fnc = _free,//TCPIP_STACK_FREE_FUNC,
+};
+
+
+const TCPIP_NETWORK_CONFIG __attribute__((unused))  TCPIP_HOSTS_CONFIGURATION[] =
+{
+    /*** Network Configuration Index 0 ***/
+    {
+        .interface = TCPIP_NETWORK_DEFAULT_INTERFACE_NAME_IDX0,
+        .hostName = TCPIP_NETWORK_DEFAULT_HOST_NAME_IDX0,
+        .macAddr = TCPIP_NETWORK_DEFAULT_MAC_ADDR_IDX0,
+        .ipAddr = TCPIP_NETWORK_DEFAULT_IP_ADDRESS_IDX0,
+        .ipMask = TCPIP_NETWORK_DEFAULT_IP_MASK_IDX0,
+        .gateway = TCPIP_NETWORK_DEFAULT_GATEWAY_IDX0,
+        .priDNS = TCPIP_NETWORK_DEFAULT_DNS_IDX0,
+        .secondDNS = TCPIP_NETWORK_DEFAULT_SECOND_DNS_IDX0,
+        .powerMode = TCPIP_NETWORK_DEFAULT_POWER_MODE_IDX0,
+        .startFlags = TCPIP_NETWORK_DEFAULT_INTERFACE_FLAGS_IDX0,
+        .pMacObject = &TCPIP_NETWORK_DEFAULT_MAC_DRIVER_IDX0,
+    },
+};
+
+const size_t TCPIP_HOSTS_CONFIGURATION_SIZE = sizeof (TCPIP_HOSTS_CONFIGURATION) / sizeof (*TCPIP_HOSTS_CONFIGURATION);
+
+const TCPIP_STACK_MODULE_CONFIG TCPIP_STACK_MODULE_CONFIG_TBL [] =
+{
+
+
+
+    { TCPIP_MODULE_MANAGER,         &tcpipHeapConfig },             // TCPIP_MODULE_MANAGER
+
+// MAC modules
+
+};
+
+const size_t TCPIP_STACK_MODULE_CONFIG_TBL_SIZE = sizeof (TCPIP_STACK_MODULE_CONFIG_TBL) / sizeof (*TCPIP_STACK_MODULE_CONFIG_TBL);
+/*********************************************************************
+ * Function:        SYS_MODULE_OBJ TCPIP_STACK_Init()
+ *
+ * PreCondition:    None
+ *
+ * Input:
+ *
+ * Output:          valid system module object if Stack and its componets are initialized
+ *                  SYS_MODULE_OBJ_INVALID otherwise
+ *
+ * Overview:        The function starts the initialization of the stack.
+ *                  If an error occurs, the SYS_ERROR() is called
+ *                  and the function de-initialize itself and will return false.
+ *
+ * Side Effects:    None
+ *
+ * Note:            This function must be called before any of the
+ *                  stack or its component routines are used.
+ *
+ ********************************************************************/
+
+
+SYS_MODULE_OBJ TCPIP_STACK_Init(void)
+{
+    TCPIP_STACK_INIT    tcpipInit;
+
+    tcpipInit.pNetConf = TCPIP_HOSTS_CONFIGURATION;
+    tcpipInit.nNets = TCPIP_HOSTS_CONFIGURATION_SIZE;
+    tcpipInit.pModConfig = TCPIP_STACK_MODULE_CONFIG_TBL;
+    tcpipInit.nModules = TCPIP_STACK_MODULE_CONFIG_TBL_SIZE;
+    tcpipInit.initCback = 0;
+
+    return TCPIP_STACK_Initialize(0, &tcpipInit.moduleInit);
+}
+// </editor-fold>
+
+
+
 // *****************************************************************************
 // *****************************************************************************
 // Section: System Initialization
 // *****************************************************************************
 // *****************************************************************************
+
+const SYS_DEBUG_INIT debugInit =
+{
+    .moduleInit = {0},
+    .errorLevel = SYS_DEBUG_GLOBAL_ERROR_LEVEL,
+    .consoleIndex = 0,
+};
+
+
+// <editor-fold defaultstate="collapsed" desc="SYS_TIME Initialization Data">
+
+const SYS_TIME_PLIB_INTERFACE sysTimePlibAPI = {
+    .timerCallbackSet = (SYS_TIME_PLIB_CALLBACK_REGISTER)CORETIMER_CallbackSet,
+    .timerStart = (SYS_TIME_PLIB_START)CORETIMER_Start,
+    .timerStop = (SYS_TIME_PLIB_STOP)CORETIMER_Stop ,
+    .timerFrequencyGet = (SYS_TIME_PLIB_FREQUENCY_GET)CORETIMER_FrequencyGet,
+    .timerPeriodSet = (SYS_TIME_PLIB_PERIOD_SET)NULL,
+    .timerCompareSet = (SYS_TIME_PLIB_COMPARE_SET)CORETIMER_CompareSet,
+    .timerCounterGet = (SYS_TIME_PLIB_COUNTER_GET)CORETIMER_CounterGet,
+};
+
+const SYS_TIME_INIT sysTimeInitData =
+{
+    .timePlib = &sysTimePlibAPI,
+    .hwTimerIntNum = 0,
+};
+
+// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="SYS_CONSOLE Instance 0 Initialization Data">
 
 
@@ -204,15 +393,6 @@ const SYS_CONSOLE_INIT sysConsole0Init =
 // </editor-fold>
 
 
-const SYS_DEBUG_INIT debugInit =
-{
-    .moduleInit = {0},
-    .errorLevel = SYS_DEBUG_GLOBAL_ERROR_LEVEL,
-    .consoleIndex = 0,
-};
-
-
-
 
 
 // *****************************************************************************
@@ -241,8 +421,7 @@ static void STDIO_BufferModeSet(void)
 }
 
 
-
-
+    
 /*******************************************************************************
   Function:
     void SYS_Initialize ( void *data )
@@ -260,7 +439,7 @@ void SYS_Initialize ( void* data )
     __builtin_disable_interrupts();
 
     STDIO_BufferModeSet();
-  
+
 
   
     PMU_Initialize();
@@ -273,17 +452,36 @@ void SYS_Initialize ( void* data )
 
 	GPIO_Initialize();
 
+	BSP_Initialize();
+    NVM_Initialize();
+
+    CORETIMER_Initialize();
 	UART3_Initialize();
 
 	UART1_Initialize();
 
-	BSP_Initialize();
+	RNG_Initialize();
 
 
-    sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
+    /* Initialize the PIC32MZW1 Driver */
+    CRYPT_RNG_Initialize(&wdrvRngCtx);
+    sysObj.drvWifiPIC32MZW1 = WDRV_PIC32MZW_Initialize(WDRV_PIC32MZW_SYS_IDX_0, (SYS_MODULE_INIT*)&wdrvPIC32MZW1InitData);
+
 
     sysObj.sysDebug = SYS_DEBUG_Initialize(SYS_DEBUG_INDEX_0, (SYS_MODULE_INIT*)&debugInit);
 
+
+    sysObj.sysTime = SYS_TIME_Initialize(SYS_TIME_INDEX_0, (SYS_MODULE_INIT *)&sysTimeInitData);
+    sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
+
+
+    sysObj.ba414e = DRV_BA414E_Initialize(0, (SYS_MODULE_INIT*)&ba414eInitData);
+
+    CRYPT_WCCB_Initialize();
+
+/* TCPIP Stack Initialization */
+  sysObj.tcpip = TCPIP_STACK_Init();
+//SYS_ASSERT(sysObj.tcpip != SYS_MODULE_OBJ_INVALID, "TCPIP_STACK_Init Failed" );
 
 
 

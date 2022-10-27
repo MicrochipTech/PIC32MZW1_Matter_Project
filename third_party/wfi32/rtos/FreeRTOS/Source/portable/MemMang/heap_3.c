@@ -55,12 +55,13 @@ task.h is included from an application file. */
 
 /*-----------------------------------------------------------*/
 
-void *pvPortMalloc( size_t xWantedSize )
+    void *pvPortMalloc( size_t xWantedSize )
 {
 void *pvReturn;
 
 	vTaskSuspendAll();
 	{
+        
 		pvReturn = malloc( xWantedSize );
 		traceMALLOC( pvReturn, xWantedSize );
 	}
@@ -76,6 +77,17 @@ void *pvReturn;
 	}
 	#endif
 
+    printf("logg1, size = %d, 0x%x\r\n", xWantedSize, pvReturn);
+
+    if( xWantedSize == 0 )
+	{
+         printf("error1..\r\n");
+    }
+    if( pvReturn == NULL )
+	{
+         printf("error2..\r\n");
+    }
+
 	return pvReturn;
 }
 /*-----------------------------------------------------------*/
@@ -86,6 +98,7 @@ void vPortFree( void *pv )
 	{
 		vTaskSuspendAll();
 		{
+            printf("logg1, free = 0x%x\r\n",pv);
 			free( pv );
 			traceFREE( pv, 0 );
 		}

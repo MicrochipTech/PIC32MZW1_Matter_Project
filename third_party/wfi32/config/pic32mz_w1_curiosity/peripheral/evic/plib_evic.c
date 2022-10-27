@@ -55,9 +55,16 @@ void EVIC_Initialize( void )
     INTCONSET = _INTCON_MVEC_MASK;
 
     /* Set up priority and subpriority of enabled interrupts */
+    IPC0SET = 0x4 | 0x0;  /* CORE_TIMER:  Priority 1 / Subpriority 0 */
+    IPC7SET = 0x40000 | 0x0;  /* FLASH_CONTROL:  Priority 1 / Subpriority 0 */
     IPC9SET = 0x40000 | 0x0;  /* UART1_FAULT:  Priority 1 / Subpriority 0 */
     IPC9SET = 0x4000000 | 0x0;  /* UART1_RX:  Priority 1 / Subpriority 0 */
     IPC10SET = 0x4 | 0x0;  /* UART1_TX:  Priority 1 / Subpriority 0 */
+    IPC20SET = 0x4000000 | 0x0;  /* RFSMC:  Priority 1 / Subpriority 0 */
+    IPC21SET = 0x4 | 0x0;  /* RFMAC:  Priority 1 / Subpriority 0 */
+    IPC21SET = 0x40000 | 0x0;  /* RFTM0:  Priority 1 / Subpriority 0 */
+    IPC41SET = 0x40000 | 0x0;  /* CRYPTO1:  Priority 1 / Subpriority 0 */
+    IPC41SET = 0x4000000 | 0x0;  /* CRYPTO1_FAULT:  Priority 1 / Subpriority 0 */
 
 
 }

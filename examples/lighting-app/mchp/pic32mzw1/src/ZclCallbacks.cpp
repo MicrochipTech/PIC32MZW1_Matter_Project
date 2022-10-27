@@ -40,6 +40,9 @@ void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath & 
 
     if (clusterId == OnOff::Id && attributeId == OnOff::Attributes::OnOff::Id)
     {
+        ChipLogProgress(Zcl, "OnOff Control attribute ID: " ChipLogFormatMEI " Type: %u Value: %u, length %u",
+                        ChipLogValueMEI(attributeId), type, *value, size);
+                        
         LightMgr().InitiateAction(AppEvent::kEventType_Light, *value ? LightingManager::ON_ACTION : LightingManager::OFF_ACTION);
     }
     else if (clusterId == LevelControl::Id)

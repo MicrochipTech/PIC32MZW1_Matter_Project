@@ -37,7 +37,7 @@
 #define APP_BUTTON_RELEASED 1
 
 #define SYSTEM_STATE_LED 1
-#define LIGHT_LED 2
+#define LIGHT_LED GPIO_PIN_RK13
 
 // Time it takes in ms for the simulated actuator to move from one
 // state to another.
@@ -54,9 +54,11 @@ extern "C" {
 
 void appError(int err);
 void pic32mzw1_Log(const char * aFormat, ...);
-//#define PIC32_LOG(...) pic32mzw1_Log(__VA_ARGS__)
+void pic32mzw1_Log_Init(void);
+
+#define PIC32_LOG(...) pic32mzw1_Log(__VA_ARGS__)
 #define PIC32_LOG_DBG(level,fmt,...) SYS_DEBUG_PRINT(level, "[PIC32MZW1] " fmt ,##__VA_ARGS__)
-#define PIC32_LOG(fmt,...) SYS_CONSOLE_PRINT("[PIC32MZW1] " fmt ,##__VA_ARGS__)
+#define PIC32_LOG_INIT pic32mzw1_Log_Init()
 
 #ifdef __cplusplus
 }

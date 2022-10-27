@@ -18,29 +18,5 @@ import("//build_overrides/chip.gni")
 import("//build_overrides/lwip.gni")
 #import("//build_overrides/pigweed.gni")
 
+mbedtls_target = "${chip_root}/third_party/wfi32:mbedtls"
 
-chip_device_platform = "wfi32"
-
-
-chip_ble_platform_config_include = ""
-chip_project_config_include = ""
-chip_system_project_config_include = ""
-chip_ble_project_config_include = ""
-
-
-chip_config_network_layer_ble = false
-
-chip_system_config_use_lwip = true
-chip_build_tests = false
-
-#lwip_platform = "external"
-lwip_platform = "wfi32"
-
-#Enabling this causes some error
-#chip_inet_config_enable_tun_endpoint = false
-chip_inet_config_enable_tcp_endpoint = true
-chip_inet_config_enable_udp_endpoint = true
-
-custom_toolchain = "${chip_root}/config/mchp/toolchain:wfi32"
-
-print("${custom_toolchain}")

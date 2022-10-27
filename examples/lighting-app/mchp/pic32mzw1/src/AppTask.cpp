@@ -33,13 +33,13 @@
 #include <assert.h>
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
-//#include <cy_wcm.h>
 #include <platform/CHIPDeviceLayer.h>
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 #include <setup_payload/SetupPayload.h>
 
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #include <platform/wfi32/NetworkCommissioningDriver.h>
+#include <DeviceInfoProviderImpl.h>
 
 /* OTA related includes */
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
@@ -54,8 +54,6 @@ using chip::DefaultOTARequestor;
 using chip::FabricIndex;
 using chip::GetRequestorInstance;
 using chip::NodeId;
-using chip::OTADownloader;
-using chip::DeviceLayer::OTAImageProcessorImpl;
 using chip::System::Layer;
 
 using namespace ::chip;
@@ -67,7 +65,7 @@ using namespace ::chip::System;
 #endif
 #define FACTORY_RESET_TRIGGER_TIMEOUT 3000
 #define FACTORY_RESET_CANCEL_WINDOW_TIMEOUT 3000
-#define APP_TASK_STACK_SIZE (4096)
+#define APP_TASK_STACK_SIZE (8096)//(4096)
 #define APP_TASK_PRIORITY 2
 #define APP_EVENT_QUEUE_SIZE 10
 
@@ -80,10 +78,10 @@ QueueHandle_t sAppEventQueue;
 LEDWidget sStatusLED;
 LEDWidget sLightLED;
 
-//bool sIsWiFiStationProvisioned = false;
-//bool sIsWiFiStationEnabled     = false;
-//bool sIsWiFiStationConnected   = false;
-//bool sHaveBLEConnections       = false;
+bool sIsWiFiStationProvisioned = false;
+bool sIsWiFiStationEnabled     = false;
+bool sIsWiFiStationConnected   = false;
+
 
 //uint8_t sAppEventQueueBuffer[APP_EVENT_QUEUE_SIZE * sizeof(AppEvent)];
 //StaticQueue_t sAppEventQueueStruct;
@@ -107,6 +105,7 @@ using namespace ::chip::Credentials;
 using namespace ::chip::DeviceLayer;
 
 AppTask AppTask::sAppTask;
+static chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
 namespace {
 app::Clusters::NetworkCommissioning::Instance
@@ -120,18 +119,20 @@ void NetWorkCommissioningInstInit()
 
 static void InitServer(intptr_t context)
 {
-    PIC32_LOG("InitServer\r\n");
+    PIC32_LOG("InitServer Enter..\r\n");
+    
+    //gExampleDeviceInfoProvider.SetStorageDelegate(&Server::GetInstance().GetPersistentStorage());
+    ///chip::DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
+    
     // Init ZCL Data Model
     static chip::CommonCaseDeviceServerInitParams initParams;
     (void) initParams.InitializeStaticResourcesBeforeServerInit();
+
     chip::Server::GetInstance().Init(initParams);
 
     // Initialize device attestation config
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 
-#if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
-    GetAppTask().InitOTARequestor();
-#endif
 }
 
 CHIP_ERROR AppTask::StartAppTask()
@@ -151,20 +152,8 @@ CHIP_ERROR AppTask::StartAppTask()
 
 CHIP_ERROR AppTask::Init()
 {
-    PIC32_LOG("AppTask::Init() Enter\r\n");
-    printf("test Init log1\r\n");
     CHIP_ERROR err = CHIP_NO_ERROR;
-#if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
-    PIC32_LOG("AppTask::Init() log1\r\n");
-    int rc = boot_set_confirmed();
-    if (rc != 0)
-    {
-        PIC32_LOG("boot_set_confirmed failed");
-        appError(CHIP_ERROR_WELL_UNINITIALIZED);
-    }
-#endif
-    printf("test Init log2\r\n");
-    PIC32_LOG("AppTask::Init() log2\r\n");
+
     // Register the callback to init the MDNS server when connectivity is available
     PlatformMgr().AddEventHandler(
         [](const ChipDeviceEvent * event, intptr_t arg) {
@@ -174,15 +163,13 @@ CHIP_ERROR AppTask::Init()
                 if (event->InternetConnectivityChange.IPv4 == kConnectivity_Established ||
                     event->InternetConnectivityChange.IPv6 == kConnectivity_Established)
                 {
-                    PIC32_LOG("AppTask::Init() log3\r\n");
                     chip::app::DnssdServer::Instance().StartServer();
                 }
             }
         },
         0);
-        PIC32_LOG("AppTask::Init() log4\r\n");
-    printf("test Init log3\r\n");
-#if 1
+
+
     chip::DeviceLayer::PlatformMgr().ScheduleWork(InitServer, reinterpret_cast<intptr_t>(nullptr));
 
     // Initialise WSTK buttons PB0 and PB1 (including debounce).
@@ -197,11 +184,11 @@ CHIP_ERROR AppTask::Init()
     );
     if (sFunctionTimer == NULL)
     {
-        PIC32_LOG("funct timer create failed");
         appError(APP_ERROR_CREATE_TIMER_FAILED);
     }
 
     NetWorkCommissioningInstInit();
+    
     PIC32_LOG("Current Firmware Version: %s", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION_STRING);
     err = LightMgr().Init();
     if (err != CHIP_NO_ERROR)
@@ -217,38 +204,32 @@ CHIP_ERROR AppTask::Init()
     sLightLED.Init(LIGHT_LED);
     sLightLED.Set(LightMgr().IsLightOn());
 
-    ConfigurationMgr().LogDeviceConfig();
 
+    ConfigurationMgr().LogDeviceConfig();
     // Print setup info
-    ///PrintOnboardingCodes(chip::RendezvousInformationFlag(chip::RendezvousInformationFlag::kBLE));
-#endif
+    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kOnNetwork));
+
+
     PIC32_LOG("AppTask::Init() Exit\r\n");
-    printf("test Init log4\r\n");
-    while (1)
-    {
-    //    printf("test Init log4\r\n");
-        //vTaskDelay(1000/portTICK_PERIOD_MS);
-    }
+
     return err;
 }
 
 void AppTask::AppTaskMain(void * pvParameter)
 {
-    //AppEvent event;
+    AppEvent event;
     
-    PIC32_LOG("App Task started 1\r\n");
+    PIC32_LOG("AppTaskMain Enter..\r\n");
+    
     CHIP_ERROR err = sAppTask.Init();
-    PIC32_LOG("App Task started 11\r\n");
-    printf("App Task started 11\r\n");
+    
     if (err != CHIP_NO_ERROR)
     {
-        printf("App Task started 12\r\n");
-        PIC32_LOG("AppTask.Init() failed");
         appError(err);
     }
 
-    PIC32_LOG("App Task started 2\r\n");
-#if 0
+
+#if 1
     while (true)
     {
         BaseType_t eventReceived = xQueueReceive(sAppEventQueue, &event, portMAX_DELAY);
@@ -267,31 +248,17 @@ void AppTask::AppTaskMain(void * pvParameter)
             sIsWiFiStationEnabled     = ConnectivityMgr().IsWiFiStationEnabled();
             sIsWiFiStationConnected   = ConnectivityMgr().IsWiFiStationConnected();
             sIsWiFiStationProvisioned = ConnectivityMgr().IsWiFiStationProvisioned();
-            sHaveBLEConnections       = (ConnectivityMgr().NumBLEConnections() != 0);
             PlatformMgr().UnlockChipStack();
         }
 
-        // Update the status LED if factory reset has not been initiated.
-        //
-        // If system has "full connectivity", keep the LED On constantly.
-        //
-        // If thread and service provisioned, but not attached to the thread network
-        // yet OR no connectivity to the service OR subscriptions are not fully
-        // established THEN blink the LED Off for a short period of time.
-        //
-        // If the system has ble connection(s) uptill the stage above, THEN blink
-        // the LEDs at an even rate of 100ms.
-        //
-        // Otherwise, blink the LED ON for a very short time.
-        if (sAppTask.mFunction != Function::kFactoryReset)
+        
+
+        //if (sAppTask.mFunction != Function::kFactoryReset)
         {
+
             if (sIsWiFiStationEnabled && sIsWiFiStationProvisioned && !sIsWiFiStationConnected)
             {
                 sStatusLED.Blink(950, 50);
-            }
-            else if (sHaveBLEConnections)
-            {
-                sStatusLED.Blink(100, 100);
             }
             else
             {
@@ -301,10 +268,11 @@ void AppTask::AppTaskMain(void * pvParameter)
 
         sStatusLED.Animate();
         sLightLED.Animate();
+
     }
     
 #endif
-    printf("App Task started 13\r\n");
+
 }
 
 void AppTask::LightActionEventHandler(AppEvent * event)
@@ -382,6 +350,7 @@ void AppTask::TimerEventHandler(TimerHandle_t timer)
 
 void AppTask::FunctionTimerEventHandler(AppEvent * event)
 {
+
     if (event->Type != AppEvent::kEventType_Timer)
     {
         return;
@@ -460,7 +429,6 @@ void AppTask::CancelTimer()
 {
     if (xTimerStop(sFunctionTimer, 0) == pdFAIL)
     {
-        PIC32_LOG("app timer stop() failed");
         appError(APP_ERROR_STOP_TIMER_FAILED);
     }
 
@@ -480,7 +448,6 @@ void AppTask::StartTimer(uint32_t aTimeoutInMs)
     // cannot immediately be sent to the timer command queue.
     if (xTimerChangePeriod(sFunctionTimer, aTimeoutInMs / portTICK_PERIOD_MS, 100) != pdPASS)
     {
-        PIC32_LOG("app timer start() failed");
         appError(APP_ERROR_START_TIMER_FAILED);
     }
 

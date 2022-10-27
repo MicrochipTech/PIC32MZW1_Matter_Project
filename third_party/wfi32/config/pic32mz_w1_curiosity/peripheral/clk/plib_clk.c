@@ -159,6 +159,7 @@ unsigned int wifi_spi_read(unsigned int spi_addr)
 
 void CLK_Initialize( void )
 {
+    volatile unsigned int *PLLDBG = (unsigned int*) 0xBF8000E0;
     volatile unsigned int *PMDRCLR = (unsigned int *) 0xBF8000B4;
 	volatile unsigned int *RFSPICTL = (unsigned int *) 0xBF8C8028;
 
@@ -217,8 +218,20 @@ void CLK_Initialize( void )
 		while( OSCCONbits.OSWEN );
         DelayMs(5);
 
-		/* Power down the EWPLL */
-		EWPLLCONbits.EWPLLPWDN = 1;
+		/* Configure EWPLL */
+		/* EWPLLBSWSEL   = 6 */
+		/* EWPLLPWDN     = PLL_ON */
+		/* EWPLLPOSTDIV1 = 32 */
+		/* EWPLLFLOCK    = NO_FORCE */
+		/* EWPLLRST      = NORESET_EWPLL */
+		/* EWPLLFBDIV    = 800 */
+		/* EWPLLREFDIV   = 20 */
+		/* EWPLLICLK     = POSC */
+		/* ETHCLKOUTEN   = ENABLED */
+		/* EWPLL_BYP     = NO_BYPASS */
+		EWPLLCON = 0x15320206 ^ 0x0438080c;
+		CFGCON0bits.ETHPLLHWMD = 1;
+		while(!((*PLLDBG) & 0x4));
 
 		/* Power down the UPLL */
 		UPLLCONbits.UPLLPWDN = 1;
@@ -272,8 +285,20 @@ void CLK_Initialize( void )
 		/* Power down the UPLL */
 		UPLLCONbits.UPLLPWDN = 1;
 
-		/* Power down the EWPLL */
-		EWPLLCONbits.EWPLLPWDN = 1;
+		/* Configure EWPLL */
+		/* EWPLLBSWSEL   = 6 */
+		/* EWPLLPWDN     = PLL_ON */
+		/* EWPLLPOSTDIV1 = 32 */
+		/* EWPLLFLOCK    = NO_FORCE */
+		/* EWPLLRST      = NORESET_EWPLL */
+		/* EWPLLFBDIV    = 800 */
+		/* EWPLLREFDIV   = 20 */
+		/* EWPLLICLK     = POSC */
+		/* ETHCLKOUTEN   = ENABLED */
+		/* EWPLL_BYP     = NO_BYPASS */
+		EWPLLCON = 0x15320206 ^ 0x438080c;
+		CFGCON0bits.ETHPLLHWMD = 1;
+		while(!((*PLLDBG) & 0x4));
 
 		/* Power down the BTPLL */
 		BTPLLCONbits.BTPLLPWDN = 1;
@@ -302,6 +327,10 @@ void CLK_Initialize( void )
 
 		while( OSCCONbits.OSWEN );        /* wait for indication of successful clock change before proceeding */
 	}
+    /* Peripheral Bus 1 is by default enabled, set its divisor */
+    /* PBDIV = 4 */
+    PB1DIVbits.PBDIV = 3;
+
 
   
 
@@ -309,9 +338,9 @@ void CLK_Initialize( void )
 
     CFGCON0bits.PMDLOCK = 0;
 
-    PMD1 = 0x25818981;
+    PMD1 = 0x20018981;
     PMD2 = 0x7e0f0f;
-    PMD3 = 0x19031312;
+    PMD3 = 0x19030312;
 
     CFGCON0bits.PMDLOCK = 1;
 

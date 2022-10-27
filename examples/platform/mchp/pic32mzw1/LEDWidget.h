@@ -50,9 +50,5 @@ private:
     uint8_t mbrightness        = 0;
     uint16_t mHue;
     uint8_t mSaturation;
-    //cyhal_pwm_t pwm_red;
-    //cyhal_pwm_t pwm_green;
-    //cyhal_pwm_t pwm_blue;
-    //cyhal_pwm_t pwm_led;
     void DoSet(bool state);
 };

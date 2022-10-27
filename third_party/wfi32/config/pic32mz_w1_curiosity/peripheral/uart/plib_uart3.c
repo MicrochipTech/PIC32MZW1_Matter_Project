@@ -48,7 +48,7 @@
 // *****************************************************************************
 
 
-static void UART3_ErrorClear( void )
+void static UART3_ErrorClear( void )
 {
     UART_ERROR errors = UART_ERROR_NONE;
     uint8_t dummyData = 0u;
@@ -96,7 +96,7 @@ void UART3_Initialize( void )
     U3STASET = (_U3STA_UTXEN_MASK | _U3STA_URXEN_MASK );
 
     /* BAUD Rate register Setup */
-    U3BRG = 216;
+    U3BRG = 108;
 
     /* Turn ON UART3 */
     U3MODESET = _U3MODE_ON_MASK;

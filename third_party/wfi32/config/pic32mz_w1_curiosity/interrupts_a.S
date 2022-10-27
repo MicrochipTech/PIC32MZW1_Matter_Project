@@ -52,6 +52,42 @@
 #include <xc.h>
 #include "ISR_Support.h"
 
+    .extern  CORE_TIMER_Handler
+
+    .section   .vector_0,code, keep
+    .equ     __vector_dispatch_0, IntVectorCORE_TIMER_Handler
+    .global  __vector_dispatch_0
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorCORE_TIMER_Handler
+
+IntVectorCORE_TIMER_Handler:
+    portSAVE_CONTEXT
+    la    s6,  CORE_TIMER_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorCORE_TIMER_Handler
+    .extern  FLASH_CONTROL_Handler
+
+    .section   .vector_30,code, keep
+    .equ     __vector_dispatch_30, IntVectorFLASH_CONTROL_Handler
+    .global  __vector_dispatch_30
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorFLASH_CONTROL_Handler
+
+IntVectorFLASH_CONTROL_Handler:
+    portSAVE_CONTEXT
+    la    s6,  FLASH_CONTROL_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorFLASH_CONTROL_Handler
     .extern  UART1_FAULT_Handler
 
     .section   .vector_38,code, keep
@@ -106,4 +142,94 @@ IntVectorUART1_TX_Handler:
     nop
     portRESTORE_CONTEXT
     .end   IntVectorUART1_TX_Handler
+    .extern  RFSMC_Handler
+
+    .section   .vector_83,code, keep
+    .equ     __vector_dispatch_83, IntVectorRFSMC_Handler
+    .global  __vector_dispatch_83
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorRFSMC_Handler
+
+IntVectorRFSMC_Handler:
+    portSAVE_CONTEXT
+    la    s6,  RFSMC_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorRFSMC_Handler
+    .extern  RFMAC_Handler
+
+    .section   .vector_84,code, keep
+    .equ     __vector_dispatch_84, IntVectorRFMAC_Handler
+    .global  __vector_dispatch_84
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorRFMAC_Handler
+
+IntVectorRFMAC_Handler:
+    portSAVE_CONTEXT
+    la    s6,  RFMAC_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorRFMAC_Handler
+    .extern  RFTM0_Handler
+
+    .section   .vector_86,code, keep
+    .equ     __vector_dispatch_86, IntVectorRFTM0_Handler
+    .global  __vector_dispatch_86
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorRFTM0_Handler
+
+IntVectorRFTM0_Handler:
+    portSAVE_CONTEXT
+    la    s6,  RFTM0_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorRFTM0_Handler
+    .extern  CRYPTO1_Handler
+
+    .section   .vector_166,code, keep
+    .equ     __vector_dispatch_166, IntVectorCRYPTO1_Handler
+    .global  __vector_dispatch_166
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorCRYPTO1_Handler
+
+IntVectorCRYPTO1_Handler:
+    portSAVE_CONTEXT
+    la    s6,  CRYPTO1_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorCRYPTO1_Handler
+    .extern  CRYPTO1_FAULT_Handler
+
+    .section   .vector_167,code, keep
+    .equ     __vector_dispatch_167, IntVectorCRYPTO1_FAULT_Handler
+    .global  __vector_dispatch_167
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorCRYPTO1_FAULT_Handler
+
+IntVectorCRYPTO1_FAULT_Handler:
+    portSAVE_CONTEXT
+    la    s6,  CRYPTO1_FAULT_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorCRYPTO1_FAULT_Handler
 

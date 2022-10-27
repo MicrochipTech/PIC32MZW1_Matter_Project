@@ -57,14 +57,17 @@ executable("lighting_app") {
     "src/LightingManager.cpp",
     "src/ZclCallbacks.cpp",
     "src/main.cpp",
+    "include/CHIPProjectConfig.h",
     #"src/freertos_hooks.c",
   ]
+  
   deps = [
  #   ":lighting_app_sdk_sources",
     "${chip_root}/examples/common/QRCode",
     "${chip_root}/examples/lighting-app/lighting-common",
     "${chip_root}/src/lib",
     "${chip_root}/src/setup_payload",
+    "${chip_root}/examples/providers:device_info_provider",
   ]
 
   include_dirs += [
@@ -79,8 +82,6 @@ executable("lighting_app") {
 
   defines = []
 
-  #defines += [ "MBEDTLS_CONFIG_FILE=<matter_mbedtls_config.h>" ]
-
   if (enable_heap_monitoring) {
     sources += [ "${examples_plat_dir}/MemMonitoring.cpp" ]
     defines += [ "HEAP_MONITORING" ]
@@ -88,12 +89,8 @@ executable("lighting_app") {
   ldflags += [
     "-mprocessor=32MZ1025W104132",
     "-mreserve=prog@0x100ff000:0x100fffff",
-    #"--script=\"..\/p32MZ1025W104132.ld\"",
   ]
 
-  #ldflags -= [
-  #  "-fdiagnostics-color",
-  #]
   if (chip_print_memory_usage) {
     ldflags += [
       "-Wl,--print-memory-usage",
@@ -101,7 +98,6 @@ executable("lighting_app") {
     ]
   }
 
-  #output_dir = root_out_dir
 }
 
 group("wfi32") {

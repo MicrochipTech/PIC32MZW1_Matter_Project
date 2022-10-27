@@ -10,7 +10,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: uart3, value: '216'}
+        attributes: {id: uart3, value: '108'}
   - type: KeyValueSet
     attributes: {id: UART_BRGH}
     children:
@@ -34,7 +34,7 @@ children:
     - type: Values
       children:
       - type: Dynamic
-        attributes: {id: uart3, value: '100000000'}
+        attributes: {id: uart3, value: '50000000'}
   - type: Boolean
     attributes: {id: UART_INTERRUPT_MODE_ENABLE}
     children:
@@ -79,4 +79,4 @@ children:
         children:
         - {type: Value, value: UART}
 - type: ElementPosition
-  attributes: {x: '663', y: '166', id: uart3}
+  attributes: {x: '667', y: '166', id: uart3}
