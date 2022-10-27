@@ -546,7 +546,7 @@ void ColorControlServer::startColorLoop(EndpointId endpoint, uint8_t startFromSt
     uint16_t currentHue = 0;
     Attributes::EnhancedCurrentHue::Get(endpoint, &currentHue);
 
-    u_int16_t startHue = 0x2300;
+    uint16_t startHue = 0x2300;
     if (startFromStartHue)
     {
         Attributes::ColorLoopStartEnhancedHue::Get(endpoint, &startHue);

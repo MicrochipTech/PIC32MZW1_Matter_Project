@@ -46,7 +46,7 @@
 #include <protocols/secure_channel/CASEServer.h>
 #include <protocols/secure_channel/MessageCounterManager.h>
 #include <setup_payload/SetupPayload.h>
-#include <sys/param.h>
+//#include <sys/param.h>
 #include <system/SystemPacketBuffer.h>
 #include <system/TLVPacketBufferBackingStore.h>
 #include <transport/SessionManager.h>
