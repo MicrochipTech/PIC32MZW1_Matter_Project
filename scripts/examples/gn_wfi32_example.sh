@@ -54,9 +54,15 @@ for arg; do
     esac
 done
 
-#gn -v gen --check --fail-on-unused-args "$OUTPUT_DIR" --root="$EXAMPLE_DIR" --args="p6_board=\"$P6_BOARD\" ${GN_ARGS[*]}"
+if [ ! -f "lwip_update" ]; then
+    echo "modify lwip mem_free"
+    find ./third_party/lwip/ -type f -exec sed -i 's/mem_free(/mem_free_l(/g' {} +
+    find ./third_party/lwip/ -type f -exec sed -i 's/mem_free,/mem_free_l,/g' {} +
+    touch lwip_update
+fi
+
 gn -v gen --check --fail-on-unused-args "$OUTPUT_DIR" --root="$EXAMPLE_DIR"
-#gn -v gen --check-onunsed-args "$OUTPUT_DIR" --root="$EXAMPLE_DIR" --args="p6_board=\"$P6_BOARD\" ${GN_ARGS[*]}"
 ninja -v -C "$OUTPUT_DIR" "${NINJA_ARGS[@]}"
+
 #print stats
 xc32-bin2hex "$OUTPUT_DIR"/*.elf
