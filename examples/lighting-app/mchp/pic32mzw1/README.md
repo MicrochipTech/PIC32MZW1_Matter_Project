@@ -1,6 +1,6 @@
 ![https://www.microchip.com/](assets/microchip.png)
 
-`<a name="chip-pic32mzw1-lighting-application"></a>`
+<a name="chiplightingapp"></a>
 
 # CHIP PIC32MZW1 Lighting Application
 
@@ -9,6 +9,7 @@ This MPLAB application demonstrates the use of Matter protocol (also known as Pr
 <hr>
 
 - [CHIP PIC32MZW1 Lighting Application](#chip-pic32mzw1-lighting-application)
+
   - [Introduction](#introduction)
   - [Hardware Requirements](#hardware-requirements)
   - [Setup CHIP Environment - Install Prerequisites](#setup-chip-environment---install-prerequisites)
@@ -19,33 +20,35 @@ This MPLAB application demonstrates the use of Matter protocol (also known as Pr
   - [Flashing the application](#flashing-the-application)
   - [Commissioning and Controlling Matter device](#commissioning-and-controlling-matter-device)
 
-`<a name="introduction"></a>`
+  </hr>
 
-### Introduction
+<a name="intro"></a>
+
+## Introduction
 
 This application is a starting point for Matter protocol demonstration over Microchip's PIC32MZW1 platform and gives an idea to control the Yellow LED on WFI32-IoT board using Android CHIPTool app (Matter Controller). During the initial release (Phase-1) of this application, Wi-Fi Network credentials are hard coded. In this application, WFI32-IoT board is commissioned over Wi-Fi Network, using IPv4 address assigned to it.
 
 - Note: This project was developed and tested using MPLAB X IDE v6.00, MPLAB XC32 compiler v4.20 on Ubuntu 20.04 LTS and 22.04 LTS.
 
-`<a name="hardware-requirements"></a>`
+<a name="requirements"></a>
 
-### Hardware Requirements
+## Hardware Requirements
 
 - [WFI32-IoT board](https://www.microchip.com/en-us/development-tool/EV36W50A)
 - An Android Phone with [&#34;CHIPTool&#34; app](assets/matterMicrochip.apk) installed
 - Router/AP (Needs no internet connectivity)
 
-`<a name="setup-chip-environment---install-prerequisites"></a>`
+<a name="environment"></a>
 
-### Setup CHIP Environment - Install Prerequisites
+## Setup CHIP Environment - Install Prerequisites
 
 Before getting ready to build the Matter application, you'll need to install a few OS specific dependencies.
 
 - [Linux](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md#installing-prerequisites-on-linux) (Ubuntu release version 20.04 LTS, 22.04 LTS is preferred)
 
-`<a name="software-requirements"></a>`
+<a name="softwarereq"></a>
 
-### Software Requirements
+## Software Requirements
 
 - [MPLAB X IDE v6.00](https://www.microchip.com/en-us/development-tools-tools-and-software/mplab-x-ide) and [follow the instructions to install IDE](https://microchipdeveloper.com/mplabx:installation). Also, select "MPLAB IPE" option during IDE installation.
 - [MPLAB XC32 Compiler v4.20](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers/downloads-documentation#XC32) and [follow the instructions to install XC32 compiler](https://microchipdeveloper.com/xc32:installation).
@@ -63,9 +66,9 @@ Before getting ready to build the Matter application, you'll need to install a f
     - To continue using the same terminal, run `source ~/.profile` or `source ~/.bashrc`
 - [Open JDK v8](https://docs.datastax.com/en/jdk-install/doc/jdk-install/installOpenJdkDeb.html) Please note that, this is a strict requirement to use Open JDK v8.
 
-`<a name="demo-setup"></a>`
+<a name="demosetup"></a>
 
-### Demo setup
+## Demo setup
 
 The Lighting application demo setup includes an Android phone running CHIPTool app, WFI32-IoT board and Router/AP (Needs no internet connectivity). The following diagram shows the demo setup for WFI32-IoT board.
 
@@ -73,9 +76,9 @@ The Lighting application demo setup includes an Android phone running CHIPTool a
 <p align="center"><img width="450" src="assets/matterSetup.png">
 </p>
 
-`<a name="checking-out-matter-repository"></a>`
+<a name="checkoutchiprepo"></a>
 
-### Checking out Matter Repository
+## Checking out Matter Repository
 
 To check out the BitBucket based Matter repository:
 
@@ -90,9 +93,9 @@ $ cd path-to-connectedhomeip/
 $ git checkout pic32mzw1_support_v1
 ```
 
-`<a name="building-the-application"></a>`
+<a name="buildapp"></a>
 
-### Building the application
+## Building the application
 
 Update Wi-Fi Access Point (AP) credentials in "/connectedhomeip/src/platform/wfi32/CHIPDevicePlatformConfig.h" file as below:
 
@@ -108,9 +111,9 @@ $ cd path-to-connectedhomeip/
 $ ./scripts/examples/gn_wfi32_example.sh examples/lighting-app/mchp/pic32mzw1/ out/wfi32/
 ```
 
-`<a name="flashing-the-application"></a>`
+<a name="flashapp"></a>
 
-### Flashing the application
+## Flashing the application
 
 To flash the application to WFI32-IoT board, run the following command from top CHIP repository:
 
@@ -123,13 +126,13 @@ $ ipecmd.sh -TPPKOB4 -P32MZ1025W104132 -M -Fout/wfi32/chip-wfi32-lighting-exampl
   <p align="center"><img width="450" src="assets/flashOutput.png" height="220">
   </p>
 
-`<a name="commissioning-and-controlling-matter-device"></a>`
+<a name="commissioncontrol"></a>
 
-### Commissioning and Controlling Matter device
+## Commissioning and Controlling Matter device
 
 Once the WFI32-IoT board is programmed with this application, use [Android CHIPTool app](assets/matterMicrochip.apk) to perform next steps in verifying the lighting application behavior.
 
-`<a name="building-the-application"></a>`
+<a name="buildapp"></a>
 
 - Note: The device running Android CHIPTool app, should be connected to the same AP ***(configured [here](#building-the-application))***
 
