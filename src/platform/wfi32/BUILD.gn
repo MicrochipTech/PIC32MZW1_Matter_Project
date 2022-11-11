@@ -76,6 +76,7 @@ static_library("wfi32") {
   include_dirs = [ 
     "${chip_root}/src/platform/wfi32",
     "${wfi32_sdk_root}", 
-    "${wfi32_sdk_root}/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1", 
+    "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1", 
+    "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/", 
   ]
 }

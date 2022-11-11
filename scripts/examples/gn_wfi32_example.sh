@@ -61,8 +61,10 @@ if [ ! -f "lwip_update" ]; then
     touch lwip_update
 fi
 
-gn -v gen --check --fail-on-unused-args "$OUTPUT_DIR" --root="$EXAMPLE_DIR"
-ninja -v -C "$OUTPUT_DIR" "${NINJA_ARGS[@]}"
+gn -v gen --check --fail-on-unused-args "$OUTPUT_DIR" --args="home_dir=\"$HOME\" dfp_version=\"1.6.220\"" --root="$EXAMPLE_DIR"
+ninja -C "$OUTPUT_DIR" "${NINJA_ARGS[@]}"
 
-#print stats
+#more debug log command
+#ninja -v -C "$OUTPUT_DIR" "${NINJA_ARGS[@]}"
+
 xc32-bin2hex "$OUTPUT_DIR"/*.elf

@@ -71,11 +71,6 @@ void appError(CHIP_ERROR error)
 // ================================================================================
 // FreeRTOS Callbacks
 // ================================================================================
-extern "C" void vApplicationIdleHook(void)
-{
-    // FreeRTOS Idle callback
-}
-
 extern "C" void vApplicationDaemonTaskStartupHook()
 {
     PIC32_LOG("vApplicationDaemonTaskStartupHook\r\n");
@@ -85,21 +80,6 @@ extern "C" void vApplicationDaemonTaskStartupHook()
     /* Create the Main task. */
     xTaskCreate(main_task, "Main task", MAIN_TASK_STACK_SIZE, NULL, MAIN_TASK_PRIORITY, NULL);
 }
-
-extern "C" void vApplicationStackOverflowHook( TaskHandle_t pxTask, signed char *pcTaskName )
-{
-   ( void ) pcTaskName;
-   ( void ) pxTask;
-
-   /* Run time task stack overflow checking is performed if
-   configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook  function is
-   called if a task stack overflow is detected.  Note the system/interrupt
-   stack is not checked. */
-   taskDISABLE_INTERRUPTS();
-   for( ;; );
-}
-
-
 
 static void main_task(void * pvParameters)
 {

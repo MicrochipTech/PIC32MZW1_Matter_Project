@@ -18,9 +18,9 @@ template("wfi32_sdk_target") {
   print("XXXwfi32 sdk, target name = ${target_name}")
   wfi32_sdk_target_name = target_name
 
-  _freertos_root = "${wfi32_sdk_root}/rtos/FreeRTOS/Source"
-  _h3_library_root = "${wfi32_sdk_root}/config/pic32mz_w1_curiosity"
-  _wolfssl_root = "${wfi32_sdk_root}/wolfssl"
+  _freertos_root = "${wfi32_sdk_root}/firmware/src/third_party/rtos/FreeRTOS/Source"
+  _h3_library_root = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity"
+  _wolfssl_root = "${wfi32_sdk_root}/firmware/src/third_party/wolfssl"
 
   config("${wfi32_sdk_target_name}_config") {
     include_dirs = [ 
@@ -191,6 +191,7 @@ template("wfi32_sdk_target") {
       "${_h3_library_root}/exceptions.c",
       "${_h3_library_root}/pmu_init.c",
       "${_h3_library_root}/network.c",
+      "${_h3_library_root}/freertos_hooks.c",
       "${_h3_library_root}/bsp/bsp.c",
       "${_h3_library_root}/crypto/src/crypto.c",
       "${_h3_library_root}/driver/ba414e/src/drv_ba414e.c",

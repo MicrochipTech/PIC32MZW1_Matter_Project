@@ -25,7 +25,7 @@ assert(current_os == "freertos")
 
 pic32mzw1_project_dir = "${chip_root}/examples/lighting-app/mchp/pic32mzw1"
 examples_plat_dir = "${chip_root}/examples/platform/mchp/pic32mzw1"
-wfi32_sdk_dir = "${wfi32_sdk_root}/config/pic32mz_w1_curiosity"
+wfi32_sdk_dir = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity"
 
 declare_args() {
   # Dump memory usage at link time.
@@ -76,7 +76,7 @@ executable("lighting_app") {
     "${pic32mzw1_project_dir}/include",
     "${wfi32_sdk_root}",
     "${wfi32_sdk_dir}",
-    "${wfi32_sdk_root}/rtos/FreeRTOS/Source/include",
+    "${wfi32_sdk_root}/firmware/src/third_party/rtos/FreeRTOS/Source/include",
 
   ]
 
