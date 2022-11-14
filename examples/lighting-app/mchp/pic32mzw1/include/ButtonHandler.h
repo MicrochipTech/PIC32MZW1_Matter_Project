@@ -24,6 +24,7 @@
 #include "FreeRTOS.h"
 //#include "cyhal.h"
 #include "timers.h" // provides FreeRTOS timer support
+#include <peripheral/gpio/plib_gpio.h>
 
 #define GPIO_INTERRUPT_PRIORITY (5)
 
@@ -34,7 +35,7 @@ public:
 
 private:
     static void GpioInit(void);
-    static void light_button_callback(void * handler_arg, int event);
-    static void func_button_callback(void * handler_arg, int event);
+    static void light_button_callback(GPIO_PIN pin, uintptr_t context);
+    static void func_button_callback(GPIO_PIN pin, uintptr_t context);
     static void TimerCallback(TimerHandle_t xTimer);
 };

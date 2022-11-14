@@ -289,15 +289,23 @@ void AppTask::LightActionEventHandler(AppEvent * event)
     }
     else if (event->Type == AppEvent::kEventType_Button)
     {
-        if (LightMgr().IsLightOn())
+        if (event->ButtonEvent.Action == APP_BUTTON_PRESSED)
         {
-            action = LightingManager::OFF_ACTION;
+            if (LightMgr().IsLightOn())
+            {
+                action = LightingManager::OFF_ACTION;
+            }
+            else
+            {
+                action = LightingManager::ON_ACTION;
+            }
+            actor = AppEvent::kEventType_Button;
         }
         else
         {
-            action = LightingManager::ON_ACTION;
+            err = APP_ERROR_UNHANDLED_EVENT;
         }
-        actor = AppEvent::kEventType_Button;
+            
     }
     else
     {
@@ -358,10 +366,15 @@ void AppTask::FunctionTimerEventHandler(AppEvent * event)
 
     // If we reached here, the button was held past FACTORY_RESET_TRIGGER_TIMEOUT,
     // initiate factory reset
-    if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kStartBleAdv)
+    if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
     {
-        PIC32_LOG("Factory Reset Triggered. Release button within %ums to cancel.", FACTORY_RESET_CANCEL_WINDOW_TIMEOUT);
+        PIC32_LOG("Factory Reset Triggered");
 
+        // Actually trigger Factory Reset
+        sAppTask.mFunction = Function::kNoneSelected;
+        chip::Server::GetInstance().ScheduleFactoryReset();
+        
+#if 0        
         // Start timer for FACTORY_RESET_CANCEL_WINDOW_TIMEOUT to allow user to
         // cancel, if required.
         sAppTask.StartTimer(FACTORY_RESET_CANCEL_WINDOW_TIMEOUT);
@@ -375,6 +388,7 @@ void AppTask::FunctionTimerEventHandler(AppEvent * event)
 
         sStatusLED.Blink(500);
         sLightLED.Blink(500);
+#endif
     }
     else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
     {
@@ -393,34 +407,36 @@ void AppTask::FunctionHandler(AppEvent * event)
     // FACTORY_RESET_TRIGGER_TIMEOUT to signal factory reset has been initiated.
     // To cancel factory reset: release the APP_FUNCTION_BUTTON once all LEDs
     // start blinking within the FACTORY_RESET_CANCEL_WINDOW_TIMEOUT
-    if (event->ButtonEvent.Action == APP_BUTTON_RELEASED)
+    if (event->ButtonEvent.Action == APP_BUTTON_PRESSED)
     {
         if (!sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kNoneSelected)
         {
+            PIC32_LOG("Factory Reset will start in %d ms", FACTORY_RESET_TRIGGER_TIMEOUT);
             sAppTask.StartTimer(FACTORY_RESET_TRIGGER_TIMEOUT);
-            sAppTask.mFunction = Function::kStartBleAdv;
+            sAppTask.mFunction = Function::kFactoryReset;
         }
     }
     else
     {
         // If the button was released before factory reset got initiated, start Thread Network
-        if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kStartBleAdv)
+        if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
         {
             sAppTask.CancelTimer();
             sAppTask.mFunction = Function::kNoneSelected;
+            PIC32_LOG("Factory Reset has been Canceled");
         }
         else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
         {
             // Set Light status LED back to show state of light.
-            sLightLED.Set(LightMgr().IsLightOn());
+            //sLightLED.Set(LightMgr().IsLightOn());
 
-            sAppTask.CancelTimer();
+            //sAppTask.CancelTimer();
 
             // Change the function to none selected since factory reset has been
             // canceled.
             sAppTask.mFunction = Function::kNoneSelected;
 
-            PIC32_LOG("Factory Reset has been Canceled");
+            PIC32_LOG("Button is release");
         }
     }
 }
@@ -559,6 +575,7 @@ void AppTask::UpdateClusterState(intptr_t context)
     {
         PIC32_LOG("ERR: updating on/off %x", status);
     }
+
 }
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 void AppTask::InitOTARequestor()

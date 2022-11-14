@@ -453,7 +453,6 @@ void SYS_Initialize ( void* data )
 
 	GPIO_Initialize();
 
-	BSP_Initialize();
     NVM_Initialize();
 
     CORETIMER_Initialize();
@@ -461,6 +460,7 @@ void SYS_Initialize ( void* data )
 
 	UART1_Initialize();
 
+	BSP_Initialize();
 	RNG_Initialize();
 
 

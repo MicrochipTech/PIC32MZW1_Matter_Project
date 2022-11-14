@@ -358,6 +358,29 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Delete(const char * key)
     return CHIP_NO_ERROR;
 }
 
+
+CHIP_ERROR KeyValueStoreManagerImpl::Erase(void)
+{
+    xSemaphoreTake(storage_mutex, portMAX_DELAY); 
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS);
+    while(xferDone == false);
+
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + 2*NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+    
+    xSemaphoreGive(storage_mutex); 
+    
+    return CHIP_NO_ERROR;
+}
+
 } // namespace PersistedStorage
 } // namespace DeviceLayer
 } // namespace chip

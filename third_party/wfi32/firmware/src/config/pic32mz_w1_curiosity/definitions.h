@@ -51,7 +51,6 @@
 #include <stdio.h>
 #include "crypto/crypto.h"
 #include "driver/ba414e/drv_ba414e.h"
-#include "bsp/bsp.h"
 #include "peripheral/clk/plib_clk.h"
 #include "peripheral/gpio/plib_gpio.h"
 #include "peripheral/evic/plib_evic.h"
@@ -62,6 +61,7 @@
 #include "peripheral/uart/plib_uart3.h"
 #include "peripheral/uart/plib_uart1.h"
 #include "driver/wifi/pic32mzw1/include/wdrv_pic32mzw_api.h"
+#include "bsp/bsp.h"
 #include "peripheral/rng/plib_rng.h"
 #include "system/console/sys_console.h"
 #include "system/console/src/sys_console_uart_definitions.h"

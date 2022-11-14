@@ -21,6 +21,7 @@
 #include "AppConfig.h"
 #include "AppTask.h"
 
+
 namespace {
 constexpr int kButtonCount = 2;
 
@@ -45,42 +46,28 @@ void ButtonHandler::Init(void)
         );
     }
 }
-
+typedef  void (*GPIO_PIN_CALLBACK) ( GPIO_PIN pin, uintptr_t context);
 void ButtonHandler::GpioInit(void)
 {
-    #if 0
-    cy_rslt_t result = CY_RSLT_SUCCESS;
-    // Set up button GPIOs to input with pullups.
-    result = cyhal_gpio_init(APP_LIGHT_BUTTON, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
-    if (result != CY_RSLT_SUCCESS)
-    {
-        printf(" cyhal_gpio_init failed for APP_LOCK_BUTTON\r\n");
-    }
-    result = cyhal_gpio_init(APP_FUNCTION_BUTTON, CYHAL_GPIO_DIR_INPUT, CYHAL_GPIO_DRIVE_PULLUP, CYBSP_BTN_OFF);
-    if (result != CY_RSLT_SUCCESS)
-    {
-        printf(" cyhal_gpio_init failed for APP_FUNCTION_BUTTON\r\n");
-    }
-    /* Configure GPIO interrupt. */
-    static cyhal_gpio_callback_data_t light_button_cbdata;
-    static cyhal_gpio_callback_data_t func_button_cbdata;
-    light_button_cbdata.callback     = light_button_callback;
-    light_button_cbdata.callback_arg = NULL;
-    cyhal_gpio_register_callback(APP_LIGHT_BUTTON, &light_button_cbdata);
-    func_button_cbdata.callback     = func_button_callback;
-    func_button_cbdata.callback_arg = NULL;
-    cyhal_gpio_register_callback(APP_FUNCTION_BUTTON, &func_button_cbdata);
-    cyhal_gpio_enable_event(APP_LIGHT_BUTTON, CYHAL_GPIO_IRQ_FALL, GPIO_INTERRUPT_PRIORITY, true);
-    cyhal_gpio_enable_event(APP_FUNCTION_BUTTON, CYHAL_GPIO_IRQ_FALL, GPIO_INTERRUPT_PRIORITY, true);
-    #endif
+    bool result;
+    result = GPIO_PinInterruptCallbackRegister( GPIO_PIN_RB8, light_button_callback, NULL);
+    if (!result)
+        PIC32_LOG("Light button interrupt set fail..");
+    GPIO_PinIntEnable(GPIO_PIN_RB8, GPIO_INTERRUPT_ON_MISMATCH);
+    
+    result = GPIO_PinInterruptCallbackRegister( GPIO_PIN_RA10, func_button_callback, NULL);
+    if (!result)
+        PIC32_LOG("Function button interrupt set fail..");
+    GPIO_PinIntEnable(GPIO_PIN_RA10, GPIO_INTERRUPT_ON_MISMATCH);
+    
 }
-void ButtonHandler::light_button_callback(void * handler_arg, int event)
+void ButtonHandler::light_button_callback(GPIO_PIN pin, uintptr_t context)
 {
     portBASE_TYPE taskWoken = pdFALSE;
     xTimerStartFromISR(buttonTimers[APP_LIGHT_BUTTON_IDX], &taskWoken);
 }
 
-void ButtonHandler::func_button_callback(void * handler_arg, int event)
+void ButtonHandler::func_button_callback(GPIO_PIN pin, uintptr_t context)
 {
     portBASE_TYPE taskWoken = pdFALSE;
     xTimerStartFromISR(buttonTimers[APP_FUNCTION_BUTTON_IDX], &taskWoken);
@@ -94,11 +81,11 @@ void ButtonHandler::TimerCallback(TimerHandle_t xTimer)
     timerId             = (uint32_t) pvTimerGetTimerID(xTimer);
     if (timerId)
     {
-        //buttonevent = cyhal_gpio_read(APP_FUNCTION_BUTTON);
+        buttonevent = SWITCH1_Get();
     }
     else
     {
-        //buttonevent = cyhal_gpio_read(APP_LIGHT_BUTTON);
+        buttonevent = SWITCH2_Get();
     }
-    GetAppTask().ButtonEventHandler(timerId, (buttonevent) ? APP_BUTTON_PRESSED : APP_BUTTON_RELEASED);
+    GetAppTask().ButtonEventHandler(timerId, (buttonevent) ? APP_BUTTON_RELEASED : APP_BUTTON_PRESSED);
 }

@@ -41,7 +41,7 @@
 
 // Time it takes in ms for the simulated actuator to move from one
 // state to another.
-#define ACTUATOR_MOVEMENT_PERIOS_MS 2000
+#define ACTUATOR_MOVEMENT_PERIOS_MS 1
 
 // ---- Thread Polling Config ----
 #define THREAD_ACTIVE_POLLING_INTERVAL_MS 100

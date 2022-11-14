@@ -82,22 +82,69 @@ bool LightingManager::InitiateAction(int32_t aActor, Action_t aAction)
     bool action_initiated = false;
     State_t new_state;
 
+    // Initiate Turn On/Off Action only when the previous one is complete.
+    if (mState == kState_OffCompleted && aAction == ON_ACTION)
+    {
+        action_initiated = true;
+
+        new_state = kState_OnInitiated;
+    }
+    else if (mState == kState_OnCompleted && aAction == OFF_ACTION)
+    {
+        action_initiated = true;
+
+        new_state = kState_OffInitiated;
+    }
+
+    if (action_initiated)
+    {
+        if (mAutoTurnOffTimerArmed && new_state == kState_OffInitiated)
+        {
+            // If auto turn off timer has been armed and someone initiates turning off,
+            // cancel the timer and continue as normal.
+            mAutoTurnOffTimerArmed = false;
+
+            CancelTimer();
+        }
+
+        StartTimer(ACTUATOR_MOVEMENT_PERIOS_MS);
+
+        // Since the timer started successfully, update the state and trigger callback
+        mState = new_state;
+
+        if (mActionInitiated_CB)
+        {
+            mActionInitiated_CB(aAction, aActor);
+        }
+    }
+
+    return action_initiated;
+#if 0
+    bool action_initiated = false;
+    State_t new_state;
+    
+    //if (aAction == ON_ACTION)
+    //    light->mState == kState_ONInitiated            
+    //else if (aAction == OFF_ACTION)
+    //    light->mState == kState_OFFInitiated
+
     if (mActionInitiated_CB)
     {
         mActionInitiated_CB(aAction, aActor);
     }
     
     return true;
+#endif
 }
 
 void LightingManager::StartTimer(uint32_t aTimeoutMs)
 {
-#if 0
-    //if (xTimerIsTimerActive(sLightTimer))
-    //{
-    //    PIC32_LOG("app timer already started!");
-    //    CancelTimer();
-    //}
+#if 1
+    if (xTimerIsTimerActive(sLightTimer))
+    {
+        PIC32_LOG("app timer already started!");
+        CancelTimer();
+    }
 
     // timer is not active, change its period to required value (== restart).
     // FreeRTOS- Block for a maximum of 100 ticks if the change period command
@@ -112,7 +159,7 @@ void LightingManager::StartTimer(uint32_t aTimeoutMs)
 
 void LightingManager::CancelTimer(void)
 {
-#if 0
+#if 1
     if (xTimerStop(sLightTimer, 0) == pdFAIL)
     {
         PIC32_LOG("sLightTimer stop() failed");

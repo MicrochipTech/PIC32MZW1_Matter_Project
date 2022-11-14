@@ -95,6 +95,13 @@ children:
       children:
       - type: Dynamic
         attributes: {id: HarmonyCore, value: 'false'}
+  - type: Boolean
+    attributes: {id: ENABLE_SYS_RESET}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: 'false'}
   - type: Menu
     attributes: {id: GEN_APP_RTOS_TASK_CONF_MENU0}
     children:

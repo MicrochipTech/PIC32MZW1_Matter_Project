@@ -108,6 +108,7 @@ public:
     static bool ConfigValueExists(Key key);
 
     static CHIP_ERROR FactoryResetConfig(void);
+    static CHIP_ERROR SystemReset(void);
 
     static void RunConfigUnitTest(void);
 };

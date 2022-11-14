@@ -240,15 +240,28 @@ CHIP_ERROR PIC32MZW1Config::FactoryResetConfig(void)
     }
 
     // To Do: Erase all key-values including fabric info.
-    //err = PersistedStorage::KeyValueStoreMgrImpl().Erase();
-    //if (err != CHIP_NO_ERROR)
-    //{
-        ChipLogError(DeviceLayer, "To Do: Clear Key-Value Storage");
-    //}
+    err = PersistedStorage::KeyValueStoreMgrImpl().Erase();
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogError(DeviceLayer, "Erase Key-Value Storage fail..");
+    }
 
     return CHIP_NO_ERROR;
 }
 
+CHIP_ERROR PIC32MZW1Config::SystemReset(void)
+{
+    /* Short delay for debug log output before reset. */
+    vTaskDelay( 100 );
+    
+    /* Perform system unlock sequence */ 
+    SYSKEY = 0x00000000;
+    SYSKEY = 0xAA996655;
+    SYSKEY = 0x556699AA;
+    RSWRSTSET  = _RSWRST_SWRST_MASK;
+    
+    return CHIP_NO_ERROR;
+}
 void PIC32MZW1Config::RunConfigUnitTest() {}
 
 } // namespace Internal

@@ -207,8 +207,9 @@ void ConfigurationManagerImpl::DoFactoryReset(intptr_t arg)
 
     // Restart the system.
     ChipLogProgress(DeviceLayer, "System restarting");
-    ChipLogProgress(DeviceLayer, "To Do: ");
-   
+    
+    PIC32MZW1Config::SystemReset();
+    
 }
 
 ConfigurationManager & ConfigurationMgrImpl()
