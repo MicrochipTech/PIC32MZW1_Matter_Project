@@ -89,7 +89,7 @@ toolchain("wfi32") {
     linker_script_path = rebase_path(linker_script, root_build_dir) 
     wifi_lib = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/lib/pic32mzw1.a"
     wifi_lib_path = rebase_path(wifi_lib, root_build_dir) 
-    command = "$mchp_cxx -mprocessor=32MZ1025W104132 -mmicromips -o $outfile {{inputs}} ${wifi_lib_path} -DXPRJ_default=default -Wl,--defsym=__MPLAB_BUILD=1,--script=${linker_script_path},--defsym=_min_heap_size=11300,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./pic32mzw1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"$home_dir/.mchp_packs/Microchip/PIC32MZ-W_DFP/$dfp_version\""
+    command = "$mchp_cxx -mprocessor=32MZ1025W104132 -mmicromips -o $outfile {{inputs}} ${wifi_lib_path} -DXPRJ_default=default -Wl,--defsym=__MPLAB_BUILD=1,--script=${linker_script_path},--defsym=_min_heap_size=512,--gc-sections,--no-code-in-dinit,--no-dinit-in-serial-mem,-Map=\"./pic32mzw1.map\",--report-mem,--cref,--memorysummary,./memoryfile.xml -mdfp=\"$home_dir/.mchp_packs/Microchip/PIC32MZ-W_DFP/$dfp_version\""
     description = "LINK $outfile"
     rspfile_content = "{{inputs}}"
     outputs = [
