@@ -2,7 +2,7 @@
 
 <a name="chiplightingapp"></a>
 
-# CHIP PIC32MZW1 Lighting Application
+# Matter (*formerly* CHIP) PIC32MZW1 Lighting Application
 
 This MPLAB application demonstrates the use of Matter protocol (also known as Project CHIP - Connected Home over IP) over Microchip PIC32MZW1 based [WFI32-IoT board](https://ww1.microchip.com/downloads/aemDocuments/documents/WSG/ProductDocuments/UserGuides/EV36W50A-WFI32-IoT-Board-Users-Guide-DS50003262.pdf)
 
@@ -51,6 +51,12 @@ Before getting ready to build the Matter application, you'll need to install a f
 ## Software Requirements
 
 - [MPLAB X IDE v6.00](https://www.microchip.com/en-us/development-tools-tools-and-software/mplab-x-ide) and [follow the instructions to install IDE](https://microchipdeveloper.com/mplabx:installation). Also, select "MPLAB IPE" option during IDE installation.
+- Check if the DFP v1.6.220 is installed. In MPLAB X IDE, from Menu bar -> Tools -> Packs -> locate "PIC32MZ-W_DFP" as below
+
+</p>
+<p align="center"><img width="450" src="assets/DFPver.png">
+</p>
+
 - [MPLAB XC32 Compiler v4.20](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers/downloads-documentation#XC32) and [follow the instructions to install XC32 compiler](https://microchipdeveloper.com/xc32:installation).
   Use XC32 professional compiler license. Please refer tab 'Internal Microchip Licenses' from [Compilers Latest Builds Page](https://compilers.microchip.com/latest_builds.php) for more details about Internal Microchip Employee License Generator.
 
@@ -59,7 +65,7 @@ Before getting ready to build the Matter application, you'll need to install a f
     - For Ubuntu, add PATHs for MPLAB X IDE and XC32 Compiler's installation directories at the end of '~/.profile' OR '~/.bashrc' file:
 
     ```
-      PATH=$PATH:"/opt/microchip/xc32/v4.20-TC9/bin"
+      PATH=$PATH:"/opt/microchip/xc32/v4.20/bin"
       PATH=$PATH:"/opt/microchip/mplabx/v6.00/mplab_platform/mplab_ipe"
     ```
 
