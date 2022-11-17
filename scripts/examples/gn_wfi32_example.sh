@@ -27,7 +27,6 @@ env
 EXAMPLE_DIR=$1
 shift
 OUTPUT_DIR=out/example_app
-P6_BOARD=CY8CKIT-062S2-43012
 
 if [[ ! -z "$1" ]]; then
     OUTPUT_DIR=$1

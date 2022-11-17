@@ -20,9 +20,7 @@
 #pragma once
 
 #include <stdint.h>
-
 #include "FreeRTOS.h"
-//#include "cyhal.h"
 #include "timers.h" // provides FreeRTOS timer support
 #include <peripheral/gpio/plib_gpio.h>
 

@@ -228,16 +228,16 @@ void AppTask::AppTaskMain(void * pvParameter)
         appError(err);
     }
 
-
-#if 1
     while (true)
     {
-        BaseType_t eventReceived = xQueueReceive(sAppEventQueue, &event, portMAX_DELAY);
+        //BaseType_t eventReceived = xQueueReceive(sAppEventQueue, &event, portMAX_DELAY);
+        BaseType_t eventReceived = xQueueReceive(sAppEventQueue, &event, 10);
         if (eventReceived == pdTRUE)
         {
+            PIC32_LOG("AppTaskMain eventReceived..\r\n");
             sAppTask.DispatchEvent(&event);
         }
-
+        
         // Collect connectivity and configuration state from the CHIP stack. Because
         // the CHIP event loop is being run in a separate task, the stack must be
         // locked while these values are queried.  However we use a non-blocking
@@ -256,13 +256,13 @@ void AppTask::AppTaskMain(void * pvParameter)
         //if (sAppTask.mFunction != Function::kFactoryReset)
         {
 
-            if (sIsWiFiStationEnabled && sIsWiFiStationProvisioned && !sIsWiFiStationConnected)
+            if (sIsWiFiStationEnabled && sIsWiFiStationProvisioned && sIsWiFiStationConnected) // ToDo: check sIsWiFiStationConnected also
             {
-                sStatusLED.Blink(950, 50);
+                sStatusLED.Set(true);
             }
             else
             {
-                sStatusLED.Blink(50, 950);
+                sStatusLED.Blink(500, 500);
             }
         }
 
@@ -270,8 +270,6 @@ void AppTask::AppTaskMain(void * pvParameter)
         sLightLED.Animate();
 
     }
-    
-#endif
 
 }
 
@@ -374,27 +372,6 @@ void AppTask::FunctionTimerEventHandler(AppEvent * event)
         sAppTask.mFunction = Function::kNoneSelected;
         chip::Server::GetInstance().ScheduleFactoryReset();
         
-#if 0        
-        // Start timer for FACTORY_RESET_CANCEL_WINDOW_TIMEOUT to allow user to
-        // cancel, if required.
-        sAppTask.StartTimer(FACTORY_RESET_CANCEL_WINDOW_TIMEOUT);
-
-        sAppTask.mFunction = Function::kFactoryReset;
-
-        // Turn off all LEDs before starting blink to make sure blink is
-        // co-ordinated.
-        sStatusLED.Set(false);
-        sLightLED.Set(false);
-
-        sStatusLED.Blink(500);
-        sLightLED.Blink(500);
-#endif
-    }
-    else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
-    {
-        // Actually trigger Factory Reset
-        sAppTask.mFunction = Function::kNoneSelected;
-        chip::Server::GetInstance().ScheduleFactoryReset();
     }
 }
 

@@ -118,7 +118,6 @@ void ConnectivityManagerImpl::_ClearWiFiStationProvision(void)
 
         memset(&stationConfig, 0, sizeof(stationConfig));
         ChipLogProgress(DeviceLayer, "To Do: clear WiFi STA setting");
-        //Internal::P6Utils::p6_wifi_set_config(WIFI_IF_STA, &stationConfig);
 
         DeviceLayer::SystemLayer().ScheduleWork(DriveStationState, NULL);
         DeviceLayer::SystemLayer().ScheduleWork(DriveAPState, NULL);
@@ -208,8 +207,10 @@ void ConnectivityManagerImpl::dhcp_status_cb(struct netif *netif)
 
         if (!ip4_addr_isany(netif_ip4_addr(netif)) && !ip4_addr_isany(netif_ip4_gw(netif)))
         {
+            
             //ChipLogProgress(DeviceLayer, "ip addr: %s\r\n", ip4addr_ntoa(netif_ip4_addr(netif))); 
-            ConnectivityManagerImpl().OnIPAddressAvailable();
+            sInstance.OnIPAddressAvailable();
+            
             return;
         }
 
@@ -263,12 +264,13 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
             // Restart the server whenever an ip address is renewed
             if (event->Type == DeviceEventType::kWiFiConnectivityChange)
             {
-                
-                ChipLogProgress(DeviceLayer,"ConnectivityManager receive  kWiFiConnectivityChange..\r\n");
-                //struct netif * nf;
-                Network_PIC32MZW_StartDHCP(&dhcp_status_cb);
-                ChipLogProgress(DeviceLayer,"ConnectivityManager receive  log2\r\n");
-                //dhcp_start(nf);
+                if (event->WiFiConnectivityChange.Result == ConnectivityChange::kConnectivity_Established)
+                {
+                    ChipLogProgress(DeviceLayer,"ConnectivityManager receive  kConnectivity_Established..\r\n");
+                    
+                    Network_PIC32MZW_StartDHCP(&ConnectivityManagerImpl::dhcp_status_cb);
+                }
+  
             }
         },
         0);
@@ -597,7 +599,7 @@ void ConnectivityManagerImpl::UpdateInternetConnectivityState(void)
     bool stationConnected;
     Internal::PIC32MZW1Utils::IsStationConnected(stationConnected);
 
-    ChipLogProgress(DeviceLayer, "UpdateInternetConnectivityState");
+    ChipLogProgress(DeviceLayer, "UpdateInternetConnectivityState, mWiFiStationState = %d", mWiFiStationState);
     // If the WiFi station is currently in the connected state...
     if ((mWiFiStationState == kWiFiStationState_Connected) || stationConnected)
     {
@@ -658,7 +660,8 @@ void ConnectivityManagerImpl::UpdateInternetConnectivityState(void)
 
 CHIP_ERROR ConnectivityManagerImpl::OnIPAddressAvailable(void)
 {
-    ChipLogProgress(DeviceLayer, "IP address available on WiFi station interface");
+    ChipLogProgress(DeviceLayer, "IP address available on WiFi station interface..");
+    mWiFiStationState = kWiFiStationState_Connected;
     UpdateInternetConnectivityState();
     return CHIP_NO_ERROR;
 }

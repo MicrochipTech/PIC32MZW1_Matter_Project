@@ -19,7 +19,7 @@
  */
 
 #include "LEDWidget.h"
-
+#include "AppConfig.h"
 #include <platform/CHIPDeviceLayer.h>
 #include <peripheral/gpio/plib_gpio.h>
 

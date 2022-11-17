@@ -36,7 +36,7 @@
 #define APP_BUTTON_PRESSED 0
 #define APP_BUTTON_RELEASED 1
 
-#define SYSTEM_STATE_LED 1
+#define SYSTEM_STATE_LED GPIO_PIN_RC9
 #define LIGHT_LED GPIO_PIN_RK13
 
 // Time it takes in ms for the simulated actuator to move from one
