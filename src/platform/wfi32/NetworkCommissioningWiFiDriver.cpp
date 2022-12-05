@@ -20,6 +20,7 @@
 #include <platform/CHIPDeviceLayer.h>
 #include <platform/wfi32/NetworkCommissioningDriver.h>
 #include <platform/wfi32/PIC32MZW1Utils.h>
+#include <platform/wfi32/PIC32MZW1Config.h>
 
 #include <limits>
 #include <string>
@@ -104,21 +105,18 @@ bool PIC32WiFiDriver::NetworkMatch(const WiFiNetwork & network, ByteSpan network
 Status PIC32WiFiDriver::AddOrUpdateNetwork(ByteSpan ssid, ByteSpan credentials, MutableCharSpan & outDebugText,
                                         uint8_t & outNetworkIndex)
 {
-    printf("PIC32WiFiDriver::AddOrUpdateNetwork In \r\n");
     outDebugText.reduce_size(0);
     outNetworkIndex = 0;
     VerifyOrReturnError(mStagingNetwork.ssidLen == 0 || NetworkMatch(mStagingNetwork, ssid), Status::kBoundsExceeded);
     VerifyOrReturnError(credentials.size() <= sizeof(mStagingNetwork.credentials), Status::kOutOfRange);
     VerifyOrReturnError(ssid.size() <= sizeof(mStagingNetwork.ssid), Status::kOutOfRange);
-
     memset(mStagingNetwork.credentials, 0, sizeof(mStagingNetwork.credentials));
     memcpy(mStagingNetwork.credentials, credentials.data(), credentials.size());
     mStagingNetwork.credentialsLen = static_cast<decltype(mStagingNetwork.credentialsLen)>(credentials.size());
-
     memset(mStagingNetwork.ssid, 0, sizeof(mStagingNetwork.ssid));
     memcpy(mStagingNetwork.ssid, ssid.data(), ssid.size());
     mStagingNetwork.ssidLen = static_cast<decltype(mStagingNetwork.ssidLen)>(ssid.size());
-
+    ChipLogProgress(NetworkProvisioning, "AddOrUpdateNetwork: SSID: %s, password:%s", mStagingNetwork.ssid, mStagingNetwork.credentials);
     return Status::kSuccess;
 }
 
@@ -144,19 +142,19 @@ Status PIC32WiFiDriver::ReorderNetwork(ByteSpan networkId, uint8_t index, Mutabl
 
 CHIP_ERROR PIC32WiFiDriver::ConnectWiFiNetwork(const char * ssid, uint8_t ssidLen, const char * key, uint8_t keyLen)
 {
-    printf("PIC32WiFiDriver::ConnectWiFiNetwork In \r\n");
+    ChipLogProgress(NetworkProvisioning, "ConnectWiFiNetwork: SSID: %s, %d, password:%s, %d",ssid, ssidLen, key, keyLen);
     CHIP_ERROR err = CHIP_NO_ERROR;
+    
+    err = PIC32MZW1Config::WriteConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiSSID, ssid, ssidLen);
+    SuccessOrExit(err);
+    err = PIC32MZW1Config::WriteConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiPassword, key, keyLen);
+    SuccessOrExit(err);
+    err = PIC32MZW1Config::WriteConfigValue(PIC32MZW1Config::kConfigKey_WiFiSecurity, (uint32_t) WDRV_PIC32MZW_AUTH_TYPE_WPAWPA2_PERSONAL);
+    SuccessOrExit(err);
+    
     ReturnErrorOnFailure(ConnectivityMgr().SetWiFiStationMode(ConnectivityManager::kWiFiStationMode_Disabled));
-    // Set the wifi configuration
-    //wifi_config_t wifi_config;
-    //chip::DeviceLayer::Internal::PIC32Utils::populate_wifi_config_t(
-    //    &wifi_config, WIFI_IF_STA, (const cy_wcm_ssid_t *) ssid, (const cy_wcm_passphrase_t *) key,
-    //    (keyLen) ? CHIP_DEVICE_CONFIG_DEFAULT_STA_SECURITY : CY_WCM_SECURITY_OPEN);
-
-    //err = chip::DeviceLayer::Internal::PIC32Utils::wifi_set_config(WIFI_IF_STA, &wifi_config);
     SuccessOrExit(err);
 
-    ReturnErrorOnFailure(ConnectivityMgr().SetWiFiStationMode(ConnectivityManager::kWiFiStationMode_Disabled));
     err = ConnectivityMgr().SetWiFiStationMode(ConnectivityManager::kWiFiStationMode_Enabled);
 
 exit:
@@ -179,7 +177,7 @@ void PIC32WiFiDriver::ConnectNetwork(ByteSpan networkId, ConnectCallback * callb
 {
     CHIP_ERROR err          = CHIP_NO_ERROR;
     Status networkingStatus = Status::kSuccess;
-    printf("PIC32WiFiDriver::ConnectNetwork In \r\n");
+    ChipLogProgress(NetworkProvisioning, "ConnectNetwork:");
     VerifyOrExit(NetworkMatch(mStagingNetwork, networkId), networkingStatus = Status::kNetworkIDNotFound);
     VerifyOrExit(mpConnectCallback == nullptr, networkingStatus = Status::kUnknownError);
     ChipLogProgress(NetworkProvisioning, "PIC32 NetworkCommissioningDelegate: SSID: %s", mStagingNetwork.ssid);

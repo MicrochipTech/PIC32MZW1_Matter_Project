@@ -40,13 +40,17 @@
 #include <app/clusters/network-commissioning/network-commissioning.h>
 #include <platform/wfi32/NetworkCommissioningDriver.h>
 #include <DeviceInfoProviderImpl.h>
+#include <platform/wfi32/PIC32MZW1Config.h>
 
+#define CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR 0
 /* OTA related includes */
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 #include <app/clusters/ota-requestor/BDXDownloader.h>
 #include <app/clusters/ota-requestor/DefaultOTARequestor.h>
 #include <app/clusters/ota-requestor/DefaultOTARequestorDriver.h>
 #include <app/clusters/ota-requestor/DefaultOTARequestorStorage.h>
+#include <platform/wfi32/OTAImageProcessorImpl.h>
+
 
 using chip::BDXDownloader;
 using chip::CharSpan;
@@ -63,11 +67,13 @@ using namespace ::chip::DeviceLayer;
 using namespace ::chip::System;
 
 #endif
-#define FACTORY_RESET_TRIGGER_TIMEOUT 3000
+#define FACTORY_RESET_TRIGGER_TIMEOUT 5000
 #define FACTORY_RESET_CANCEL_WINDOW_TIMEOUT 3000
 #define APP_TASK_STACK_SIZE (1024)//(4096)
 #define APP_TASK_PRIORITY 2
 #define APP_EVENT_QUEUE_SIZE 10
+
+
 
 namespace {
 TimerHandle_t sFunctionTimer; // FreeRTOS app sw timer.
@@ -81,6 +87,7 @@ LEDWidget sLightLED;
 bool sIsWiFiStationProvisioned = false;
 bool sIsWiFiStationEnabled     = false;
 bool sIsWiFiStationConnected   = false;
+bool sIsWiFiAPActive = false;
 
 
 //uint8_t sAppEventQueueBuffer[APP_EVENT_QUEUE_SIZE * sizeof(AppEvent)];
@@ -133,6 +140,9 @@ static void InitServer(intptr_t context)
     // Initialize device attestation config
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 
+#if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR    
+    GetAppTask().InitOTARequestor();
+#endif
 }
 
 CHIP_ERROR AppTask::StartAppTask()
@@ -248,24 +258,23 @@ void AppTask::AppTaskMain(void * pvParameter)
             sIsWiFiStationEnabled     = ConnectivityMgr().IsWiFiStationEnabled();
             sIsWiFiStationConnected   = ConnectivityMgr().IsWiFiStationConnected();
             sIsWiFiStationProvisioned = ConnectivityMgr().IsWiFiStationProvisioned();
+            sIsWiFiAPActive   = ConnectivityMgr().IsWiFiAPActive();
             PlatformMgr().UnlockChipStack();
         }
 
-        
-
-        //if (sAppTask.mFunction != Function::kFactoryReset)
+        if (sIsWiFiStationEnabled && sIsWiFiStationProvisioned && sIsWiFiStationConnected) // ToDo: check sIsWiFiStationConnected also
         {
-
-            if (sIsWiFiStationEnabled && sIsWiFiStationProvisioned && sIsWiFiStationConnected) // ToDo: check sIsWiFiStationConnected also
-            {
-                sStatusLED.Set(true);
-            }
-            else
-            {
-                sStatusLED.Blink(500, 500);
-            }
+            sStatusLED.Set(true);
         }
-
+        else if (sIsWiFiAPActive)
+        {
+            sStatusLED.Blink(200, 200);
+        }
+        else
+        {
+            sStatusLED.Blink(500, 500);
+        }
+        
         sStatusLED.Animate();
         sLightLED.Animate();
 
@@ -401,19 +410,33 @@ void AppTask::FunctionHandler(AppEvent * event)
             sAppTask.CancelTimer();
             sAppTask.mFunction = Function::kNoneSelected;
             PIC32_LOG("Factory Reset has been Canceled");
+            
+            CHIP_ERROR err;
+            char wifimode[] = "softAP";
+            err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiMode, wifimode, strlen(wifimode));
+            if (err != CHIP_NO_ERROR)
+                PIC32_LOG("Update key 'wifimode' fail..");
+            
+            PIC32_LOG("System reset..");
+            Internal::PIC32MZW1Config::SystemReset();
+
         }
         else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)
         {
             // Set Light status LED back to show state of light.
             //sLightLED.Set(LightMgr().IsLightOn());
 
-            //sAppTask.CancelTimer();
+            sAppTask.CancelTimer();
 
             // Change the function to none selected since factory reset has been
             // canceled.
             sAppTask.mFunction = Function::kNoneSelected;
 
             PIC32_LOG("Button is release");
+        }
+        else{
+            sAppTask.CancelTimer();
+            sAppTask.mFunction = Function::kNoneSelected;
         }
     }
 }
@@ -557,6 +580,7 @@ void AppTask::UpdateClusterState(intptr_t context)
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 void AppTask::InitOTARequestor()
 {
+    PIC32_LOG("InitOTARequestor In" );
     SetRequestorInstance(&gRequestorCore);
     ConfigurationMgr().StoreSoftwareVersion(CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
     gRequestorStorage.Init(chip::Server::GetInstance().GetPersistentStorage());

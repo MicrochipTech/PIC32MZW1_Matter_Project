@@ -68,7 +68,8 @@ class ConnectivityManagerImpl final : public ConnectivityManager,
 
 public:
     CHIP_ERROR ping_thread(void);
-    static void dhcp_status_cb(struct netif *netif);
+    static void DHCPStatusCallback(struct netif *netif);
+    static void NetworkProvisioningCallback(char* ssid, char* password, uint8_t auth);
 
 private:
     using Flags = GenericConnectivityManagerImpl_WiFi::ConnectivityFlags;

@@ -230,6 +230,7 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
         {
             found = 1;
             //memcpy((char *)value, dvs_data[i].value, value_size);
+            memset(dvs_data[i].value, 0, KVS_VALUE_SIZE);
             memcpy(dvs_data[i].value, value, value_size);
             dvs_data[i].value_len = value_size;
             break;

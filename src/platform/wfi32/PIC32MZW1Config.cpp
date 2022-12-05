@@ -251,15 +251,17 @@ CHIP_ERROR PIC32MZW1Config::FactoryResetConfig(void)
 
 CHIP_ERROR PIC32MZW1Config::SystemReset(void)
 {
+    vTaskSuspendAll();
+
     /* Short delay for debug log output before reset. */
-    vTaskDelay( 100 );
+    //vTaskDelay( 500 );
     
     /* Perform system unlock sequence */ 
     SYSKEY = 0x00000000;
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
     RSWRSTSET  = _RSWRST_SWRST_MASK;
-    
+
     return CHIP_NO_ERROR;
 }
 void PIC32MZW1Config::RunConfigUnitTest() {}

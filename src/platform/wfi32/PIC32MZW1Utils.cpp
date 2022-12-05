@@ -199,6 +199,12 @@ CHIP_ERROR PIC32MZW1Utils::pic32mzw1_wifi_disconnect(void)
 {
     CHIP_ERROR err   = CHIP_NO_ERROR;
     WDRV_PIC32MZW_STATUS result;
+    int wait_ms = 2000;
+    
+    ChipLogError(DeviceLayer, "pic32mzw1_wifi_disconnect() In");
+    
+    if (!mIsStationConnected)
+        return err;
 
     result =  WDRV_PIC32MZW_BSSDisconnect(PIC32MZW1Utils::wifi_handle);
 
@@ -209,8 +215,20 @@ CHIP_ERROR PIC32MZW1Utils::pic32mzw1_wifi_disconnect(void)
     }
     else
     {
-        mIsStationConnected = false;
+        while ((mIsStationConnected == true) && wait_ms)
+        {
+            wait_ms -= 50;
+            vTaskDelay(50 / portTICK_PERIOD_MS);
+        }
+        if (wait_ms <= 0)
+        {
+            ChipLogError(DeviceLayer, "pic32mzw1_wifi_disconnect() failed: Timeout..");
+            err = CHIP_ERROR_INTERNAL;
+        }
+
     }
+
+    ChipLogError(DeviceLayer, "pic32mzw1_wifi_disconnect() Out");
 
     return err;
 }
@@ -234,6 +252,12 @@ void PIC32MZW1Utils::STANotifyCB(DRV_HANDLE handle, WDRV_PIC32MZW_ASSOC_HANDLE a
     {
         ChipLogProgress(DeviceLayer, "STANotifyCB:: DISCONNECTED:: %02X:%02X:%02X:%02X:%02X:%02X", macAddr.addr[0], macAddr.addr[1], macAddr.addr[2], macAddr.addr[3], macAddr.addr[4], macAddr.addr[5]);
         mIsStationConnected = false;
+
+        ChipDeviceEvent event;
+        event.Type                           = DeviceEventType::kWiFiConnectivityChange;
+        event.WiFiConnectivityChange.Result = ConnectivityChange::kConnectivity_Lost;
+        PlatformMgr().PostEventOrDie(&event);
+
         // To Do: Release DHCP
     }
 
@@ -246,17 +270,23 @@ CHIP_ERROR PIC32MZW1Utils::pic32mzw1_wifi_connect(void)
     char ssid[DeviceLayer::Internal::kMaxWiFiSSIDLength];
     char password[DeviceLayer::Internal::kMaxWiFiKeyLength];
     uint32_t auth    = 0;
-    size_t offset = 0;
-    
-    ChipLogProgress(DeviceLayer, "invoke pic32mzw1_wifi_connect()..");
-    err = PIC32MZW1Config::ReadConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiSSID, ssid, sizeof(ssid), offset);
+    size_t ssid_offset = 0;
+    size_t pw_offset = 0;
+
+    memset(ssid, 0, sizeof(ssid));
+    memset(password, 0, sizeof(password));
+
+    err = PIC32MZW1Config::ReadConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiSSID, ssid, sizeof(ssid), ssid_offset);
     SuccessOrExit(err);
-    err = PIC32MZW1Config::ReadConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiPassword, password, sizeof(password), offset);
+
+    err = PIC32MZW1Config::ReadConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiPassword, password, sizeof(password), pw_offset);
     SuccessOrExit(err);
+
     err = PIC32MZW1Config::ReadConfigValue(PIC32MZW1Config::kConfigKey_WiFiSecurity, auth);
     SuccessOrExit(err);
 
-
+    ChipLogProgress(DeviceLayer, "pic32mzw1_wifi_connect(), SSID:%s, Password:%s, Auth:%d, ssid_offset:%d, pw_offset:%d", ssid, password, auth, ssid_offset, pw_offset);
+    
     pic32mzw1_wifi_set_config(ssid, password, (WDRV_PIC32MZW_AUTH_TYPE) auth);
     
     result =  WDRV_PIC32MZW_BSSConnect(wifi_handle, &mWiFiConfig.sta.bssCtx, &mWiFiConfig.sta.authCtx, STANotifyCB);
@@ -280,7 +310,6 @@ void PIC32MZW1Utils::APNotifyCB(DRV_HANDLE handle, WDRV_PIC32MZW_ASSOC_HANDLE as
     if (WDRV_PIC32MZW_CONN_STATE_CONNECTED == currentState)
     {
         ChipLogProgress(DeviceLayer, "APNotifyCB:: CONNECTED:: %02X:%02X:%02X:%02X:%02X:%02X", macAddr.addr[0], macAddr.addr[1], macAddr.addr[2], macAddr.addr[3], macAddr.addr[4], macAddr.addr[5]);
-
     }
     else if (WDRV_PIC32MZW_CONN_STATE_DISCONNECTED == currentState)
     {

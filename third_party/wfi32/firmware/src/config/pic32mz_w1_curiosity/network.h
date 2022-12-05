@@ -1,25 +1,25 @@
 /*******************************************************************************
-* Copyright (C) 2020 Microchip Technology Inc. and its subsidiaries.
-*
-* Subject to your compliance with these terms, you may use Microchip software
-* and any derivatives exclusively with Microchip products. It is your
-* responsibility to comply with third party license terms applicable to your
-* use of third party software (including open source software) that may
-* accompany Microchip software.
-*
-* THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-* EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-* WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-* PARTICULAR PURPOSE.
-*
-* IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-* INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-* WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-* BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-* FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-* ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-* THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
-*******************************************************************************/
+ * Copyright (C) 2020 Microchip Technology Inc. and its subsidiaries.
+ *
+ * Subject to your compliance with these terms, you may use Microchip software
+ * and any derivatives exclusively with Microchip products. It is your
+ * responsibility to comply with third party license terms applicable to your
+ * use of third party software (including open source software) that may
+ * accompany Microchip software.
+ *
+ * THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+ * EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+ * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+ * PARTICULAR PURPOSE.
+ *
+ * IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+ * INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+ * WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+ * BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+ * FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+ * ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+ * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+ *******************************************************************************/
 
 /*******************************************************************************
   MPLAB Harmony Application Header File
@@ -50,23 +50,22 @@
 // *****************************************************************************
 // *****************************************************************************
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdlib.h>
 #include "configuration.h"
 #include "system/console/sys_console.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-
-#include "lwip/tcpip.h"
-#include "lwip/dhcp.h"
 #include "lwip/autoip.h"
-#include "lwip/inet.h"
+#include "lwip/dhcp.h"
 #include "lwip/ethip6.h"
+#include "lwip/inet.h"
+#include "lwip/tcpip.h"
 #include <lwip/ip_addr.h>
 
 // DOM-IGNORE-BEGIN
-#ifdef __cplusplus  // Provide C++ Compatibility
+#ifdef __cplusplus // Provide C++ Compatibility
 
 extern "C" {
 
@@ -95,13 +94,19 @@ typedef enum
     NETWORK_STATE_WIFI_INIT = 0,
     NETWORK_STATE_INIT,
     NETWORK_STATE_TCPIP_WAIT_FOR_TCPIP_INIT,
-    NETWORK_STATE_IDLE, 
+    NETWORK_STATE_IDLE,
     NETWORK_STATE_ERROR,
-    
 
 } NETWORK_STATES;
 
-
+typedef enum
+{
+    OPEN = 1,
+    WPAWPA2MIXED,
+    WEP,
+    WPA2WPA3MIXED,
+    WIFI_AUTH_MAX
+} WIFI_AUTH;
 // *****************************************************************************
 /* Application Data
 
@@ -122,17 +127,16 @@ typedef struct
 
 } NETWORK_DATA;
 
+typedef void (*DHCP_STATUS_CALLBACK)(struct netif * netif);
 
-
-typedef void (*DHCP_STATUS_CALLBACK)(struct netif *netif);
-
+typedef void (*NETWORK_PROVISIONING_CALLBACK)(char * ssid, char * passphrase, uint8_t auth);
 // *****************************************************************************
 // *****************************************************************************
 // Section: Application Callback Routines
 // *****************************************************************************
 // *****************************************************************************
 /* These routines are called by drivers when certain events occur.
-*/
+ */
 
 // *****************************************************************************
 // *****************************************************************************
@@ -140,9 +144,17 @@ typedef void (*DHCP_STATUS_CALLBACK)(struct netif *netif);
 // *****************************************************************************
 // *****************************************************************************
 
+void Network_PIC32MZW_NETWORK_Provision_Callback_Register(NETWORK_PROVISIONING_CALLBACK cb);
+
+void Network_PIC32MZW_Set_WiFi_Mode(int softAP);
+
 struct netif * Network_PIC32MZW_Get_Interface(void);
 
 int Network_PIC32MZW_StartDHCP(DHCP_STATUS_CALLBACK cb);
+
+int Network_PIC32MZW_StopDHCP(void);
+
+int Network_PIC32MZW_StartDHCPServer(void);
 
 DRV_HANDLE Network_PIC32MZW_Get_WiFiHandle(void);
 
@@ -176,19 +188,16 @@ DRV_HANDLE Network_PIC32MZW_Get_WiFiHandle(void);
     This routine must be called from SYS_Tasks() routine.
  */
 
-void Network_Tasks( void );
-
-
+void Network_Tasks(void);
 
 #endif /* _APP_H */
 
-//DOM-IGNORE-BEGIN
+// DOM-IGNORE-BEGIN
 #ifdef __cplusplus
 }
 #endif
-//DOM-IGNORE-END
+// DOM-IGNORE-END
 
 /*******************************************************************************
  End of File
  */
-

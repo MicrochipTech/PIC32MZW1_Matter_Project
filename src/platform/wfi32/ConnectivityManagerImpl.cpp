@@ -84,10 +84,10 @@ CHIP_ERROR ConnectivityManagerImpl::_SetWiFiStationMode(WiFiStationMode val)
         ChipLogProgress(DeviceLayer, "WiFi station mode change: %s -> %s", WiFiStationModeToStr(mWiFiStationMode),
                         WiFiStationModeToStr(val));
         mWiFiStationMode = val;
-        /* Schedule work for disabled case causes station mode not getting enabled */
+
         if (mWiFiStationMode != kWiFiStationMode_Disabled)
         {
-            DeviceLayer::SystemLayer().ScheduleWork(DriveStationState, NULL);
+            DriveStationState();
         }
         else
         {
@@ -199,9 +199,9 @@ exit:
 }
 
 
-void ConnectivityManagerImpl::dhcp_status_cb(struct netif *netif)
+void ConnectivityManagerImpl::DHCPStatusCallback(struct netif *netif)
 {
-    ChipLogProgress(DeviceLayer, "dhcp_status_cb() In...");
+    ChipLogProgress(DeviceLayer, "DHCPStatusCallback() In...");
 
     if (netif_is_up(netif)){
 
@@ -233,6 +233,36 @@ void ConnectivityManagerImpl::dhcp_status_cb(struct netif *netif)
     return;
 }
 
+void ConnectivityManagerImpl::NetworkProvisioningCallback(char* ssid, char* password, uint8_t auth)
+{
+    CHIP_ERROR err                = CHIP_NO_ERROR;
+    char wifimode[] = "station";
+
+    ChipLogProgress(DeviceLayer, "NetworkProvisioningCallback() In...ssid: %s ssidlen %d, password:%s, passworlen %d", ssid, strlen(ssid), password, strlen(password));
+
+    err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiSSID, ssid, strlen(ssid));
+    SuccessOrExit(err);
+
+    vTaskDelay( 100 );
+    err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiPassword, password, strlen(password));
+    SuccessOrExit(err);
+    vTaskDelay( 100 );
+    
+    err = Internal::PIC32MZW1Config::WriteConfigValue(Internal::PIC32MZW1Config::kConfigKey_WiFiSecurity, (uint32_t) auth);
+    SuccessOrExit(err);
+    vTaskDelay( 100 );
+    
+    err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiMode, wifimode, strlen(wifimode));
+    SuccessOrExit(err);
+    vTaskDelay( 100 );
+
+    ChipLogProgress(DeviceLayer, "System reset..");  
+    Internal::PIC32MZW1Config::SystemReset();
+    
+exit:
+    ChipLogProgress(DeviceLayer, "Fail to provision network, WriteConfigValue error..");    
+    return;
+}
 
 // ==================== ConnectivityManager Platform Internal Methods ====================
 CHIP_ERROR ConnectivityManagerImpl::_Init()
@@ -251,7 +281,28 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
 
     // WiFi-Station mode is enabled by default
     
-    ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log1");
+    ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() Init..");
+
+    char ssid[DeviceLayer::Internal::kMaxWiFiSSIDLength];
+    char password[DeviceLayer::Internal::kMaxWiFiKeyLength];
+    uint32_t auth    = 0;
+    char wifi_mode[10];
+    size_t offset = 0;
+    int softAP = 0;
+    
+    
+    err = Internal::PIC32MZW1Config::ReadConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiMode, wifi_mode, sizeof(wifi_mode), offset);
+    if (err != CHIP_NO_ERROR)
+    {
+        ChipLogProgress(DeviceLayer, "No WiFiMode argument in the Key Store, default is station mode");
+    }
+    else
+    {
+        if (strcmp(wifi_mode, "softAP") == 0)
+            softAP = 1;
+    }
+    
+    Network_PIC32MZW_Set_WiFi_Mode(softAP);
 
     err = Internal::PIC32MZW1Utils::pic32mzw1_wifi_init();
     if (err != CHIP_NO_ERROR)
@@ -268,52 +319,73 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
                 {
                     ChipLogProgress(DeviceLayer,"ConnectivityManager receive  kConnectivity_Established..\r\n");
                     
-                    Network_PIC32MZW_StartDHCP(&ConnectivityManagerImpl::dhcp_status_cb);
+                    Network_PIC32MZW_StartDHCP(&ConnectivityManagerImpl::DHCPStatusCallback);
+                }
+                else if (event->WiFiConnectivityChange.Result == ConnectivityChange::kConnectivity_Lost)
+                {
+                    ChipLogProgress(DeviceLayer,"ConnectivityManager receive  kConnectivity_Lost..\r\n");
+                    
+                    Network_PIC32MZW_StopDHCP();
                 }
   
             }
         },
         0);
 
-    // If there is no persistent station provision...
-    if (!IsWiFiStationProvisioned())
+    if (softAP)
     {
-        ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log2");
-
-
-
-        if (CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID[0] != 0)
-        {
-            ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log3");
-            err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiSSID, CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID, strlen(CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID));
-            SuccessOrExit(err);
-            err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiPassword, CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD, strlen(CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD));
-            SuccessOrExit(err);
-            //err = Internal::PIC32MZW1Config::WriteConfigValue(Internal::PIC32MZW1Config::kConfigKey_WiFiSecurity, CHIP_DEVICE_CONFIG_DEFAULT_STA_SECURITY);
-            err = Internal::PIC32MZW1Config::WriteConfigValue(Internal::PIC32MZW1Config::kConfigKey_WiFiSecurity, (uint32_t) CHIP_DEVICE_CONFIG_DEFAULT_STA_SECURITY);
-            SuccessOrExit(err);
-
-            mIsProvisioned = true;
-            // Enable WiFi station mode.
-            ReturnErrorOnFailure(SetWiFiStationMode(kWiFiStationMode_Enabled));
-            
-        }
-        else
-        {
-            ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log4");
-            ReturnErrorOnFailure(SetWiFiStationMode(kWiFiStationMode_Disabled));
-        }
+        //For AP mode test
+        ReturnErrorOnFailure(SetWiFiAPMode(kWiFiAPMode_Enabled));
     }
     else
     {
-        ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log5");
-        // Enable WiFi station mode.
-        ReturnErrorOnFailure(SetWiFiStationMode(kWiFiStationMode_Enabled));
+
+        // If there is no persistent station provision...
+        if (!IsWiFiStationProvisioned())
+        {
+            ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log2");
+
+            if (CHIP_NO_ERROR == Internal::PIC32MZW1Config::ReadConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiSSID, ssid, sizeof(ssid), offset))
+            {
+                if (CHIP_NO_ERROR == Internal::PIC32MZW1Config::ReadConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiPassword, password, sizeof(password), offset))
+                    if (CHIP_NO_ERROR == Internal::PIC32MZW1Config::ReadConfigValue(Internal::PIC32MZW1Config::kConfigKey_WiFiSecurity, auth))
+                    {
+                        mIsProvisioned = true;
+                        ReturnErrorOnFailure(SetWiFiStationMode(kWiFiStationMode_Enabled));
+                    }
+            }
+            else if (!mIsProvisioned && CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID[0] != 0)
+            {
+                ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log3");
+                err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiSSID, CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID, strlen(CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID));
+                SuccessOrExit(err);
+                err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiPassword, CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD, strlen(CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD));
+                SuccessOrExit(err);
+                err = Internal::PIC32MZW1Config::WriteConfigValue(Internal::PIC32MZW1Config::kConfigKey_WiFiSecurity, (uint32_t) CHIP_DEVICE_CONFIG_DEFAULT_STA_SECURITY);
+                SuccessOrExit(err);
+
+                mIsProvisioned = true;
+                // Enable WiFi station mode.
+                ReturnErrorOnFailure(SetWiFiStationMode(kWiFiStationMode_Enabled));
+                
+            }
+            else
+            {
+                ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log4");
+                ReturnErrorOnFailure(SetWiFiStationMode(kWiFiStationMode_Disabled));
+            }
+        }
+        else
+        {
+            ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() log5");
+            // Enable WiFi station mode.
+            ReturnErrorOnFailure(SetWiFiStationMode(kWiFiStationMode_Enabled));
+        }
+        ChipLogProgress(DeviceLayer, "DriverStationState()");
+        // Queue work items to bootstrap the station state machines once the Chip event loop is running.
+        err = DeviceLayer::SystemLayer().ScheduleWork(DriveStationState, NULL);
+        SuccessOrExit(err);
     }
-    ChipLogProgress(DeviceLayer, "DriverStationState()");
-    // Queue work items to bootstrap the station state machines once the Chip event loop is running.
-    err = DeviceLayer::SystemLayer().ScheduleWork(DriveStationState, NULL);
-    SuccessOrExit(err);
 
 exit:
     return err;
@@ -459,6 +531,8 @@ void ConnectivityManagerImpl::DriveAPState()
                     err = Internal::PIC32MZW1Utils::pic32mzw1_start_ap();
                     SuccessOrExit(err);
                     ChangeWiFiAPState(kWiFiAPState_Active);
+                    Network_PIC32MZW_NETWORK_Provision_Callback_Register(&ConnectivityManagerImpl::NetworkProvisioningCallback);
+                    Network_PIC32MZW_StartDHCPServer();
                 }
             }
 
@@ -491,11 +565,12 @@ void ConnectivityManagerImpl::DriveStationState()
     bool stationConnected;
     WDRV_PIC32MZW_STATUS result;
     ChipLogProgress(DeviceLayer, "DriverStationState() In");
+
     // If the station interface is currently connected ...
     if (mWiFiStationState == kWiFiStationState_Connected || mWiFiStationState == kWiFiStationState_Connecting) 
     {
         ChipLogProgress(DeviceLayer, "DriverStationState() log1");
-        
+
         // If the WiFi station interface is no longer enabled, or no longer provisioned,
         // disconnect the station from the AP, unless the WiFi station mode is currently
         // under application control.
@@ -503,9 +578,8 @@ void ConnectivityManagerImpl::DriveStationState()
             (mWiFiStationMode != kWiFiStationMode_Enabled || !IsWiFiStationProvisioned()))
         {
             ChipLogProgress(DeviceLayer, "Disconnecting WiFi station interface");
-        
-            err =  Internal::PIC32MZW1Utils::pic32mzw1_wifi_disconnect();
 
+            err =  Internal::PIC32MZW1Utils::pic32mzw1_wifi_disconnect();
             if (err == CHIP_NO_ERROR)
             {
                 System::Clock::Timestamp now = System::SystemClock().GetMonotonicTimestamp();
@@ -514,7 +588,7 @@ void ConnectivityManagerImpl::DriveStationState()
             }
             else
             {
-                ChipLogError(DeviceLayer, "p6_wifi_disconnect() failed: %s", chip::ErrorStr(err));
+                ChipLogError(DeviceLayer, "wifi_disconnect() failed: %s", chip::ErrorStr(err));
             }
 
             
@@ -574,13 +648,11 @@ void ConnectivityManagerImpl::DriveStationState()
                 System::Clock::Timeout timeToNextConnect = (mLastStationConnectFailTime + mWiFiStationReconnectInterval) - now;
                 ChipLogProgress(DeviceLayer, "Next WiFi station reconnect in %" PRIu32 " ms ",
                                 System::Clock::Milliseconds32(timeToNextConnect).count());
-
                 err = DeviceLayer::SystemLayer().StartTimer(timeToNextConnect, DriveStationState, NULL);
                 SuccessOrExit(err);
             }
         }
     }
-
 exit:
 
     ChipLogProgress(DeviceLayer, "Done driving station state, nothing else to do...");
