@@ -32,12 +32,13 @@
  *
  */
 
+
 #include "conf_tinyservices.h"
 #include "tinyservices.h"
 #include "wifi_private.h"
-#include "lwip/dhcp.h"
-#include "lwip/prot/dhcp.h"
-#include "lwip/tcpip.h"
+//#include "lwip/dhcp.h"
+//#include "lwip/prot/dhcp.h"
+//#include "lwip/tcpip.h"
 #include <string.h>
 
 #define UNUSED(v)          //(void)(v)

@@ -39,6 +39,10 @@
 #include "lwip/pbuf.h"
 #include "lwip/sys.h"
 
+#include "lwip/dhcp.h"
+#include "lwip/prot/dhcp.h"
+#include "lwip/tcpip.h"
+
 #include "definitions.h"
 /* DHCP options */
 #define DHCP_OPTION_DOMAIN_NAME 15

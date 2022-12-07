@@ -21,6 +21,7 @@ template("wfi32_sdk_target") {
   _freertos_root = "${wfi32_sdk_root}/firmware/src/third_party/rtos/FreeRTOS/Source"
   _h3_library_root = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity"
   _wolfssl_root = "${wfi32_sdk_root}/firmware/src/third_party/wolfssl"
+  _lwip_tinyservices_root = "${wfi32_sdk_root}/firmware/src/third_party/lwip-tinyservices"
 
   config("${wfi32_sdk_target_name}_config") {
     include_dirs = [ 
@@ -30,6 +31,7 @@ template("wfi32_sdk_target") {
     include_dirs += [ 
       "${_wolfssl_root}",
       "${_wolfssl_root}/wolfssl",
+      "${_lwip_tinyservices_root}",
     ]
     include_dirs += [
       "${wfi32_sdk_root}", 
@@ -106,6 +108,7 @@ template("wfi32_sdk_target") {
       "${_freertos_root}/portable/MPLAB/PIC32MZ/port.c",
       "${_freertos_root}/portable/MPLAB/PIC32MZ/port_asm.S",
     ]
+    
 
     sources += [
       "${_wolfssl_root}/wolfssl/wolfcrypt/src/aes.c",
@@ -245,7 +248,12 @@ template("wfi32_sdk_target") {
       #"${_h3_library_root}/strcasecmp.c",
     ]
     
-    #deps = [ "${wfi32_sdk_root}/../../src/lwip" ]
+    sources += [
+      "${_lwip_tinyservices_root}/tinydhcpserver.c",
+      "${_lwip_tinyservices_root}/tinyservices.c",
+    ]
+    
+   #deps = [ "${wfi32_sdk_root}/../../src/lwip" ]
     
     if (!defined(configs)) {
       configs = []
