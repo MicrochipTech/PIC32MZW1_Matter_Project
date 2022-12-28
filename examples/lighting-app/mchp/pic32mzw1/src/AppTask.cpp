@@ -42,7 +42,6 @@
 #include <DeviceInfoProviderImpl.h>
 #include <platform/wfi32/PIC32MZW1Config.h>
 
-#define CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR 0
 /* OTA related includes */
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
 #include <app/clusters/ota-requestor/BDXDownloader.h>
@@ -413,12 +412,12 @@ void AppTask::FunctionHandler(AppEvent * event)
             
             CHIP_ERROR err;
             char wifimode[] = "softAP";
-            err = Internal::PIC32MZW1Config::WriteConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiMode, wifimode, strlen(wifimode));
+            err = DeviceLayer::Internal::PIC32MZW1Config::WriteConfigValueStr(DeviceLayer::Internal::PIC32MZW1Config::kConfigKey_WiFiMode, wifimode, strlen(wifimode));
             if (err != CHIP_NO_ERROR)
                 PIC32_LOG("Update key 'wifimode' fail..");
             
             PIC32_LOG("System reset..");
-            Internal::PIC32MZW1Config::SystemReset();
+            DeviceLayer::Internal::PIC32MZW1Config::SystemReset();
 
         }
         else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)

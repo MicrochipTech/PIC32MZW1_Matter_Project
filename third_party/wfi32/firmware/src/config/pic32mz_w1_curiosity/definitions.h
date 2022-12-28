@@ -65,6 +65,7 @@
 #include "peripheral/rng/plib_rng.h"
 #include "system/console/sys_console.h"
 #include "system/console/src/sys_console_uart_definitions.h"
+#include "peripheral/spi/spi_master/plib_spi1_master.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "system/int/sys_int.h"

@@ -100,7 +100,7 @@
 #pragma config CLASSBDIS =         DISABLE
 #pragma config USBIDIO =         ON
 #pragma config VBUSIO =         ON
-#pragma config HSSPIEN =         OFF
+#pragma config HSSPIEN =         ON
 #pragma config SMCLR =      MCLR_NORM
 #pragma config USBDMTRIM =      0
 #pragma config USBDPTRIM =      0
@@ -462,6 +462,8 @@ void SYS_Initialize ( void* data )
 
 	BSP_Initialize();
 	RNG_Initialize();
+
+	SPI1_Initialize();
 
 
     /* Initialize the PIC32MZW1 Driver */

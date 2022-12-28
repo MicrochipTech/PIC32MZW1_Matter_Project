@@ -11,7 +11,9 @@
             <header-extensions>h,hpp</header-extensions>
             <asminc-extensions/>
             <sourceEncoding>ISO-8859-1</sourceEncoding>
-            <make-dep-projects/>
+            <make-dep-projects>
+                <make-dep-project>../../bootloader/firmware/pic32mz_w1_curiosity.X</make-dep-project>
+            </make-dep-projects>
             <sourceRootList>
                 <sourceRootElem>../src</sourceRootElem>
                 <sourceRootElem>../../../../examples/lighting-app/mchp</sourceRootElem>
@@ -39,6 +41,7 @@
                 <sourceRootElem>../../../../zzz_generated/app-common</sourceRootElem>
                 <sourceRootElem>../../../../zzz_generated/lighting-app</sourceRootElem>
                 <sourceRootElem>../../config/pic32mz_w1_curiosity</sourceRootElem>
+                <sourceRootElem>../../bootloader/firmware/src/config/pic32mz_w1_curiosity/sst26</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

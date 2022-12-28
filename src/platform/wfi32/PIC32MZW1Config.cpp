@@ -261,7 +261,8 @@ CHIP_ERROR PIC32MZW1Config::SystemReset(void)
     SYSKEY = 0xAA996655;
     SYSKEY = 0x556699AA;
     RSWRSTSET  = _RSWRST_SWRST_MASK;
-
+    (void)RSWRST;
+    
     return CHIP_NO_ERROR;
 }
 void PIC32MZW1Config::RunConfigUnitTest() {}

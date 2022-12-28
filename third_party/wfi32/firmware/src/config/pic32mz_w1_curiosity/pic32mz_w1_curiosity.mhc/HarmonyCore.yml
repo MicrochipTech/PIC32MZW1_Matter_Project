@@ -39,7 +39,7 @@ children:
           - type: Pair
             attributes: {description: 'TRUE', value: '0', key: ENABLE_SYS_MEDIA}
           - type: Pair
-            attributes: {description: 'FALSE', value: '0', key: ENABLE_SYS_PORTS}
+            attributes: {description: 'TRUE', value: '0', key: ENABLE_SYS_PORTS}
           - type: Pair
             attributes: {description: 'FALSE', value: '0', key: ENABLE_SYS_DMA}
           - type: Pair
@@ -90,6 +90,13 @@ children:
         attributes: {id: HarmonyCore, value: 'true'}
   - type: Boolean
     attributes: {id: ENABLE_SYS_MEDIA}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: HarmonyCore, value: 'false'}
+  - type: Boolean
+    attributes: {id: ENABLE_SYS_PORTS}
     children:
     - type: Values
       children:

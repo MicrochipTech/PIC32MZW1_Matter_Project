@@ -63,6 +63,8 @@
 
 void CORE_TIMER_InterruptHandler( void );
 void NVM_InterruptHandler( void );
+void SPI1_RX_InterruptHandler( void );
+void SPI1_TX_InterruptHandler( void );
 void UART1_FAULT_InterruptHandler( void );
 void UART1_RX_InterruptHandler( void );
 void UART1_TX_InterruptHandler( void );
@@ -87,6 +89,16 @@ void CORE_TIMER_Handler (void)
 void FLASH_CONTROL_Handler (void)
 {
     NVM_InterruptHandler();
+}
+
+void SPI1_RX_Handler (void)
+{
+    SPI1_RX_InterruptHandler();
+}
+
+void SPI1_TX_Handler (void)
+{
+    SPI1_TX_InterruptHandler();
 }
 
 void UART1_FAULT_Handler (void)
