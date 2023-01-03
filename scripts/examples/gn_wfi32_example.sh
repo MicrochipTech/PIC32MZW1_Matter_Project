@@ -60,7 +60,7 @@ if [ ! -f "lwip_update" ]; then
     touch lwip_update
 fi
 
-gn -v gen --check --fail-on-unused-args "$OUTPUT_DIR" --args="home_dir=\"$HOME\" dfp_version=\"1.6.220\"" --root="$EXAMPLE_DIR"
+gn -v gen --check --fail-on-unused-args "$OUTPUT_DIR" --args="home_dir=\"$HOME\" dfp_version=\"1.6.220\" ${GN_ARGS[*]}" --root="$EXAMPLE_DIR"
 ninja -C "$OUTPUT_DIR" "${NINJA_ARGS[@]}"
 
 #more debug log command

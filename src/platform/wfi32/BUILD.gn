@@ -32,6 +32,11 @@ assert(chip_device_platform == "wfi32")
 #  ]
 
 #}
+declare_args() {
+  # Build with OTA features
+  #enable_ota=
+}
+
 
 static_library("wfi32") {
   print("XXX WFI32 Platform log2")
@@ -70,6 +75,7 @@ static_library("wfi32") {
     #":freertos",
   ]
 
+   
   #defines = [
   #    "MBEDTLS_CONFIG_FILE=<matter_mbedtls_config.h>",
   #] 
@@ -79,4 +85,14 @@ static_library("wfi32") {
     "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1", 
     "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/", 
   ]
+  
+  sources += [
+    "OTAImageProcessorImpl.cpp",
+    "OTAImageProcessorImpl.h"
+  ]
+  defines = [ 
+    "PIC32MZW1_OTA"
+  ]
+
+
 }

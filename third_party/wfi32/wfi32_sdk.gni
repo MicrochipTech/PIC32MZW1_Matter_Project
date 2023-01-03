@@ -14,6 +14,7 @@
 
 import("//build_overrides/wfi32_sdk.gni")
 
+
 template("wfi32_sdk_target") {
   print("XXXwfi32 sdk, target name = ${target_name}")
   wfi32_sdk_target_name = target_name
@@ -65,6 +66,7 @@ template("wfi32_sdk_target") {
       "${_h3_library_root}/system/time",
       "${_h3_library_root}/crypto",
       "${_h3_library_root}/crypto/src",
+      "${_h3_library_root}/sst26/",
       "/opt/microchip/xc32/v4.10/pic32mx/include/proc/PIC32MZ-W/",
     ]
   
@@ -233,12 +235,15 @@ template("wfi32_sdk_target") {
       "${_h3_library_root}/peripheral/uart/plib_uart3.c",
       "${_h3_library_root}/peripheral/nvm/plib_nvm.c",
       "${_h3_library_root}/peripheral/rng/plib_rng.c",
+      "${_h3_library_root}/peripheral/spi/spi_master/plib_spi1_master.c",
       "${_h3_library_root}/system/console/src/sys_console.c",
       "${_h3_library_root}/system/console/src/sys_console_uart.c",
       "${_h3_library_root}/system/debug/src/sys_debug.c",
       "${_h3_library_root}/system/int/src/sys_int.c",
       "${_h3_library_root}/system/time/src/sys_time.c",
       "${_h3_library_root}/system/sys_time_h2_adapter.c",
+      "${_h3_library_root}/sst26/ext_flash.c",
+      "${_h3_library_root}/sst26/app_sst26vf.c",
       "${_h3_library_root}/stdio/xc32_monitor.c",
       "${_h3_library_root}/interrupts_a.S",
     ]
@@ -252,7 +257,8 @@ template("wfi32_sdk_target") {
       "${_lwip_tinyservices_root}/tinydhcpserver.c",
       "${_lwip_tinyservices_root}/tinyservices.c",
     ]
-    
+   
+ 
    #deps = [ "${wfi32_sdk_root}/../../src/lwip" ]
     
     if (!defined(configs)) {

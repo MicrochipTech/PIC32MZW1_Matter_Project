@@ -26,6 +26,7 @@ declare_args() {
   mchp_cpu = "P32MZ1025W104132"
   home_dir = ""
   dfp_version = ""
+  linker_file = "p32MZ1025W104132.ld"
 }
 
 toolchain("wfi32") {
@@ -85,7 +86,8 @@ toolchain("wfi32") {
   tool("link") {
     outfile = "{{target_output_name}}{{output_extension}}"
     rspfile = "$outfile.rsp"
-    linker_script = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/p32MZ1025W104132.ld"
+    #linker_script = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/p32MZ1025W104132.ld"
+    linker_script = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/$linker_file"
     linker_script_path = rebase_path(linker_script, root_build_dir) 
     wifi_lib = "${wfi32_sdk_root}/firmware/src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/lib/pic32mzw1.a"
     wifi_lib_path = rebase_path(wifi_lib, root_build_dir) 

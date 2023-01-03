@@ -39,6 +39,9 @@ declare_args() {
 
   # Build update app
   build_update_image = false
+
+  # Build with OTA features
+  enable_ota = false
 }
 
 
@@ -85,6 +88,12 @@ executable("lighting_app") {
   if (enable_heap_monitoring) {
     sources += [ "${examples_plat_dir}/MemMonitoring.cpp" ]
     defines += [ "HEAP_MONITORING" ]
+  }
+  if (enable_ota) {
+    defines += [
+      "CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR",
+      "PIC32MZW1_OTA"
+    ]
   }
   ldflags += [
     "-mprocessor=32MZ1025W104132",
