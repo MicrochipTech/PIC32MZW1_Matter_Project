@@ -160,7 +160,7 @@ The debug session can be started by referring to the steps mentioned [here.](htt
 
   - Do not merge following code, if the prompt messages are shown:
   </p>
-    <p align="center"><img width="650" src="assets/dnm1.png">
+    <p align="center"><img width="450" src="assets/dnm1.png">
     </p>
     <p align="center"><img width="450" src="assets/dnm2.png">
     </p>
