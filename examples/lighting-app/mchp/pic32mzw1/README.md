@@ -32,9 +32,9 @@ This MPLAB example demonstrates the use of Matter protocol (also known as Projec
 
 ## Introduction
 
-This example is a starting point for Matter protocol demonstration over Microchip's PIC32MZW1 platform and gives an idea to control the Yellow LED on WFI32-IoT board using Android CHIPTool app (Matter Controller). During the initial release (Phase-1) of this example, Wi-Fi Network credentials are hard coded and WFI32-IoT board is commissioned over Wi-Fi Network, using IPv4 address assigned to it.
+This example is a starting point for Matter protocol demonstration over Microchip's PIC32MZW1 platform and gives an idea to control the Yellow LED on WFI32-IoT board using Android CHIPTool app (Matter Controller). During the initial release (Phase-1) of this example, we use the example certificates provided in the matter's repo for device attestation and embedded the certifcates in the project code. To launch products in the market, certificates approved by [CSA](https://csa-iot.org/) are need to be used. 
 
-- Note: This example was developed and tested using MPLAB X IDE v6.00, MPLAB XC32 compiler v4.20 on Ubuntu 20.04 LTS and 22.04 LTS and on Microsoft Windows 10 Pro.
+- Note: This example was developed and tested using MPLAB X IDE v6.00+, MPLAB XC32 compiler v4.20 on Ubuntu 20.04 LTS and 22.04 LTS and on Microsoft Windows 10 Pro.
 
 <a name="hwrequirements"></a>
 
@@ -48,7 +48,8 @@ This example is a starting point for Matter protocol demonstration over Microchi
 
 ## Setup CHIP Environment - Install Prerequisites
 
-Before getting ready to build the Matter example, you'll need to install a few OS specific dependencies.
+The project can support GN build system and MPLAB X IDE build. If you build with MPLAB X IDE, you can run on Windows or Linux environment. If you build with GN build system, you can run on Linux Environment.  
+Below is the Linux OS that you can use.
 
 - [Linux](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md#installing-prerequisites-on-linux) (Ubuntu release version 20.04 LTS, 22.04 LTS is preferred)
 
@@ -56,7 +57,7 @@ Before getting ready to build the Matter example, you'll need to install a few O
 
 ## Software Requirements
 
-- [MPLAB X IDE v6.00](https://www.microchip.com/en-us/development-tools-tools-and-software/mplab-x-ide) and [follow the instructions to install IDE](https://microchipdeveloper.com/mplabx:installation). Also, select "MPLAB IPE" option during IDE installation.
+- [MPLAB X IDE v6.00+](https://www.microchip.com/en-us/development-tools-tools-and-software/mplab-x-ide) and [follow the instructions to install IDE](https://microchipdeveloper.com/mplabx:installation). Also, select "MPLAB IPE" option during IDE installation.
 - Check if the DFP v1.6.220 is installed. In MPLAB X IDE, from Menu bar -> Tools -> Packs -> locate "PIC32MZ-W_DFP" as below
 
 </p>
@@ -66,7 +67,7 @@ Before getting ready to build the Matter example, you'll need to install a few O
 - [MPLAB XC32 Compiler v4.20](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers/downloads-documentation#XC32) and [follow the instructions to install XC32 compiler](https://microchipdeveloper.com/xc32:installation).
   Use XC32 professional compiler license. Please refer tab 'Internal Microchip Licenses' from [Compilers Latest Builds Page](https://compilers.microchip.com/latest_builds.php) for more details about Internal Microchip Employee License Generator.
 
-- [Open JDK v8](https://docs.datastax.com/en/jdk-install/doc/jdk-install/installOpenJdkDeb.html) Please note that, this is a strict requirement to use Open JDK v8
+- [Open JDK v8](https://docs.datastax.com/en/jdk-install/doc/jdk-install/installOpenJdkDeb.html) for GN build system. Please note that, this is a strict requirement to use Open JDK v8
 
   - Note:
     - For Ubuntu, add PATHs for MPLAB X IDE and XC32 Compiler's installation directories at the end of '~/.profile' OR '~/.bashrc' file:
@@ -143,8 +144,8 @@ Update default Wi-Fi Access Point (AP) credentials in "/connectedhomeip/src/plat
 #define CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID "DEMO_AP"
 #define CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD "password"
 ```
-  ### For Linux environment
-   To build the example using CLI on Ubuntu, execute following commands:
+  ### For GN buid system (Linux environment)
+   To build the example using GN build system on Ubuntu, execute following commands:
 
    ```
    $ cd path-to-connectedhomeip/
@@ -161,8 +162,8 @@ Update default Wi-Fi Access Point (AP) credentials in "/connectedhomeip/src/plat
     <p align="center"><img width="450" src="assets/flashOutput.png" height="220">
    </p>  
 
-  ### For Windows environment
-   To build and flash the example using MPLAB X IDE on Microsoft Windows, execute following commands:
+  ### For MPLAB X IDE (Windows environment/ Linux environment)
+   To build and flash the example using MPLAB X IDE on Microsoft Windows/ Ubuntu, execute following commands:
 
    ```
    $ cd path-to-connectedhomeip\third_party\wfi32
@@ -370,7 +371,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
 
 ## Memory Consumption
 
-As per latest memory usage analysis, this example consumes 837KB Program Memory and 214.6KB Data Memory.
+As per latest memory usage analysis, this example consumes 892KB Program Memory and 238KB Data Memory.
 
 <a name="examplimitations"></a>
 
