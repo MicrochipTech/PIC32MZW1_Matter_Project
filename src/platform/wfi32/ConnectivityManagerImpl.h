@@ -115,7 +115,7 @@ private:
     System::Clock::Timestamp mLastStationConnectFailTime;
     System::Clock::Timestamp mLastAPDemandTime;
     WiFiStationMode mWiFiStationMode;
-    WiFiStationState mWiFiStationState;
+    static WiFiStationState mWiFiStationState;
     WiFiAPMode mWiFiAPMode;
     WiFiAPState mWiFiAPState;
     System::Clock::Timeout mWiFiStationReconnectInterval;

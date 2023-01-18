@@ -237,7 +237,7 @@ void PIC32MZW1Utils::STANotifyCB(DRV_HANDLE handle, WDRV_PIC32MZW_ASSOC_HANDLE a
 {
     WDRV_PIC32MZW_MAC_ADDR macAddr;
     WDRV_PIC32MZW_AssocPeerAddressGet(associationHandle, &macAddr);
-
+    
     if (WDRV_PIC32MZW_CONN_STATE_CONNECTED == currentState)
     {
         ChipLogProgress(DeviceLayer, "STANotifyCB:: CONNECTED:: %02X:%02X:%02X:%02X:%02X:%02X", macAddr.addr[0], macAddr.addr[1], macAddr.addr[2], macAddr.addr[3], macAddr.addr[4], macAddr.addr[5]);
@@ -259,6 +259,16 @@ void PIC32MZW1Utils::STANotifyCB(DRV_HANDLE handle, WDRV_PIC32MZW_ASSOC_HANDLE a
         PlatformMgr().PostEventOrDie(&event);
 
         // To Do: Release DHCP
+    }
+    else if (WDRV_PIC32MZW_CONN_STATE_FAILED == currentState)
+    {
+        ChipLogProgress(DeviceLayer, "STANotifyCB:: WDRV_PIC32MZW_CONN_STATE_FAILED");
+         
+        ChipDeviceEvent event;
+        event.Type                           = DeviceEventType::kWiFiConnectivityChange;
+        event.WiFiConnectivityChange.Result = ConnectivityChange::kConnectivity_Lost;
+        PlatformMgr().PostEventOrDie(&event);
+        
     }
 
 }

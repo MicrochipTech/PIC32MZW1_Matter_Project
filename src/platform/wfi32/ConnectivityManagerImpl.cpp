@@ -37,6 +37,7 @@
 #include <lib/support/logging/CHIPLogging.h>
 #include <platform/wfi32/PIC32MZW1Utils.h>
 #include <platform/wfi32/PIC32MZW1Config.h>
+#include <platform/wfi32/ConnectivityManagerImpl.h>
 #include <platform/internal/BLEManager.h>
 
 #include "network.h"
@@ -59,6 +60,8 @@
 #error "WiFi Station support must be enabled when building for PSoC6"
 #endif
 
+
+
 using namespace ::chip;
 using namespace ::chip::Inet;
 using namespace ::chip::System;
@@ -68,6 +71,7 @@ namespace chip {
 namespace DeviceLayer {
 
 ConnectivityManagerImpl ConnectivityManagerImpl::sInstance;
+ConnectivityManager::WiFiStationState ConnectivityManagerImpl::mWiFiStationState = ConnectivityManager::kWiFiStationState_NotConnected;
 
 ConnectivityManager::WiFiStationMode ConnectivityManagerImpl::_GetWiFiStationMode(void)
 {
@@ -282,7 +286,7 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
     // WiFi-Station mode is enabled by default
     
     ChipLogProgress(DeviceLayer, "ConnectivityManagerImpl() Init..");
-
+    
     char ssid[DeviceLayer::Internal::kMaxWiFiSSIDLength];
     char password[DeviceLayer::Internal::kMaxWiFiKeyLength];
     uint32_t auth    = 0;
@@ -326,6 +330,9 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
                     ChipLogProgress(DeviceLayer,"ConnectivityManager receive  kConnectivity_Lost..\r\n");
                     
                     Network_PIC32MZW_StopDHCP();
+                    
+                    mWiFiStationState = kWiFiStationState_NotConnected;
+                    ConnectivityManagerImpl::DriveStationState(NULL, NULL);
                 }
   
             }
@@ -569,7 +576,6 @@ void ConnectivityManagerImpl::DriveStationState()
     // If the station interface is currently connected ...
     if (mWiFiStationState == kWiFiStationState_Connected || mWiFiStationState == kWiFiStationState_Connecting) 
     {
-        ChipLogProgress(DeviceLayer, "DriverStationState() log1");
 
         // If the WiFi station interface is no longer enabled, or no longer provisioned,
         // disconnect the station from the AP, unless the WiFi station mode is currently
@@ -600,7 +606,6 @@ void ConnectivityManagerImpl::DriveStationState()
     // Otherwise the station interface is NOT connected to an AP, so...
     else
     {
-        ChipLogProgress(DeviceLayer, "DriverStationState() log2");
         System::Clock::Timestamp now = System::SystemClock().GetMonotonicTimestamp();
 
         // Advance the station state to NotConnected if it was previously Connected or Disconnecting,
@@ -608,7 +613,6 @@ void ConnectivityManagerImpl::DriveStationState()
         if (mWiFiStationState == kWiFiStationState_Disconnecting ||
             mWiFiStationState == kWiFiStationState_Connecting_Failed)
         {
-            ChipLogProgress(DeviceLayer, "DriverStationState() log3");
             WiFiStationState prevState = mWiFiStationState;
             ChangeWiFiStationState(kWiFiStationState_NotConnected);
             if (prevState != kWiFiStationState_Connecting_Failed)
@@ -626,7 +630,6 @@ void ConnectivityManagerImpl::DriveStationState()
         // scanning, then...
         if (mWiFiStationMode == kWiFiStationMode_Enabled && IsWiFiStationProvisioned())
         {
-            ChipLogProgress(DeviceLayer, "DriverStationState() log4");
             // Initiate a connection to the AP if we haven't done so before, or if enough
             // time has passed since the last attempt.
             if (mLastStationConnectFailTime == System::Clock::kZero ||
