@@ -114,14 +114,14 @@ The demo setup for Matter Lighting example includes an Android phone running CHI
 - To check out the Matter repository:
 
 ```
-$ git clone --recurse-submodules https://github.com/MicrochipTech/PIC32MZW1_Matter_Project.git
+git clone https://github.com/MicrochipTech/PIC32MZW1_Matter_Project.git
 ```
 
 - Switch to branch "pic32mzw1_support_v1":
 
 ```
-$ cd path-to-connectedhomeip/
-$ git checkout pic32mzw1_support_v1
+cd PIC32MZW1_Matter_Project/
+git checkout pic32mzw1_support_v1
 ```
 
 - Update submodules:
@@ -138,7 +138,7 @@ git submodule update --progress --init --recursive -- "examples/common/QRCode/re
 
 ## Build and Flash the example
 
-Update default Wi-Fi Access Point (AP) credentials in "/connectedhomeip/src/platform/wfi32/CHIPDevicePlatformConfig.h" file as below:
+Update default Wi-Fi Access Point (AP) credentials in "/PIC32MZW1_Matter_Project/src/platform/wfi32/CHIPDevicePlatformConfig.h" file as below:
 
 ```
 #define CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID "DEMO_AP"
@@ -148,15 +148,15 @@ Update default Wi-Fi Access Point (AP) credentials in "/connectedhomeip/src/plat
    To build the example using GN build system on Ubuntu, execute following commands:
 
    ```
-   $ cd path-to-connectedhomeip/
-   $ ./scripts/examples/gn_wfi32_example.sh examples/lighting-app/mchp/pic32mzw1/ out/wfi32/
+   cd PIC32MZW1_Matter_Project/
+   ./scripts/examples/gn_wfi32_example.sh examples/lighting-app/mchp/pic32mzw1/ out/wfi32/
    ```
 
    To flash the example to WFI32-IoT board using CLI, run the following command:
 
    ```
-   $ cd path-to-connectedhomeip/
-   $ ipecmd.sh -TPPKOB4 -P32MZ1025W104132 -M -Fout/wfi32/chip-wfi32-lighting-example.hex -OL
+   cd PIC32MZW1_Matter_Project/
+   ipecmd.sh -TPPKOB4 -P32MZ1025W104132 -M -Fout/wfi32/chip-wfi32-lighting-example.hex -OL
    ```
    </p>
     <p align="center"><img width="450" src="assets/flashOutput.png" height="220">
@@ -166,9 +166,9 @@ Update default Wi-Fi Access Point (AP) credentials in "/connectedhomeip/src/plat
    To build and flash the example using MPLAB X IDE on Microsoft Windows/ Ubuntu, execute following commands:
 
    ```
-   $ cd path-to-connectedhomeip\third_party\wfi32
+   $ cd PIC32MZW1_Matter_Project\third_party\wfi32
    $ Run the batch script - "mem_def_workaround.bat"
-   $ Use MPLAB X IDE to open the project "matter_lighting_app_pic32mz_w1.X", available at connectedhomeip\third_party\wfi32\firmware
+   $ Use MPLAB X IDE to open the project "matter_lighting_app_pic32mz_w1.X", available at PIC32MZW1_Matter_Project\third_party\wfi32\firmware
    $ Compile the project in MPLAB X IDE and program the flash
    ```
    The debug session can be started by referring to the steps mentioned [here.](https://microchipdeveloper.com/mplabx:start-a-debug-session) 
@@ -290,7 +290,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
    - The MPLAB X IDE based Example includes OTA and Bootloader features by default.
 
    - For GN system based example, follow the steps:
-     - Navigate to "<MATTER_PROJECT_PATH>/connectedhomeip/" directory
+     - Navigate to "<MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/" directory
 
    ```
    Build the Bootloader:
@@ -325,7 +325,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   ### OTA Test Setup
 
    - Generate the OTA image
-     - The OTA image is generated at <MATTER_PROJECT_PATH>\connectedhomeip\third_party\wfi32\firmware\matter_lighting_app_pic32mz_w1.X\dist\pic32mz_w1_curiosity\production\matter_lighting_app_pic32mz_w1.X.production.bin
+     - The OTA image is generated at <MATTER_PROJECT_PATH>\PIC32MZW1_Matter_Project\third_party\wfi32\firmware\matter_lighting_app_pic32mz_w1.X\dist\pic32mz_w1_curiosity\production\matter_lighting_app_pic32mz_w1.X.production.bin
 
      - Run below command to generate Matter OTA image that includes Matter specific header
      
@@ -426,7 +426,7 @@ As per latest memory usage analysis, this example consumes 892KB Program Memory 
 ## Add or modify clusters
 
 To customize the proejct, user can configure/enable/disable different clusters using ZAP GUI tool for cluster configuration. More information is available [here.](https://github.com/project-chip/connectedhomeip/tree/master/src/app/zap-templates)  
-Application codes under directory path-to-connectedhomeip/examples/lighting-app/mchp/pic32mzw1/ need to be modified after the clusters configurations are changed.
+Application codes under directory PIC32MZW1_Matter_Project/examples/lighting-app/mchp/pic32mzw1/ need to be modified after the clusters configurations are changed.
 
   ### Pre-requisite for Linux
    - [Install node version 16.x for ZAP GUI tool](https://joshtronic.com/2021/05/09/how-to-install-nodejs-16-on-ubuntu-2004-lts/)
@@ -435,7 +435,7 @@ Application codes under directory path-to-connectedhomeip/examples/lighting-app/
    - Execute the following commands:
 
 ```
-$ cd path-to-connectedhomeip/
+$ cd PIC32MZW1_Matter_Project/
 $ ./scripts/tools/zap/run_zaptool.sh <ZAP_FILE>
 For example:
 $ ./scripts/tools/zap/run_zaptool.sh examples/lighting-app/lighting-common/lighting-app.zap
@@ -447,23 +447,23 @@ $ ./scripts/tools/zap/generated.py examples/lighting-app/lighting-common/lightin
 
   ### Pre-requisite for Windows
    - [Download node](https://nodejs.org/download/release/v16.18.0/) and move the node folder to C:\Program Files. Add "path-to-node.exe" to the environment PATH variable.
-   - In command prompt, type: cd <MATTER_PROJECT_PATH>\connectedhomeip\third_party\zap\repo
+   - In command prompt, type: cd <MATTER_PROJECT_PATH>\PIC32MZW1_Matter_Project\third_party\zap\repo
    - Type: npm install installed-check
 
   #### Launch GUI and Configure Clusters
    - Execute the following command:
    
    ```
-   $ node src-script/zap-start.js --logToStdout --gen  <MATTER_PROJECT_PATH>/connectedhomeip/src/app/zap-templates/app-templates.json --zcl  <MATTER_PROJECT_PATH>/connectedhomeip/src/app/zap-templates/zcl/zcl.json -I <ZAP_FILE_PATH>
+   $ node src-script/zap-start.js --logToStdout --gen  <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/app-templates.json --zcl  <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/zcl/zcl.json -I <ZAP_FILE_PATH>
    
    For example:
-   $ node src-script/zap-start.js --logToStdout --gen C:/matter/connectedhomeip/src/app/zap-templates/app-templates.json --zcl C:/matter/connectedhomeip/src/app/zap-templates/zcl/zcl.json -i C:/matter/connectedhomeip/examples/lighting-app/lighting-common/lighting-app.zap
+   $ node src-script/zap-start.js --logToStdout --gen <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/app-templates.json --zcl <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/zcl/zcl.json -i <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/examples/lighting-app/lighting-common/lighting-app.zap
 
    $ npm install installed-check
    ```
 
   #### Generate the template code 
-   - Using command prompt, go to <MATTER_PROJECT_PATH>/connectedhomeip directory
+   - Using command prompt, go to <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project directory
 
 </p>
   <p align="center"><img width="450" src="assets/templcode.png">
