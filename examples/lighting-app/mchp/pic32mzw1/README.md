@@ -49,8 +49,8 @@ This example is a starting point for Matter protocol demonstration over Microchi
 ## Setup CHIP Environment - Install Prerequisites
 
 The project can support GN build system and MPLAB X IDE build. If you build with MPLAB X IDE, you can run on Windows or Linux environment. If you build with GN build system, you can run on Linux Environment.  
-Below is the Linux OS that you can use.
-
+Below is the OS environment that you can use.
+- Microsoft Windows OR
 - [Linux](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md#installing-prerequisites-on-linux) (Ubuntu release version 20.04 LTS, 22.04 LTS is preferred)
 
 <a name="softwarereq"></a>
@@ -111,10 +111,10 @@ The demo setup for Matter Lighting example includes an Android phone running CHI
 
 ## Checking out Matter Repository
 
-- To check out the BitBucket based Matter repository:
+- To check out the Matter repository:
 
 ```
-$ git clone --recurse-submodules https://bitbucket.microchip.com/scm/~a16023/connectedhomeip.git
+$ git clone --recurse-submodules https://github.com/MicrochipTech/PIC32MZW1_Matter_Project.git
 ```
 
 - Switch to branch "pic32mzw1_support_v1":
