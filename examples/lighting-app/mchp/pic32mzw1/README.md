@@ -177,7 +177,7 @@ Update default Wi-Fi Access Point (AP) credentials in "/PIC32MZW1_Matter_Project
 
 ## Wi-Fi Network Provisioning
 
-To connect the WFI32-IoT board to the target AP:
+If you want to connect the WFI32-IoT board to the target AP other than the default settings, you can perform below steps:
 
   #### Step 1:
   Short press the Switch 1 (SW1), the WFI32-IoT board will reboot and start in softAP mode.
@@ -377,9 +377,10 @@ As per latest memory usage analysis, this example consumes 892KB Program Memory 
 
 ## Example Limitations
 - Debug mode cannot be used with MPLAB X IDE on Microsoft Windows
-- It takes long loading time to start debug mode with MPLAB X IDE on Ubuntu
-- Wi-Fi provisioning details are hard-coaded for the phase-1 released version 
+- It takes long loading time to start debug mode with MPLAB X IDE
 - Requires MPLAB XC32 compiler's PRO license
+- Example certificates provided in the matter's repo are used for device attestation, certificates are embedded in the program code.
+- Not support with Google Home APP/ Google Assistant
 
 <a name="addh3components"></a>
 
