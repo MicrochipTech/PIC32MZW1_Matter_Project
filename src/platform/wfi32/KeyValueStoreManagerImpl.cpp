@@ -22,9 +22,9 @@
 #include "definitions.h"
 
 #define KVS_KEY_SIZE    64
-#define KVS_VALUE_SIZE  280
-#define MAX_KEY_NUM     30
-#define KVS_KEY_ADDRESS 0x900FD000
+#define KVS_VALUE_SIZE  320//280
+#define MAX_KEY_NUM     40//30
+#define KVS_KEY_ADDRESS 0x900FC000//0x900FD000
 #define KVS_VALUE_ADDRESS 0x900FF000
 
 static SemaphoreHandle_t storage_mutex = NULL;
@@ -98,6 +98,16 @@ CHIP_ERROR KeyValueStoreManagerImpl::Init()
         NVM_PageErase(KVS_KEY_ADDRESS + 2*NVM_FLASH_PAGESIZE);
         while(xferDone == false);
 
+        xferDone = false;
+        while(NVM_IsBusy() == true);
+        NVM_PageErase(KVS_KEY_ADDRESS + 3*NVM_FLASH_PAGESIZE);
+        while(xferDone == false);
+/*
+        xferDone = false;
+        while(NVM_IsBusy() == true);
+        NVM_PageErase(KVS_KEY_ADDRESS + 4*NVM_FLASH_PAGESIZE);
+        while(xferDone == false);
+*/
         memset(dvs_data,0, sizeof(dvs_data));
         //dvs_data[0].key_len = 2;
         //dvs_data[19].key_len = 33;
@@ -213,6 +223,7 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
    
     
     bool found = 0;
+    bool is_put = 0;
     int i;
     
     xSemaphoreTake(storage_mutex, portMAX_DELAY); 
@@ -228,7 +239,9 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
     {
         if (0 == strcmp(dvs_data[i].key, key))
         {
+            ChipLogProgress(DeviceLayer, "KeyValueStoreManagerImpl::_Put, done.."); 
             found = 1;
+            is_put = 1;
             //memcpy((char *)value, dvs_data[i].value, value_size);
             memset(dvs_data[i].value, 0, KVS_VALUE_SIZE);
             memcpy(dvs_data[i].value, value, value_size);
@@ -243,9 +256,17 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
         for (i=0; i< MAX_KEY_NUM; i++)
         {
             if (dvs_data[i].key_len == 0)
-            {              
+            {     
+                ChipLogProgress(DeviceLayer, "KeyValueStoreManagerImpl::_Put, %d done..", i); 
+                is_put = 1;        
                 strcpy(dvs_data[i].key, key);
                 dvs_data[i].key_len = strlen(key);
+
+                if (strlen(key) > 64)
+                     ChipLogProgress(DeviceLayer, "Key size is too large.. %d", strlen(key));
+                if (value_size > 320)
+                     ChipLogProgress(DeviceLayer, "Value size is too large.. %d", value_size);
+
                 memcpy(dvs_data[i].value, value, value_size);
                 dvs_data[i].value_len = value_size;
                 
@@ -255,6 +276,8 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
         }
     }    
     
+    if (!is_put)
+        ChipLogProgress(DeviceLayer, "KeyValueStoreManagerImpl::_Put, storage is full..");
     
     xSemaphoreTake(storage_mutex, portMAX_DELAY); 
     
@@ -272,7 +295,17 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
     while(NVM_IsBusy() == true);
     NVM_PageErase(KVS_KEY_ADDRESS + 2*NVM_FLASH_PAGESIZE);
     while(xferDone == false);
-    
+
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + 3*NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+/*
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + 4*NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+*/    
     
     // write data to nvm
     uint8_t *writePtr = (uint8_t *) &dvs_data;
@@ -340,7 +373,17 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Delete(const char * key)
     while(NVM_IsBusy() == true);
     NVM_PageErase(KVS_KEY_ADDRESS + 2*NVM_FLASH_PAGESIZE);
     while(xferDone == false);
-    
+
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + 3*NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+/*
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + 4*NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+*/   
     
     // write data to nvm
     uint8_t *writePtr = (uint8_t *) &dvs_data;
@@ -376,7 +419,17 @@ CHIP_ERROR KeyValueStoreManagerImpl::Erase(void)
     while(NVM_IsBusy() == true);
     NVM_PageErase(KVS_KEY_ADDRESS + 2*NVM_FLASH_PAGESIZE);
     while(xferDone == false);
-    
+
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + 3*NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+/*
+    xferDone = false;
+    while(NVM_IsBusy() == true);
+    NVM_PageErase(KVS_KEY_ADDRESS + 4*NVM_FLASH_PAGESIZE);
+    while(xferDone == false);
+*/    
     xSemaphoreGive(storage_mutex); 
     
     return CHIP_NO_ERROR;

@@ -610,7 +610,7 @@ void Network_Tasks(void)
         counter++;
         if (counter > 20)
         {
-            SYS_CONSOLE_PRINT("APP: free heap = %d\r\n", xPortGetFreeHeapSize());
+            SYS_CONSOLE_PRINT("APP: free heap = %d, minimum = %d\r\n", xPortGetFreeHeapSize(), xPortGetMinimumEverFreeHeapSize());
             counter = 0;
         }
 #endif

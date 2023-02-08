@@ -22,9 +22,6 @@
  */
 
 #include <platform/internal/CHIPDeviceLayerInternal.h>
-
-//#include "cyhal_system.h"
-//#include <cy_lwip.h>
 #include <lib/support/logging/CHIPLogging.h>
 #include <platform/DiagnosticDataProvider.h>
 #include <platform/wfi32/DiagnosticDataProviderImpl.h>
@@ -40,37 +37,37 @@ DiagnosticDataProviderImpl & DiagnosticDataProviderImpl::GetDefaultInstance()
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetCurrentHeapFree(uint64_t & currentHeapFree)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetCurrentHeapUsed(uint64_t & currentHeapUsed)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetCurrentHeapHighWatermark(uint64_t & currentHeapHighWatermark)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetRebootCount(uint16_t & rebootCount)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetUpTime(uint64_t & upTime)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetTotalOperationalHours(uint32_t & totalOperationalHours)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetBootReason(BootReasonType & bootReason)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 void DiagnosticDataProviderImpl::UpdateoffPremiseService(bool ipv4service, bool ipv6service)
@@ -80,8 +77,7 @@ void DiagnosticDataProviderImpl::UpdateoffPremiseService(bool ipv4service, bool 
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetNetworkInterfaces(NetworkInterface ** netifpp)
 {
-    //struct netif * net_interface;
-    CHIP_ERROR err         = CHIP_NO_ERROR;
+    CHIP_ERROR err         = CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;//CHIP_NO_ERROR;
 
     return err;
 }
@@ -96,85 +92,85 @@ void DiagnosticDataProviderImpl::ReleaseNetworkInterfaces(NetworkInterface * net
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiBssId(ByteSpan & value)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiSecurityType(uint8_t & securityType)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiVersion(uint8_t & wiFiVersion)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiChannelNumber(uint16_t & channelNumber)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiRssi(int8_t & rssi)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiBeaconRxCount(uint32_t & beaconRxCount)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiBeaconLostCount(uint32_t & beaconLostCount)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiCurrentMaxRate(uint64_t & currentMaxRate)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiPacketMulticastRxCount(uint32_t & packetMulticastRxCount)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiPacketMulticastTxCount(uint32_t & packetMulticastTxCount)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiPacketUnicastRxCount(uint32_t & packetUnicastRxCount)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiPacketUnicastTxCount(uint32_t & packetUnicastTxCount)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::GetWiFiOverrunCount(uint64_t & overrunCount)
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 CHIP_ERROR DiagnosticDataProviderImpl::ResetWiFiNetworkDiagnosticsCounts()
 {
 
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 void DiagnosticDataProviderImpl::xtlv_buffer_parsing(const uint8_t * tlv_buf, uint16_t buflen, WiFiStatsCountType Counttype,
@@ -185,7 +181,7 @@ void DiagnosticDataProviderImpl::xtlv_buffer_parsing(const uint8_t * tlv_buf, ui
 
 CHIP_ERROR DiagnosticDataProviderImpl::WiFiCounters(WiFiStatsCountType type, uint64_t & count)
 {
-    return CHIP_NO_ERROR;
+    return CHIP_ERROR_UNSUPPORTED_CHIP_FEATURE;
 }
 
 DiagnosticDataProvider & GetDiagnosticDataProviderImpl()
