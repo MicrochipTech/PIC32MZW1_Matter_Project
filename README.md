@@ -83,7 +83,7 @@ Below is the OS environment that you can use.
 
 ## Demo setup
 
-The demo setup for Matter Lighting example includes an Android phone running CHIPTool app, WFI32-IoT board and Router/AP (Needs no internet connectivity). The following diagram shows the demo setup for WFI32-IoT board.
+The demo setup for Matter Lighting example includes an Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk), WFI32-IoT board and Router/AP (Needs no internet connectivity). The following diagram shows the demo setup for WFI32-IoT board.
 
 </p>
   <p align="center"><img width="450" src="assets/matterSetup.png">
@@ -233,7 +233,96 @@ sock.sendall('finish')
 
 ## Commissioning and Controlling Matter device
 
-Once the WFI32-IoT board is programmed with this example, use [Android CHIPTool app](assets/matterMicrochip.apk) to perform next steps in verifying the lighting example with Android device.
+Once the WFI32-IoT board is programmed with this example, you have 3 ways to perform the demo. You can use [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk) to perform next steps in verifying the lighting example with Android device.
+
+If you need to test with Google Assistant, you can use the method 1 which use GHA to pair the Matter devices.
+
+### Method 1: Use Google Home APP (GHA) and tests Matter devices in Google Home ecosystem
+
+If you need to test the Matter devices with Google Home ecosystem (i.e. google assistant), you need to use Google Home APP (GHA) on android phone to pair the Matter devices. You also need to have a Google Nest devices function as Matter hubs in the Google Home ecosystem.
+The Google Nest device can be Google Nest Hub (2nd gen)/ Google Home Mini. You can also find other supported Google Nest devices in this [page](https://developers.home.google.com/matter/supported-devices)  
+
+  #### Step 1:
+
+  Create a developer project, which include Matter integration, are managed on the new [Google Home Developer Console](https://console.home.google.com/projects) 
+  You can follow this [url](https://developers.home.google.com/matter/project/create) to create the project with Matter integration.
+  Select the Vendor ID be 0xfff1 and Product ID be 0x8001 when you create the Mattter Integration:
+    </p>
+    <p align="center"><img width="600" src="assets/googleHomePrjSettings.png">
+    </p>
+
+  #### Step 2:
+
+  Set up the Google Nest devices (e.g. Google Nest Hub (2nd gen)) as the Matter Hubs and connect the devices to the same Wi-Fi network of the Matter devices (WFI32-IoT board) and the smartphnoe.
+
+  #### Step 3:
+
+  Install the [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US) to your Android smartphone which can be downloaded from Google Play Store
+
+  #### Step 4:
+
+  Verify the Matter Modules & Services on your smart phone by following this [guide](https://developers.home.google.com/matter/verify-services)
+
+  #### Step 5:
+
+  Pair the Matter device (WFI32-IoT board) by following this [guide](https://developers.home.google.com/matter/integration/pair)   
+  The QR code string is printed in the serial console when it boots up. For example:
+  ```
+  CHIP:SVR: SetupQRCode: [MT:-24J0AFN00KA0648G00]
+  CHIP:SVR: Copy/paste the below URL in a browser to see the QR Code:
+  CHIP:SVR: https://project-chip.github.io/connectedhomeip/qrcode.html?data=MT%3A-24J0AFN00KA0648G00
+  CHIP:SVR: Manual pairing code: [34970112332]
+  ```
+
+  Open the link in a web browser to display the QR code.
+
+  #### Step 6:
+
+  Use the Google Home APP(GHA) or speak to Google Assistant to control the Matter device (WFI32-IoT board). Users can get more information from this [guide](https://developers.home.google.com/matter/integration/control)  
+  The Yellow LED on-board can be controlled - turned ON, OFF by toggle the device state from GHA or voice command with Google Assistant.
+
+  User can also press SW2 on-board to control ON, OFF the Yellow LED locally. The device state is updated to the GHA.  
+
+  </p>
+    <p align="center"><img width="700" src="assets/googleHomeControl.png">
+    </p>
+
+  - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
+
+### Method 2: Use Google Home Sample APP for Matter
+
+The Google Home Sample App for Matter uses the [Google Home Mobile SDK](https://developers.home.google.com/matter/apis/home) to create an Android app that's similar to Google Home app (GHA) . This sample app support to commission the Matter devices to the Matter fabric and control the Matter devices.  
+
+  #### Step 1:
+
+  Download and Install the [Google Home Sample APP](https://developers.home.google.com/samples/matter-app) to your Android smartphone
+
+  #### Step 2:
+
+  Follow the [link](https://developers.home.google.com/samples/matter-app) to commission the matter devices.
+  Pair the Matter device (WFI32-IoT board) by following this [guide](https://developers.home.google.com/matter/integration/pair)   
+  The QR code string is printed in the serial console when it boots up. For example:
+  
+  ```
+  CHIP:SVR: SetupQRCode: [MT:-24J0AFN00KA0648G00]
+  CHIP:SVR: Copy/paste the below URL in a browser to see the QR Code:
+  CHIP:SVR: https://project-chip.github.io/connectedhomeip/qrcode.html?data=MT%3A-24J0AFN00KA0648G00
+  CHIP:SVR: Manual pairing code: [34970112332]
+  ```
+
+  Open the link in a web browser to display the QR code.
+
+  #### Step 3:
+
+  Control the Matter device by toggle your device On or Off on the APP.
+
+  </p>
+    <p align="center"><img width="450" src="assets/googleHomeSampleAPP.png"><img width="450" src="assets/controlYellowLED.png">
+    </p>
+
+   - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device. 
+
+### Method 3: Use CHIPTool APP
 
 More information about building and installing Android CHIPTool application can be found [here](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/android_building.md#building-android)
 
