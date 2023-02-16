@@ -184,7 +184,7 @@ If you want to connect the WFI32-IoT board to the target AP other than the defau
   
   The Blue LED on-board will blink at 200ms ON/OFF.
   </p>
-    <p align="center"><img width="450" src="assets/softAPButton.png">
+    <p align="center"><img width="300" src="assets/softAPButton.png">
       </p>
 
   #### Step 2:
@@ -195,7 +195,7 @@ If you want to connect the WFI32-IoT board to the target AP other than the defau
   
   Click "Connect" button
   </p>
-    <p align="center"><img width="450" src="assets/iosWifiProvisioningApp.png">
+    <p align="center"><img width="300" src="assets/iosWifiProvisioningApp.png">
       </p>
   
   #### Step 4:
@@ -205,7 +205,7 @@ If you want to connect the WFI32-IoT board to the target AP other than the defau
   #### Step 5:
   WFI32-IoT Board receives the target AP credentials and connects to the target AP. The Blue LED on-board turns ON when connected to Wi-Fi. The Blue LED blinks at 500ms ON/OF,F if it fails to make the Wi-Fi connection.
   </p>
-    <p align="center"><img width="450" src="assets/networkConnectBlueLED.png">
+    <p align="center"><img width="300" src="assets/networkConnectBlueLED.png">
       </p>
 
 - Note: The "Microchip Wi-Fi Provisioning" APP shown above is actually using a TCP client in the backend. The TCP client connects to WFI32-IoT TCP server and sends properly fomratted AP credentials.
@@ -317,7 +317,7 @@ The Google Home Sample App for Matter uses the [Google Home Mobile SDK](https://
   Control the Matter device by toggle your device On or Off on the APP.
 
   </p>
-    <p align="center"><img width="450" src="assets/googleHomeSampleAPP.png"><img width="450" src="assets/controlYellowLED.png">
+    <p align="center"><img width="300" src="assets/googleHomeSampleAPP.png"><img width="300" src="assets/controlYellowLED.png">
     </p>
 
    - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device. 
@@ -364,7 +364,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   - Note: "Fabric ID" and "Device ID" fields will be auto populated.
 
   </p>
-    <p align="center"><img width="450" src="assets/controlYellowLED.png">
+    <p align="center"><img width="300" src="assets/controlYellowLED.png">
     </p>
     <p align="center"><img width="300" src="assets/controllingDevice.png">
     </p>
