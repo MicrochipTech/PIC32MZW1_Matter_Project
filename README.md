@@ -336,7 +336,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
 
 
   </p>
-    <p align="center"><img width="450" src="assets/provisionMenuSelect.png">
+    <p align="center"><img width="300" src="assets/provisionMenuSelect.png">
     </p>
 
   #### Step 2:
@@ -344,7 +344,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   To find Matter devices connected to the same AP ***(configured [here](#building-the-example))***, with "Discriminator - 3840" and "Pincode - 20202021" use "DISCOVER" tab. For a single Matter device discovered on the network, "Device address" will be auto populated and when multiple Matter devices are discovered, select an entry from the list to populate the "Device address". To proceed with commissioning of the discovered Matter device, use "COMMISSION" tab.
 
   </p>
-    <p align="center"><img width="450" src="assets/commissioningDevice.png">
+    <p align="center"><img width="300" src="assets/commissioningDevice.png">
     </p>
 
   #### Step 3:
@@ -352,7 +352,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   CHIPTool app notifies successful commissioning of Matter device with message "Commissioning completed with result: 0". To proceed with controlling device, use "LIGHT ON/OFF & LEVEL CLUSTER" tab.
 
   </p>
-    <p align="center"><img width="450" src="assets/CommissionedControlMenu.png">
+    <p align="center"><img width="300" src="assets/CommissionedControlMenu.png">
     </p>
 
   #### Step 4:
@@ -366,7 +366,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   </p>
     <p align="center"><img width="450" src="assets/controlYellowLED.png">
     </p>
-    <p align="center"><img width="450" src="assets/controllingDevice.png">
+    <p align="center"><img width="300" src="assets/controllingDevice.png">
     </p>
 
   - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
@@ -469,7 +469,6 @@ As per latest memory usage analysis, this example consumes 892KB Program Memory 
 - It takes long loading time to start debug mode with MPLAB X IDE
 - Requires MPLAB XC32 compiler's PRO license
 - Example certificates provided in the matter's repo are used for device attestation, certificates are embedded in the program code.
-- Not support with Google Home APP/ Google Assistant
 
 <a name="addh3components"></a>
 
