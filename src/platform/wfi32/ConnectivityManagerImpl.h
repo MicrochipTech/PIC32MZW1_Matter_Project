@@ -127,6 +127,7 @@ private:
 
     static void DriveStationState(::chip::System::Layer * aLayer, void * aAppState);
     static void DriveAPState(::chip::System::Layer * aLayer, void * aAppState);
+    void CheckProvisioningState();
     void DriveStationState(void);
     void DriveAPState(void);
     CHIP_ERROR ConfigureWiFiAP(void);

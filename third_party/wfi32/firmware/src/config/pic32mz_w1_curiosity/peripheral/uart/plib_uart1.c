@@ -40,6 +40,7 @@
 
 #include "device.h"
 #include "plib_uart1.h"
+#include "definitions.h"
 
 // *****************************************************************************
 // *****************************************************************************
@@ -56,8 +57,8 @@ UART_RING_BUFFER_OBJECT uart1Obj;
 
 static uint8_t UART1_ReadBuffer[UART1_READ_BUFFER_SIZE];
 
-#define UART1_WRITE_BUFFER_SIZE     2048
-#define UART1_WRITE_BUFFER_SIZE_9BIT       (2048 >> 1)
+#define UART1_WRITE_BUFFER_SIZE     4000//2048
+#define UART1_WRITE_BUFFER_SIZE_9BIT       (4000 >> 1)//(2048 >> 1)
 #define UART1_TX_INT_DISABLE()      IEC1CLR = _IEC1_U1TXIE_MASK;
 #define UART1_TX_INT_ENABLE()       IEC1SET = _IEC1_U1TXIE_MASK;
 
@@ -500,6 +501,7 @@ static inline bool UART1_TxPushByte(uint16_t wrByte)
     }
     else
     {
+        printf("uart1 overflow\r\n");
         /* Queue is full. Report Error. */
     }
 

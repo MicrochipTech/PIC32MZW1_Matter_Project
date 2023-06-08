@@ -144,7 +144,10 @@ CHIP_ERROR PIC32WiFiDriver::ConnectWiFiNetwork(const char * ssid, uint8_t ssidLe
 {
     ChipLogProgress(NetworkProvisioning, "ConnectWiFiNetwork: SSID: %s, %d, password:%s, %d",ssid, ssidLen, key, keyLen);
     CHIP_ERROR err = CHIP_NO_ERROR;
+    char wifimode[] = "station";
     
+    err = PIC32MZW1Config::WriteConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiMode, wifimode, strlen(wifimode));
+    SuccessOrExit(err);
     err = PIC32MZW1Config::WriteConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiSSID, ssid, ssidLen);
     SuccessOrExit(err);
     err = PIC32MZW1Config::WriteConfigValueStr(PIC32MZW1Config::kConfigKey_WiFiPassword, key, keyLen);
@@ -166,9 +169,9 @@ void PIC32WiFiDriver::OnConnectWiFiNetwork()
     if (mpConnectCallback)
     {
         CommitConfiguration();
-        chip::DeviceLayer::PlatformMgr().LockChipStack();
+
         mpConnectCallback->OnResult(Status::kSuccess, CharSpan(), 0);
-        chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+
         mpConnectCallback = nullptr;
     }
 }

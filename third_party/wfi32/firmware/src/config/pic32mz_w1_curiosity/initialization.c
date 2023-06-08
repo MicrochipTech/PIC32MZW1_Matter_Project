@@ -456,11 +456,14 @@ void SYS_Initialize ( void* data )
     NVM_Initialize();
 
     CORETIMER_Initialize();
+    UART2_Initialize();
 	UART3_Initialize();
 
 	UART1_Initialize();
 
 	BSP_Initialize();
+	
+
 	RNG_Initialize();
 
 	SPI1_Initialize();
@@ -471,10 +474,10 @@ void SYS_Initialize ( void* data )
     sysObj.drvWifiPIC32MZW1 = WDRV_PIC32MZW_Initialize(WDRV_PIC32MZW_SYS_IDX_0, (SYS_MODULE_INIT*)&wdrvPIC32MZW1InitData);
 
 
+    sysObj.sysTime = SYS_TIME_Initialize(SYS_TIME_INDEX_0, (SYS_MODULE_INIT *)&sysTimeInitData);
     sysObj.sysDebug = SYS_DEBUG_Initialize(SYS_DEBUG_INDEX_0, (SYS_MODULE_INIT*)&debugInit);
 
 
-    sysObj.sysTime = SYS_TIME_Initialize(SYS_TIME_INDEX_0, (SYS_MODULE_INIT *)&sysTimeInitData);
     sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
 
 

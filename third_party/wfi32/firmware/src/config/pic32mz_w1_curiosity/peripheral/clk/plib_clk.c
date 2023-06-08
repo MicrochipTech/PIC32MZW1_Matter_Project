@@ -227,9 +227,9 @@ void CLK_Initialize( void )
 		/* EWPLLFBDIV    = 800 */
 		/* EWPLLREFDIV   = 20 */
 		/* EWPLLICLK     = POSC */
-		/* ETHCLKOUTEN   = ENABLED */
+		/* ETHCLKOUTEN   = DISABLED */
 		/* EWPLL_BYP     = NO_BYPASS */
-		EWPLLCON = 0x15320206 ^ 0x0438080c;
+		EWPLLCON = 0x5320206 ^ 0x0438080c;
 		CFGCON0bits.ETHPLLHWMD = 1;
 		while(!((*PLLDBG) & 0x4));
 
@@ -281,7 +281,16 @@ void CLK_Initialize( void )
 		/* SPLL_BYP     = NO_BYPASS     */
 		SPLLCON = 0x414045;
 
-
+        /* Configure UPLL */
+		/* UPLLBSWSEL   = 5 */
+		/* UPLLPWDN     = PLL_ON */
+		/* UPLLPOSTDIV1 = 10 */
+		/* UPLLFLOCK    = NOFORCE_LOCK */
+		/* UPLLRST      = DEASSERT_RST */
+		/* UPLLFBDIV    = 24 */
+		/* UPLLREFDIV   = 1 */
+		/* UPLL_BYP     = UPLL */
+		//UPLLCON = 0x404180a5;
 		/* Power down the UPLL */
 		UPLLCONbits.UPLLPWDN = 1;
 
@@ -294,9 +303,9 @@ void CLK_Initialize( void )
 		/* EWPLLFBDIV    = 800 */
 		/* EWPLLREFDIV   = 20 */
 		/* EWPLLICLK     = POSC */
-		/* ETHCLKOUTEN   = ENABLED */
+		/* ETHCLKOUTEN   = DISABLED */
 		/* EWPLL_BYP     = NO_BYPASS */
-		EWPLLCON = 0x15320206 ^ 0x438080c;
+		EWPLLCON = 0x5320206 ^ 0x438080c;
 		CFGCON0bits.ETHPLLHWMD = 1;
 		while(!((*PLLDBG) & 0x4));
 
@@ -340,7 +349,7 @@ void CLK_Initialize( void )
 
     PMD1 = 0x20018981;
     PMD2 = 0x7e0f0f;
-    PMD3 = 0x19030212;
+    PMD3 = 0x19030210;
 
     CFGCON0bits.PMDLOCK = 1;
 

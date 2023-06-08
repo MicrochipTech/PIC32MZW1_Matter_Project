@@ -216,8 +216,12 @@ CHIP_ERROR AppTask::Init()
 
     ConfigurationMgr().LogDeviceConfig();
     // Print setup info
-    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kOnNetwork));
-
+#ifdef CHIP_DEVICE_CONFIG_ENABLE_CHIPOBLE
+    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kBLE));
+#else
+    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kOnNetwork));  /* QR Code for Wi-Fi only deveice */
+#endif
+    
 
     PIC32_LOG("AppTask::Init() Exit\r\n");
 
@@ -409,7 +413,9 @@ void AppTask::FunctionHandler(AppEvent * event)
             sAppTask.CancelTimer();
             sAppTask.mFunction = Function::kNoneSelected;
             PIC32_LOG("Factory Reset has been Canceled");
-            
+#ifdef CHIP_DEVICE_CONFIG_ENABLE_CHIPOBLE
+            ConnectivityMgr().SetBLEAdvertisingEnabled(true);
+#else            
             CHIP_ERROR err;
             char wifimode[] = "softAP";
             err = DeviceLayer::Internal::PIC32MZW1Config::WriteConfigValueStr(DeviceLayer::Internal::PIC32MZW1Config::kConfigKey_WiFiMode, wifimode, strlen(wifimode));
@@ -418,6 +424,7 @@ void AppTask::FunctionHandler(AppEvent * event)
             
             PIC32_LOG("System reset..");
             DeviceLayer::Internal::PIC32MZW1Config::SystemReset();
+#endif
 
         }
         else if (sAppTask.mFunctionTimerActive && sAppTask.mFunction == Function::kFactoryReset)

@@ -75,7 +75,7 @@ void GPIO_Initialize ( void )
     PORTA;
     IEC1SET = _IEC1_CNAIE_MASK;
     /* PORTB Initialization */
-    ANSELBCLR = 0x100; /* Digital Mode Enable */
+    ANSELBCLR = 0x300; /* Digital Mode Enable */
 
     /* Change Notice Enable */
     CNCONBSET = _CNCONB_ON_MASK;
@@ -84,7 +84,7 @@ void GPIO_Initialize ( void )
     /* PORTC Initialization */
     ODCCSET = 0x200; /* Open Drain Enable */
     LATC = 0x200; /* Initial Latch Value */
-    TRISCCLR = 0x200; /* Direction Control */
+    TRISCCLR = 0x1200; /* Direction Control */
     /* PORTK Initialization */
     ODCKSET = 0x7000; /* Open Drain Enable */
     LATK = 0x7000; /* Initial Latch Value */
@@ -99,9 +99,11 @@ void GPIO_Initialize ( void )
 
     /* PPS Input Remapping */
     U3RXR = 10;
+    U2RXR = 5;
 
     /* PPS Output Remapping */
     RPC14R = 1;
+    RPK7R = 2;
 
         /* Lock back the system after PPS configuration */
     CFGCON0bits.IOLOCK = 1;

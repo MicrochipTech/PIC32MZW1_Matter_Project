@@ -42,6 +42,7 @@
                 <sourceRootElem>../../../../zzz_generated/lighting-app</sourceRootElem>
                 <sourceRootElem>../../config/pic32mz_w1_curiosity</sourceRootElem>
                 <sourceRootElem>../../bootloader/firmware/src/config/pic32mz_w1_curiosity/sst26</sourceRootElem>
+                <sourceRootElem>../../../../src/ble</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

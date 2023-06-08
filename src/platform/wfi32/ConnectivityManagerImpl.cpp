@@ -237,6 +237,25 @@ void ConnectivityManagerImpl::DHCPStatusCallback(struct netif *netif)
     return;
 }
 
+void ConnectivityManagerImpl::CheckProvisioningState()
+{
+    char ssid[DeviceLayer::Internal::kMaxWiFiSSIDLength];
+    char password[DeviceLayer::Internal::kMaxWiFiKeyLength];
+    uint32_t auth    = 0;
+    size_t offset = 0;
+    bool isProvisioned = false;
+
+    if (CHIP_NO_ERROR == Internal::PIC32MZW1Config::ReadConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiSSID, ssid, sizeof(ssid), offset))
+    {
+        if (CHIP_NO_ERROR == Internal::PIC32MZW1Config::ReadConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiPassword, password, sizeof(password), offset))
+            if (CHIP_NO_ERROR == Internal::PIC32MZW1Config::ReadConfigValue(Internal::PIC32MZW1Config::kConfigKey_WiFiSecurity, auth))
+            {
+                isProvisioned = true;
+            }
+    }
+    mIsProvisioned = isProvisioned;
+    return;
+}
 void ConnectivityManagerImpl::NetworkProvisioningCallback(char* ssid, char* password, uint8_t auth)
 {
     CHIP_ERROR err                = CHIP_NO_ERROR;
@@ -293,11 +312,13 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
     char wifi_mode[10];
     size_t offset = 0;
     int softAP = 0;
+    int no_wifi_mode_arg = 0;
     
     
     err = Internal::PIC32MZW1Config::ReadConfigValueStr(Internal::PIC32MZW1Config::kConfigKey_WiFiMode, wifi_mode, sizeof(wifi_mode), offset);
     if (err != CHIP_NO_ERROR)
     {
+        no_wifi_mode_arg = 1;
         ChipLogProgress(DeviceLayer, "No WiFiMode argument in the Key Store, default is station mode");
     }
     else
@@ -307,7 +328,6 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
     }
     
     Network_PIC32MZW_Set_WiFi_Mode(softAP);
-
     err = Internal::PIC32MZW1Utils::pic32mzw1_wifi_init();
     if (err != CHIP_NO_ERROR)
     {
@@ -322,8 +342,10 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
                 if (event->WiFiConnectivityChange.Result == ConnectivityChange::kConnectivity_Established)
                 {
                     ChipLogProgress(DeviceLayer,"ConnectivityManager receive  kConnectivity_Established..\r\n");
-                    
+                    NetworkCommissioning::PIC32WiFiDriver::GetInstance().OnConnectWiFiNetwork();
+                    ChipLogProgress(DeviceLayer,"ConnectivityManager log2..\r\n");
                     Network_PIC32MZW_StartDHCP(&ConnectivityManagerImpl::DHCPStatusCallback);
+                    ChipLogProgress(DeviceLayer,"ConnectivityManager log3..\r\n");
                 }
                 else if (event->WiFiConnectivityChange.Result == ConnectivityChange::kConnectivity_Lost)
                 {
@@ -339,7 +361,11 @@ CHIP_ERROR ConnectivityManagerImpl::_Init()
         },
         0);
 
-    if (softAP)
+    if (no_wifi_mode_arg)
+    {
+        ChipLogProgress(DeviceLayer, "WiFi mode is not set, do not enable sta/ ap mode \r\n");
+    }
+    else if (softAP)
     {
         //For AP mode test
         ReturnErrorOnFailure(SetWiFiAPMode(kWiFiAPMode_Enabled));
@@ -566,12 +592,16 @@ exit:
     }
 }
 
+
 void ConnectivityManagerImpl::DriveStationState()
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
     bool stationConnected;
     WDRV_PIC32MZW_STATUS result;
     ChipLogProgress(DeviceLayer, "DriverStationState() In");
+
+    if (!IsWiFiStationProvisioned())
+        CheckProvisioningState();
 
     // If the station interface is currently connected ...
     if (mWiFiStationState == kWiFiStationState_Connected || mWiFiStationState == kWiFiStationState_Connecting) 

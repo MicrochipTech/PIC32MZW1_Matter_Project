@@ -71,6 +71,15 @@
 #define SPI1_CS_Get()               ((PORTA >> 1) & 0x1)
 #define SPI1_CS_PIN                  GPIO_PIN_RA1
 
+/*** Macros for BT_RST pin ***/
+#define BT_RST_Set()               (LATCSET = (1<<12))
+#define BT_RST_Clear()             (LATCCLR = (1<<12))
+#define BT_RST_Toggle()            (LATCINV= (1<<12))
+#define BT_RST_OutputEnable()      (TRISCCLR = (1<<12))
+#define BT_RST_InputEnable()       (TRISCSET = (1<<12))
+#define BT_RST_Get()               ((PORTC >> 12) & 0x1)
+#define BT_RST_PIN                  GPIO_PIN_RC12
+
 
 // *****************************************************************************
 /* GPIO Port

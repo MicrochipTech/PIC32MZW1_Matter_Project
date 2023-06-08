@@ -70,6 +70,9 @@ void UART1_RX_InterruptHandler( void );
 void UART1_TX_InterruptHandler( void );
 void CHANGE_NOTICE_A_InterruptHandler( void );
 void CHANGE_NOTICE_B_InterruptHandler( void );
+void UART2_FAULT_InterruptHandler( void );
+void UART2_RX_InterruptHandler( void );
+void UART2_TX_InterruptHandler( void );
 void WDRV_PIC32MZW_TasksRFSMCISR( void );
 void WDRV_PIC32MZW_TasksRFMACISR( void );
 void WDRV_PIC32MZW_TasksRFTimer0ISR( void );
@@ -124,6 +127,21 @@ void CHANGE_NOTICE_A_Handler (void)
 void CHANGE_NOTICE_B_Handler (void)
 {
     CHANGE_NOTICE_B_InterruptHandler();
+}
+
+void UART2_FAULT_Handler (void)
+{
+    UART2_FAULT_InterruptHandler();
+}
+
+void UART2_RX_Handler (void)
+{
+    UART2_RX_InterruptHandler();
+}
+
+void UART2_TX_Handler (void)
+{
+    UART2_TX_InterruptHandler();
 }
 
 void RFSMC_Handler (void)

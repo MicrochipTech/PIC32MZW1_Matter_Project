@@ -66,7 +66,7 @@
 #include <lwip/tcp.h>
 #include <lwip/tcpip.h>
 
-//#define PACKET_DEBUG
+// #define PACKET_DEBUG
 #define HEAP_DEBUG
 
 // *****************************************************************************
@@ -540,7 +540,7 @@ void Network_Tasks(void)
             }
             else
             {
-                /* Add WILC1000 AP/WD interface. */
+                /* Add AP/WD interface. */
                 ip4_addr_t mask       = SN_MASK_IP;
                 ip4_addr_t gateway    = GW_ADDR_IP;
                 ip4_addr_t ip_addr_ap = AP_ADDR_IP;

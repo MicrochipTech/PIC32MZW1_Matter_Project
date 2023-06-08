@@ -30,7 +30,7 @@
 using namespace ::chip::DeviceLayer::Internal;
 using chip::DeviceLayer::Internal::DeviceNetworkInfo;
 
-#define WIFI_DRV_OPEN_WAIT_COUNTER 100
+#define WIFI_DRV_OPEN_WAIT_COUNTER 1000
 
 wifi_config_t PIC32MZW1Utils::mWiFiConfig = {};
 wifi_mode_t PIC32MZW1Utils::mWiFiMode = WIFI_MODE_NULL;
@@ -302,8 +302,12 @@ CHIP_ERROR PIC32MZW1Utils::pic32mzw1_wifi_connect(void)
     result =  WDRV_PIC32MZW_BSSConnect(wifi_handle, &mWiFiConfig.sta.bssCtx, &mWiFiConfig.sta.authCtx, STANotifyCB);
     if (WDRV_PIC32MZW_STATUS_OK != result)
     {
-        ChipLogError(DeviceLayer, "PIC32MZW1 WiFi connect fail");
+        ChipLogError(DeviceLayer, "PIC32MZW1 WiFi connect fail, result = %d", result);
         err = CHIP_ERROR_INTERNAL;
+    }
+    else
+    {
+        err = CHIP_NO_ERROR;
     }
     
 
