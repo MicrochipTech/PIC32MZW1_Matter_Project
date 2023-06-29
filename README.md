@@ -4,7 +4,7 @@
 
 # Matter (*formerly* CHIP) PIC32MZW1 Lighting Example
 
-This MPLAB example demonstrates the use of Matter protocol (also known as Project CHIP - Connected Home over IP) over Microchip PIC32MZW1 based [WFI32-IoT board](https://ww1.microchip.com/downloads/aemDocuments/documents/WSG/ProductDocuments/UserGuides/EV36W50A-WFI32-IoT-Board-Users-Guide-DS50003262.pdf)
+This MPLAB example demonstrates the use of Matter protocol (also known as Project CHIP - Connected Home over IP) over Microchip PIC32MZW1 based [WFI32-IoT board](https://ww1.microchip.com/downloads/aemDocuments/documents/WSG/ProductDocuments/UserGuides/EV36W50A-WFI32-IoT-Board-Users-Guide-DS50003262.pdf) and RNBD451 BLE Add On Board.
 
 <hr>
 
@@ -32,7 +32,7 @@ This MPLAB example demonstrates the use of Matter protocol (also known as Projec
 
 ## Introduction
 
-This example is a starting point for Matter protocol demonstration over Microchip's PIC32MZW1 platform and gives an idea to control the Yellow LED on WFI32-IoT board using Android CHIPTool app (Matter Controller). During the initial release (Phase-1) of this example, we use the example certificates provided in the matter's repo for device attestation and embedded the certifcates in the project code. To launch products in the market, certificates approved by [CSA](https://csa-iot.org/) are need to be used. 
+This example is a starting point for Matter protocol demonstration over Microchip's PIC32MZW1 Wi-Fi MCU and RNBD451 BLE module platform and gives an idea to control the Yellow LED on WFI32-IoT board using Android CHIPTool app (Matter Controller). During the initial release (Phase-1) of this example, we use the example certificates provided in the matter's repo for device attestation and embedded the certifcates in the project code. To launch products in the market, certificates approved by [CSA](https://csa-iot.org/) are need to be used. 
 
 - Note: This example was developed and tested using MPLAB X IDE v6.00+, MPLAB XC32 compiler v4.20 on Ubuntu 20.04 LTS and 22.04 LTS and on Microsoft Windows 10 Pro.
 
@@ -40,9 +40,11 @@ This example is a starting point for Matter protocol demonstration over Microchi
 
 ## Hardware Requirements
 
-- [WFI32-IoT board](https://www.microchip.com/en-us/development-tool/EV36W50A)
-- An Android Phone with [&#34;CHIPTool&#34; app](assets/matterMicrochip.apk) installed
-- Router/AP (Needs no internet connectivity)
+- [WFI32-IoT Board](https://www.microchip.com/en-us/development-tool/EV36W50A)
+- [RNBD451 Add On Board](https://www.microchip.com/en-us/development-tool/EV25F14A)
+- An Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk)
+- [ATECC608B TRUST board DT100104](https://www.microchip.com/en-us/development-tool/DT100104) 
+- Router/AP
 
 <a name="environment"></a>
 
@@ -83,10 +85,10 @@ Below is the OS environment that you can use.
 
 ## Demo setup
 
-The demo setup for Matter Lighting example includes an Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk), WFI32-IoT board and Router/AP (Needs no internet connectivity). The following diagram shows the demo setup for WFI32-IoT board.
+The demo setup for Matter Lighting example includes an Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk), WFI32-IoT board and Router/AP. The following diagram shows the demo setup for WFI32-IoT board.
 
 </p>
-  <p align="center"><img width="450" src="assets/matterSetup.png">
+  <p align="center"><img width="600" src="assets/matterSetup.png">
   </p>
 
 <a name="exampfeatures"></a>
@@ -96,7 +98,7 @@ The demo setup for Matter Lighting example includes an Android phone running [Go
 - This example supports OTA (Over-the-air) firmware upgrade feature
 - MPLAB X IDE can be used on Microsoft Windows to build and flash the example
 - Enables ON/OFF lighting cluster
-- Supports device discovery and Commission
+- Supports device discovery and Commission over BLE
 - Status LED (Blue color D403)
   - Blinking at 500ms ON/OFF : Attempting to connect to AP
   - Blinking at 200ms ON/OFF : Set as Soft-AP mode for network provisioning
@@ -173,61 +175,6 @@ Update default Wi-Fi Access Point (AP) credentials in "/PIC32MZW1_Matter_Project
    ```
    The debug session can be started by referring to the steps mentioned [here.](https://microchipdeveloper.com/mplabx:start-a-debug-session) 
 
-<a name="network_provisioning"></a>
-
-## Wi-Fi Network Provisioning
-
-If you want to connect the WFI32-IoT board to the target AP other than the default settings, you can perform below steps:
-
-  #### Step 1:
-  Short press the Switch 1 (SW1), the WFI32-IoT board will reboot and start in softAP mode.
-  
-  The Blue LED on-board will blink at 200ms ON/OFF.
-  </p>
-    <p align="center"><img width="300" src="assets/softAPButton.png">
-      </p>
-
-  #### Step 2:
-  Connect your smartphone to WFI32-IoT board softAP, SSID is "INF-FFF1-8001" in OPEN security.
-
-  #### Step 3:
-  Launch the "Microchip WiFi Provisioning" [iOS](https://apps.apple.com/us/app/wi-fi-provisioning/id1553255731?platform=iphone) or [Android](https://play.google.com/store/apps/details?id=com.microchip.wifiapplication) APP on your iPhone or Android phone.
-  
-  Click "Connect" button
-  </p>
-    <p align="center"><img width="300" src="assets/iosWifiProvisioningApp.png">
-      </p>
-  
-  #### Step 4:
-  - Input the target AP SSID and password:
- Select the desired AP name from the app's scan result list and click "Send" button
-
-  #### Step 5:
-  WFI32-IoT Board receives the target AP credentials and connects to the target AP. The Blue LED on-board turns ON when connected to Wi-Fi. The Blue LED blinks at 500ms ON/OF,F if it fails to make the Wi-Fi connection.
-  </p>
-    <p align="center"><img width="300" src="assets/networkConnectBlueLED.png">
-      </p>
-
-- Note: The "Microchip Wi-Fi Provisioning" APP shown above is actually using a TCP client in the backend. The TCP client connects to WFI32-IoT TCP server and sends properly fomratted AP credentials.
-User can use any other socket client app beside the smartphone APP.
-
-  For example, user can use a PC to connect the WFI32-IoT softAP (SSID is "INF-FFF1-8001") and run below Python 2.7 based TCP client scripts. The WFI32-IoT board will reboot after it receive the AP credentials.
-
-```python
-import socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# WFI32-IoT board runs an AP interface with IP address 192.168.1.1 and a TCP server on port 80
-server_address = ('192.168.5.1', 80)
-# Connect to the TCP socket
-sock.connect(server_address)
-# Send AP credentials over the connected socket to the WFI32-IoT board
-# Replace 'ssid' with your AP SSID and 'password' with your AP password 
-# Replace 'security' with proper value relevant to your AP security mode:
-#0:Open | 1: WAP/WPA2 | 2:WEP | 3:WPA3 | 4:Enterprise
-sock.sendall('apply,ssid,security,password,NULL')
-# Send a 'finish' string over the socket to inform WFI32-IoT board to apply the passed credentials
-sock.sendall('finish')
-```
 
 <a name="commissioncontrol"></a>
 
@@ -241,6 +188,11 @@ If you need to test with Google Assistant, you can use the method 1 which use GH
 
 If you need to test the Matter devices with Google Home ecosystem (i.e. google assistant), you need to use Google Home APP (GHA) on android phone to pair the Matter devices. You also need to have a Google Nest devices function as Matter hubs in the Google Home ecosystem.
 The Google Nest device can be Google Nest Hub (2nd gen)/ Google Home Mini. You can also find other supported Google Nest devices in this [page](https://developers.home.google.com/matter/supported-devices)  
+Below picture show about the setup:  
+
+   </p>
+    <p align="center"><img width="600" src="assets/google_assistant_demo.png">
+   </p>  
 
   #### Step 1:
 
@@ -265,7 +217,11 @@ The Google Nest device can be Google Nest Hub (2nd gen)/ Google Home Mini. You c
 
   #### Step 5:
 
-  Pair the Matter device (WFI32-IoT board) by following this [guide](https://developers.home.google.com/matter/integration/pair)   
+  Connect your samrtphone to the target AP that the Matter deice need to be connected to.
+
+  #### Step 6:
+
+  Pair the Matter device (WFI32-IoT board) over BLE by following this [guide](https://developers.home.google.com/matter/integration/pair)   
   The QR code string is printed in the serial console when it boots up. For example:
   ```
   CHIP:SVR: SetupQRCode: [MT:-24J0AFN00KA0648G00]
@@ -276,7 +232,7 @@ The Google Nest device can be Google Nest Hub (2nd gen)/ Google Home Mini. You c
 
   Open the link in a web browser to display the QR code.
 
-  #### Step 6:
+  #### Step 7:
 
   Use the Google Home APP(GHA) or speak to Google Assistant to control the Matter device (WFI32-IoT board). Users can get more information from this [guide](https://developers.home.google.com/matter/integration/control)  
   The Yellow LED on-board can be controlled - turned ON, OFF by toggle the device state from GHA or voice command with Google Assistant.
@@ -299,7 +255,11 @@ The Google Home Sample App for Matter uses the [Google Home Mobile SDK](https://
 
   #### Step 2:
 
-  Follow the [link](https://developers.home.google.com/samples/matter-app) to commission the matter devices.
+  Connect your samrtphone to the target AP that the Matter deice need to be connected to.
+
+  #### Step 3:
+
+  Follow the [link](https://developers.home.google.com/samples/matter-app) to commission the matter devices over BLE.
   Pair the Matter device (WFI32-IoT board) by following this [guide](https://developers.home.google.com/matter/integration/pair)   
   The QR code string is printed in the serial console when it boots up. For example:
   
@@ -312,7 +272,7 @@ The Google Home Sample App for Matter uses the [Google Home Mobile SDK](https://
 
   Open the link in a web browser to display the QR code.
 
-  #### Step 3:
+  #### Step 4:
 
   Control the Matter device by toggle your device On or Off on the APP.
 
@@ -332,6 +292,10 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
 
   #### Step 1:
 
+  Connect your samrtphone to the target AP that the Matter deice need to be connected to.
+    
+  #### Step 2:
+
   Use "PROVISION CHIP DEVICE WITH WI-FI" -> "INPUT DEVICE ADDRESS" tabs to start commissioning WFI32-IoT board with IP address.
 
 
@@ -339,7 +303,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
     <p align="center"><img width="300" src="assets/provisionMenuSelect.png">
     </p>
 
-  #### Step 2:
+  #### Step 3:
 
   To find Matter devices connected to the same AP ***(configured [here](#building-the-example))***, with "Discriminator - 3840" and "Pincode - 20202021" use "DISCOVER" tab. For a single Matter device discovered on the network, "Device address" will be auto populated and when multiple Matter devices are discovered, select an entry from the list to populate the "Device address". To proceed with commissioning of the discovered Matter device, use "COMMISSION" tab.
 
@@ -347,7 +311,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
     <p align="center"><img width="300" src="assets/commissioningDevice.png">
     </p>
 
-  #### Step 3:
+  #### Step 4:
 
   CHIPTool app notifies successful commissioning of Matter device with message "Commissioning completed with result: 0". To proceed with controlling device, use "LIGHT ON/OFF & LEVEL CLUSTER" tab.
 
@@ -355,7 +319,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
     <p align="center"><img width="300" src="assets/CommissionedControlMenu.png">
     </p>
 
-  #### Step 4:
+  #### Step 5:
 
   The Yellow LED on-board can be controlled - turned ON, OFF, toggled using respective tabs. The "READ" tab returns the On/Off command value.
 
@@ -372,6 +336,47 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
 
 <a name="otafwupgrade"></a>
+
+## Attestation Certificate Provisioning
+
+Matter Device Attestation Certificate (DAC) need to be provisioing to the device for the commissioning process.  
+In this project, the DAC and the keys are stored in the ECC608 TrustFlex chip (secure element) , user need to create the Matter DAC first with the public key that stored in the ECC608 TrustFlex and run the python scripts to provision the certificate to the ECC608 chip.  
+  ### Retieve the public key from ECC608 TrustFlex
+  1. plug the ATECC608B TRUST board [DT100104](https://www.microchip.com/en-us/development-tool/DT100104) to WFI32-IoT Board through the MikroBus connector
+  2. connect PC to the WFI32-IoT Board with USB cable
+  3. Go to the direcotry third_party/wfi32/utilities/
+  4. run info.py scripts, the scripts extract the public key from the ECC608 Trustflex and output the file public_key.pem
+  ### Create the DAC
+  1. Go to directory src/tools/chip-cert, compile the chip-cert tool according to the readme file  
+  2. If you are doing test/ development, you can use the default Attestation Authority (PAA) certificate, Product Attestation Intermediate (PAI) in this source code tree, and create the Device Attestation Certificates (DAC) only  
+     a. Copy credentials/development/attestation/Matter-Development-PAI-noPID-Key.pem and Matter-Development-PAI-noPID-Cert.pem to the same direcotry of chip-cert.  
+     b. Create Product Device Attestation Certificates (DAC): 
+      ```
+        ./chip-cert gen-att-cert --type d --subject-cn "Matter Development DAC 01" --subject-vid FFF1 --subject-pid 8001 --valid-from "2022-10-15 14:00:00" --lifetime 7305 --ca-key Matter-Development-PAI-noPID-Key.pem --ca-cert Matter-Development-PAI-noPID-Cert.pem --out Chip-DAC-Cert.pem 
+      ```
+     
+  3.  If you need to create the whole certtifcate chains by your own, (self-signed roduct Attestation Authority (PAA) certificate, Product Attestation Intermediate (PAI) certificate and  Device Attestation Certificates (DAC)), perform below steps:  
+      
+      a. Create Product Attestation Authority (PAA) certificate and private key  
+        ```
+          ./chip-cert gen-att-cert --type a --subject-cn "Matter Development PAA 01" --valid-from "2020-10-15 14:00:00" --lifetime 7305 --out-key Chip-PAA-Key.pem --out Chip-PAA-Cert.pem  
+        ```
+
+      b. Create Product Attestation Intermediate (PAI) certificate and private key
+
+        ```
+          ./chip-cert gen-att-cert --type i --subject-cn "Matter Development PAI 01" --subject-vid FFF1 --valid-from "2020-10-15 14:00:00" --lifetime 7305 --ca-key Chip-PAA-Key.pem --ca-cert Chip-PAA-Cert.pem --out-key Chip-PAI-Key.pem --out Chip-PAI-Cert.pem
+        ```
+      c. Create Product Device Attestation Certificates (DAC): 
+
+      ```
+        ./chip-cert gen-att-cert --type d --subject-cn "Matter Development DAC 01" --subject-vid FFF1 --subject-pid 0123 --valid-from "2020-10-15 14:00:00" --lifetime 7305 --ca-key Chip-PAI-Key.pem --ca-cert Chip-PAI-Cert.pem --out Chip-DAC-Cert.pem
+
+      ```
+  ### Provision certificate
+
+  1. Go to the direcotry third_party/wfi32/utilities/
+  2. run provision.py scripts, the scripts load DAC to the ECC608 TrustFlex.
 
 ## OTA Firmware Upgrade
 
