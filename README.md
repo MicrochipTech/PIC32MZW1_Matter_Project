@@ -17,9 +17,9 @@ This MPLAB example demonstrates the use of Matter protocol (also known as Projec
   - [Demo Setup](#demo-setup)
   - [Features](#features)
   - [Checking out Matter Repository](#checking-out-matter-repository)
-  - [Wi-Fi Network Provisioning](#wi-fi-network-provisioning)
   - [Build and Flash the example](#build-and-flash-the-example)
   - [Commissioning and Controlling Matter device](#commissioning-and-controlling-matter-device)
+  - [Attestation Certificate Provisioning](#attestation-certificate-provisioning)
   - [OTA Firmware Upgrade](#ota-firmware-upgrade)
   - [Memory Consumption](#memory-consumption)
   - [Limitations](#example-limitations)
@@ -277,7 +277,7 @@ The Google Home Sample App for Matter uses the [Google Home Mobile SDK](https://
   Control the Matter device by toggle your device On or Off on the APP.
 
   </p>
-    <p align="center"><img width="300" src="assets/googleHomeSampleAPP.png"><img width="300" src="assets/controlYellowLED.png">
+    <p align="center"><img width="300" src="assets/googleHomeSampleAPP.png"><img height="400" src="assets/controlYellowLED.png">
     </p>
 
    - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device. 
@@ -328,9 +328,7 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   - Note: "Fabric ID" and "Device ID" fields will be auto populated.
 
   </p>
-    <p align="center"><img width="300" src="assets/controlYellowLED.png">
-    </p>
-    <p align="center"><img width="300" src="assets/controllingDevice.png">
+    <p align="center"><img height="500" src="assets/controlYellowLED.png">   <img width="300" src="assets/controllingDevice.png">
     </p>
 
   - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
