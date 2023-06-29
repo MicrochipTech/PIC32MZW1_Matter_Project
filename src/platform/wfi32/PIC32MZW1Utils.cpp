@@ -358,7 +358,7 @@ CHIP_ERROR PIC32MZW1Utils::pic32mzw1_start_ap(void)
         return CHIP_ERROR_INVALID_ARGUMENT;
     }
     
-    if(WDRV_PIC32MZW_STATUS_OK != WDRV_PIC32MZW_BSSCtxSetChannel(&wifiConfig.ap.bssCtx, CHIP_DEVICE_CONFIG_WIFI_AP_CHANNEL))
+    if(WDRV_PIC32MZW_STATUS_OK != WDRV_PIC32MZW_BSSCtxSetChannel(&wifiConfig.ap.bssCtx, (WDRV_PIC32MZW_CHANNEL_ID) CHIP_DEVICE_CONFIG_WIFI_AP_CHANNEL))
     {
         ChipLogError(DeviceLayer, "channel set fail");
         return CHIP_ERROR_INVALID_ARGUMENT;

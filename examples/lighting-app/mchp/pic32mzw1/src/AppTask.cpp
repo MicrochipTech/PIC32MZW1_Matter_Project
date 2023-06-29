@@ -49,7 +49,8 @@
 #include <app/clusters/ota-requestor/DefaultOTARequestorDriver.h>
 #include <app/clusters/ota-requestor/DefaultOTARequestorStorage.h>
 #include <platform/wfi32/OTAImageProcessorImpl.h>
-
+#include <platform/wfi32/FactoryDataProvider.h>
+#include <platform/wfi32/CHIPDevicePlatformConfig.h>
 
 using chip::BDXDownloader;
 using chip::CharSpan;
@@ -110,6 +111,11 @@ using namespace chip::TLV;
 using namespace ::chip::Credentials;
 using namespace ::chip::DeviceLayer;
 
+
+#if CHIP_DEVICE_CONFIG_ECC_INTEGRATION
+DeviceLayer::FactoryDataProvider sFactoryDataProvider;
+#endif // CONFIG_ENABLE_ESP32_FACTORY_DATA_PROVIDER
+
 AppTask AppTask::sAppTask;
 static chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 
@@ -136,9 +142,17 @@ static void InitServer(intptr_t context)
 
     chip::Server::GetInstance().Init(initParams);
 
+#if CHIP_DEVICE_CONFIG_ECC_INTEGRATION
+    //SetCommissionableDataProvider(&sFactoryDataProvider);
+    SetDeviceAttestationCredentialsProvider(&sFactoryDataProvider);
+#if CONFIG_DEVICE_INSTANCE_INFO_PROVIDER
+    //SetDeviceInstanceInfoProvider(&sFactoryDataProvider);
+#endif
+#else
     // Initialize device attestation config
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
-
+#endif
+    
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR    
     GetAppTask().InitOTARequestor();
 #endif

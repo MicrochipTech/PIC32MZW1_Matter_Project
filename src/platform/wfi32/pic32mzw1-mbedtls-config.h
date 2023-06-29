@@ -31,6 +31,8 @@
 #define _CRT_SECURE_NO_DEPRECATE 1
 #endif
 
+#include "CHIPDevicePlatformConfig.h"
+
 /**
  * \name SECTION: System support
  *
@@ -476,10 +478,12 @@
 //#define MBEDTLS_AES_SETKEY_DEC_ALT
 //#define MBEDTLS_AES_ENCRYPT_ALT
 //#define MBEDTLS_AES_DECRYPT_ALT
-//#define MBEDTLS_ECDH_GEN_PUBLIC_ALT
-//#define MBEDTLS_ECDH_COMPUTE_SHARED_ALT
-//#define MBEDTLS_ECDSA_VERIFY_ALT
-//#define MBEDTLS_ECDSA_SIGN_ALT
+#ifdef CHIP_DEVICE_CONFIG_ECC_INTEGRATION
+#define MBEDTLS_ECDH_GEN_PUBLIC_ALT
+#define MBEDTLS_ECDH_COMPUTE_SHARED_ALT
+#define MBEDTLS_ECDSA_VERIFY_ALT
+#define MBEDTLS_ECDSA_SIGN_ALT
+#endif 
 //#define MBEDTLS_ECDSA_GENKEY_ALT
 
 /**
@@ -3346,8 +3350,9 @@
  *            on it, and considering stronger message digests instead.
  *
  */
-//#define MBEDTLS_SHA1_C
-
+#ifdef CHIP_DEVICE_CONFIG_ECC_INTEGRATION
+#define MBEDTLS_SHA1_C
+#endif
 /**
  * \def MBEDTLS_SHA256_C
  *

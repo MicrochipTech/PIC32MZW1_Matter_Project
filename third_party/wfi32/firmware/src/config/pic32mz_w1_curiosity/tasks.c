@@ -21,26 +21,26 @@
 
 // DOM-IGNORE-BEGIN
 /*******************************************************************************
-* Copyright (C) 2018 Microchip Technology Inc. and its subsidiaries.
-*
-* Subject to your compliance with these terms, you may use Microchip software
-* and any derivatives exclusively with Microchip products. It is your
-* responsibility to comply with third party license terms applicable to your
-* use of third party software (including open source software) that may
-* accompany Microchip software.
-*
-* THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
-* EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
-* WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
-* PARTICULAR PURPOSE.
-*
-* IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
-* INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
-* WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
-* BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
-* FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
-* ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
-* THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
+ * Copyright (C) 2018 Microchip Technology Inc. and its subsidiaries.
+ *
+ * Subject to your compliance with these terms, you may use Microchip software
+ * and any derivatives exclusively with Microchip products. It is your
+ * responsibility to comply with third party license terms applicable to your
+ * use of third party software (including open source software) that may
+ * accompany Microchip software.
+ *
+ * THIS SOFTWARE IS SUPPLIED BY MICROCHIP "AS IS". NO WARRANTIES, WHETHER
+ * EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS SOFTWARE, INCLUDING ANY IMPLIED
+ * WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY, AND FITNESS FOR A
+ * PARTICULAR PURPOSE.
+ *
+ * IN NO EVENT WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE,
+ * INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY KIND
+ * WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF MICROCHIP HAS
+ * BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE FORESEEABLE. TO THE
+ * FULLEST EXTENT ALLOWED BY LAW, MICROCHIP'S TOTAL LIABILITY ON ALL CLAIMS IN
+ * ANY WAY RELATED TO THIS SOFTWARE WILL NOT EXCEED THE AMOUNT OF FEES, IF ANY,
+ * THAT YOU HAVE PAID DIRECTLY TO MICROCHIP FOR THIS SOFTWARE.
  *******************************************************************************/
 // DOM-IGNORE-END
 
@@ -54,24 +54,23 @@
 #include "definitions.h"
 #include "network.h"
 
-
 // *****************************************************************************
 // *****************************************************************************
 // Section: RTOS "Tasks" Routine
 // *****************************************************************************
 // *****************************************************************************
 
-void _DRV_BA414E_Tasks(  void *pvParameters  )
+void _DRV_BA414E_Tasks(void * pvParameters)
 {
-    while(1)
+    while (1)
     {
         DRV_BA414E_Tasks(sysObj.ba414e);
     }
 }
 
-static void _WDRV_PIC32MZW1_Tasks(  void *pvParameters  )
+static void _WDRV_PIC32MZW1_Tasks(void * pvParameters)
 {
-    while(1)
+    while (1)
     {
         SYS_STATUS status;
 
@@ -91,9 +90,10 @@ TaskHandle_t xAPP_Tasks;
 
 void _APP_Tasks(  void *pvParameters  )
 {   
+    Secure_Element_Init();
     while(1)
     {
-    Network_Tasks();
+        Network_Tasks();
         vTaskDelay(50 / portTICK_PERIOD_MS);
     }
 }
@@ -101,15 +101,12 @@ void _APP_Tasks(  void *pvParameters  )
 
 void _TCPIP_STACK_Task(  void *pvParameters  )
 {
-    while(1)
+    while (1)
     {
         TCPIP_STACK_Task(sysObj.tcpip);
         vTaskDelay(1 / portTICK_PERIOD_MS);
     }
 }
-
-
-
 
 // *****************************************************************************
 // *****************************************************************************
@@ -124,10 +121,9 @@ void _TCPIP_STACK_Task(  void *pvParameters  )
   Remarks:
     See prototype in system/common/sys_module.h.
 */
-void SYS_Tasks ( void )
+void SYS_Tasks(void)
 {
     /* Maintain system services */
-    
 
 
     /* Maintain Device Drivers */

@@ -51,6 +51,74 @@
             <itemPath>../src/config/pic32mz_w1_curiosity/driver/driver_common.h</itemPath>
           </logicalFolder>
           <logicalFolder name="f7" displayName="library" projectFiles="true">
+            <logicalFolder name="cryptoauthlib"
+                           displayName="cryptoauthlib"
+                           projectFiles="true">
+              <logicalFolder name="atcacert" displayName="atcacert" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_client.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_def.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_host_hw.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_host_sw.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_der.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_date.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_pem.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="calib" displayName="calib" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_aes_gcm.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_command.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_basic.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_execution.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="crypto" displayName="crypto" projectFiles="true">
+                <logicalFolder name="hashes" displayName="hashes" projectFiles="true">
+                  <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/hashes/sha1_routines.h</itemPath>
+                  <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/hashes/sha2_routines.h</itemPath>
+                </logicalFolder>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_sha1.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_rand.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_hw_aes.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_ecdsa.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_sha2.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="hal" displayName="hal" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/atca_start_iface.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/atca_hal.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/atca_start_config.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="host" displayName="host" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/host/atca_host.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="jwt" displayName="jwt" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/jwt/atca_jwt.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="tng" displayName="tng" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tng_atca.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tng_atcacert_client.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tngtls_cert_def_1_signer.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tng_root_cert.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tnglora_cert_def_2_device.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tnglora_cert_def_1_signer.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tngtls_cert_def_2_device.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tflxtls_cert_def_4_device.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tnglora_cert_def_4_device.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tngtls_cert_def_3_device.h</itemPath>
+              </logicalFolder>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_debug.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_status.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/cryptoauthlib.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_basic.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_compiler.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_config.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_helpers.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_version.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_bool.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_device.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_cfgs.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_devtypes.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_iface.h</itemPath>
+            </logicalFolder>
             <logicalFolder name="f1" displayName="tcpip" projectFiles="true">
               <logicalFolder name="f1" displayName="src" projectFiles="true">
                 <logicalFolder name="f1" displayName="common" projectFiles="true">
@@ -240,6 +308,12 @@
             </logicalFolder>
             <logicalFolder name="f3" displayName="gpio" projectFiles="true">
               <itemPath>../src/config/pic32mz_w1_curiosity/peripheral/gpio/plib_gpio.h</itemPath>
+            </logicalFolder>
+            <logicalFolder name="i2c" displayName="i2c" projectFiles="true">
+              <logicalFolder name="master" displayName="master" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/peripheral/i2c/master/plib_i2c1_master.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/peripheral/i2c/master/plib_i2c_master_common.h</itemPath>
+              </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f6" displayName="nvm" projectFiles="true">
               <itemPath>../src/config/pic32mz_w1_curiosity/peripheral/nvm/plib_nvm.h</itemPath>
@@ -560,6 +634,103 @@
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="f8" displayName="library" projectFiles="true">
+            <logicalFolder name="cryptoauthlib"
+                           displayName="cryptoauthlib"
+                           projectFiles="true">
+              <logicalFolder name="atcacert" displayName="atcacert" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_client.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_def.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_host_hw.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_host_sw.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_der.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_date.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atcacert/atcacert_pem.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="calib" displayName="calib" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_nonce.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_genkey.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_helpers.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_derivekey.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_updateextra.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_gendig.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_aes_gcm.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_counter.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_verify.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_random.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_aes.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_hmac.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_sign.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_command.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_info.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_read.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_lock.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_mac.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_checkmac.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_basic.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_kdf.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_privwrite.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_execution.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_write.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_ecdh.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_sha.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_selftest.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/calib/calib_secureboot.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="crypto" displayName="crypto" projectFiles="true">
+                <logicalFolder name="hashes" displayName="hashes" projectFiles="true">
+                  <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/hashes/sha1_routines.c</itemPath>
+                  <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/hashes/sha2_routines.c</itemPath>
+                </logicalFolder>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_sha1.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_hw_aes_ctr.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_rand.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cbcmac.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cbc.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_pbkdf2.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_ecdsa.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_sw_sha2.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_hw_aes_cmac.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto/atca_crypto_hw_aes_ccm.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="hal" displayName="hal" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/hal_i2c_harmony.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/atca_hal.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/hal_harmony_init.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/ATECC608_0.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/hal_freertos.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/hal/hal_pic32_delay.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="host" displayName="host" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/host/atca_host.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="jwt" displayName="jwt" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/jwt/atca_jwt.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="mbedtls" displayName="mbedtls" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/mbedtls/atca_mbedtls_ecdh.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/mbedtls/atca_mbedtls_ecdsa.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/mbedtls/atca_mbedtls_wrap.c</itemPath>
+              </logicalFolder>
+              <logicalFolder name="tng" displayName="tng" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tng_atca.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tng_atcacert_client.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tngtls_cert_def_1_signer.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tng_root_cert.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tnglora_cert_def_1_signer.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tnglora_cert_def_2_device.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tngtls_cert_def_2_device.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tflxtls_cert_def_4_device.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tngtls_cert_def_3_device.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng/tnglora_cert_def_4_device.c</itemPath>
+              </logicalFolder>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_debug.c</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_basic.c</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_helpers.c</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_cfgs.c</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_device.c</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_utils_sizes.c</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/atca_iface.c</itemPath>
+            </logicalFolder>
             <logicalFolder name="f1" displayName="tcpip" projectFiles="true">
               <logicalFolder name="f1" displayName="src" projectFiles="true">
                 <logicalFolder name="f1" displayName="common" projectFiles="true">
@@ -594,6 +765,11 @@
             </logicalFolder>
             <logicalFolder name="f3" displayName="gpio" projectFiles="true">
               <itemPath>../src/config/pic32mz_w1_curiosity/peripheral/gpio/plib_gpio.c</itemPath>
+            </logicalFolder>
+            <logicalFolder name="i2c" displayName="i2c" projectFiles="true">
+              <logicalFolder name="master" displayName="master" projectFiles="true">
+                <itemPath>../src/config/pic32mz_w1_curiosity/peripheral/i2c/master/plib_i2c1_master.c</itemPath>
+              </logicalFolder>
             </logicalFolder>
             <logicalFolder name="f6" displayName="nvm" projectFiles="true">
               <itemPath>../src/config/pic32mz_w1_curiosity/peripheral/nvm/plib_nvm.c</itemPath>
@@ -648,6 +824,7 @@
           <itemPath>../src/config/pic32mz_w1_curiosity/interrupts_a.S</itemPath>
           <itemPath>../src/config/pic32mz_w1_curiosity/freertos_hooks.c</itemPath>
           <itemPath>../src/config/pic32mz_w1_curiosity/network.c</itemPath>
+          <itemPath>../src/config/pic32mz_w1_curiosity/secure_element.c</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f2" displayName="FreeRTOS" projectFiles="true">
@@ -1722,6 +1899,11 @@
               <itemPath>../../../../src/platform/wfi32/SystemPlatformConfig.h</itemPath>
               <itemPath>../../../../src/platform/wfi32/BLEManagerImpl.cpp</itemPath>
               <itemPath>../../../../src/platform/wfi32/BLEManagerImpl.h</itemPath>
+              <itemPath>../../../../src/platform/wfi32/AttestationPAI.h</itemPath>
+              <itemPath>../../../../src/platform/wfi32/CHIPCryptoPALEcc608.cpp</itemPath>
+              <itemPath>../../../../src/platform/wfi32/CHIPCryptoPALEcc608.h</itemPath>
+              <itemPath>../../../../src/platform/wfi32/FactoryDataProvider.cpp</itemPath>
+              <itemPath>../../../../src/platform/wfi32/FactoryDataProvider.h</itemPath>
             </logicalFolder>
             <itemPath>../../../../src/platform/CommissionableDataProvider.cpp</itemPath>
             <itemPath>../../../../src/platform/DeviceControlServer.cpp</itemPath>
@@ -3118,6 +3300,10 @@
         </C32CPP>
         <C32Global>
         </C32Global>
+      </item>
+      <item path="../../../../src/crypto/CHIPCryptoPALmbedTLS.cpp"
+            ex="true"
+            overriding="false">
       </item>
       <item path="../../../../src/inet/InetFaultInjection.cpp"
             ex="true"
@@ -5196,7 +5382,7 @@
         <property key="enable-unroll-loops" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/pic32mz_w1_curiosity;../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/include/;../src/config/pic32mz_w1_curiosity/library;../src/config/pic32mz_w1_curiosity/library/tcpip/src;../src/config/pic32mz_w1_curiosity/library/tcpip/src/common;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ;../src/third_party/wolfssl;../src/third_party/wolfssl/wolfssl;..\..\..\..\src\include\platform\internal;..\..\..\..\src\lwip\freertos;..\..\..\..\src\lwip\wfi32;..\..\..\..\src\platform\wfi32;..\..\..\lwip\repo\lwip\src\include;..\..\..\mbedtls\repo\include;..\src\ble_app;..\src\config\pic32mz_w1_curiosity\matter_gen_files\include;..\src\config\pic32mz_w1_curiosity\sst26;..\src\third_party\lwip-tinyservices;..\src\rnHostLib;..\src\ble_app"/>
+                  value="../src;../src/config/pic32mz_w1_curiosity;../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/include/;../src/config/pic32mz_w1_curiosity/library;../src/config/pic32mz_w1_curiosity/library/cryptoauthlib;../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/crypto;../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/pkcs11;../src/config/pic32mz_w1_curiosity/library/cryptoauthlib/tng;../src/config/pic32mz_w1_curiosity/library/tcpip/src;../src/config/pic32mz_w1_curiosity/library/tcpip/src/common;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ;../src/third_party/wolfssl;../src/third_party/wolfssl/wolfssl;..\..\..\..\src\include\platform\internal;..\..\..\..\src\lwip\freertos;..\..\..\..\src\lwip\wfi32;..\..\..\..\src\platform\wfi32;..\..\..\lwip\repo\lwip\src\include;..\..\..\mbedtls\repo\include;..\src\ble_app;..\src\config\pic32mz_w1_curiosity\matter_gen_files\include;..\src\config\pic32mz_w1_curiosity\sst26;..\src\rnHostLib;..\src\third_party\lwip-tinyservices"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="true"/>
         <property key="isolate-each-function" value="true"/>
@@ -5266,7 +5452,7 @@
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-cross-reference-file" value="true"/>
         <property key="generate-micro-compressed-code" value="true"/>
-        <property key="heap-size" value="512"/>
+        <property key="heap-size" value="2300"/>
         <property key="input-libraries" value=""/>
         <property key="kseg-length" value=""/>
         <property key="kseg-origin" value=""/>
@@ -5298,7 +5484,7 @@
         <property key="exceptions" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/pic32mz_w1_curiosity;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ;..\..\..\..\examples\common\QRCode\repo\c;..\..\..\..\examples\lighting-app\mchp\pic32mzw1\include;..\..\..\..\examples\platform\mchp\pic32mzw1;..\..\..\..\examples\providers;..\..\..\..\src;..\..\..\..\src\include;..\..\..\..\src\include\platform\internal;..\..\..\..\src\lib;..\..\..\..\src\lib\dnssd\minimal_mdns\responders;..\..\..\..\src\lwip\freertos;..\..\..\..\src\lwip\wfi32;..\..\..\..\src\platform\wfi32;..\..\..\..\src\setup_payload;..\..\..\..\zzz_generated;..\..\..\..\zzz_generated\app-common;..\..\..\..\zzz_generated\lighting-app;..\..\..\lwip\repo\lwip\src\include;..\..\..\mbedtls\repo\include;..\..\..\nlassert\repo;..\..\..\nlassert\repo\include;..\..\..\nlfaultinjection\repo;..\..\..\nlio\repo;..\..\..\nlio\repo\include;..\..\..\nlunit-test\repo;..\src\ble_app;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1\include;..\src\config\pic32mz_w1_curiosity\library;..\src\config\pic32mz_w1_curiosity\library\tcpip\src\common;..\src\config\pic32mz_w1_curiosity\matter_gen_files\include;..\src\third_party\rtos\FreeRTOS\Source\include;..\src\third_party\rtos\FreeRTOS\Source\portable\MPLAB\PIC32MZ;..\src\third_party\wolfssl;..\src\rnHostLib"/>
+                  value="../src;../src/config/pic32mz_w1_curiosity;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ;..\..\..\..\examples\common\QRCode\repo\c;..\..\..\..\examples\lighting-app\mchp\pic32mzw1\include;..\..\..\..\examples\platform\mchp\pic32mzw1;..\..\..\..\examples\providers;..\..\..\..\src;..\..\..\..\src\include;..\..\..\..\src\include\platform\internal;..\..\..\..\src\lib;..\..\..\..\src\lib\dnssd\minimal_mdns\responders;..\..\..\..\src\lwip\freertos;..\..\..\..\src\lwip\wfi32;..\..\..\..\src\platform\wfi32;..\..\..\..\src\setup_payload;..\..\..\..\zzz_generated;..\..\..\..\zzz_generated\app-common;..\..\..\..\zzz_generated\lighting-app;..\..\..\lwip\repo\lwip\src\include;..\..\..\mbedtls\repo\include;..\..\..\nlassert\repo;..\..\..\nlassert\repo\include;..\..\..\nlfaultinjection\repo;..\..\..\nlio\repo;..\..\..\nlio\repo\include;..\..\..\nlunit-test\repo;..\src\ble_app;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1\include;..\src\config\pic32mz_w1_curiosity\library;..\src\config\pic32mz_w1_curiosity\library\tcpip\src\common;..\src\config\pic32mz_w1_curiosity\matter_gen_files\include;..\src\rnHostLib;..\src\third_party\rtos\FreeRTOS\Source\include;..\src\third_party\rtos\FreeRTOS\Source\portable\MPLAB\PIC32MZ;..\src\third_party\wolfssl;..\..\..\..\src\crypto;..\src\config\pic32mz_w1_curiosity\library\cryptoauthlib;..\src\config\pic32mz_w1_curiosity\library\cryptoauthlib\mbedtls"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="true"/>
         <property key="isolate-each-function" value="true"/>
@@ -5396,6 +5582,8 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="10000000-100fffff"/>
+        <property key="programmerToGoFilePath"
+                  value="C:/matter/memory_check/wireless/apps/test2/PIC32MZW1_Matter_Project/third_party/wfi32/firmware/matter_lighting_app_pic32mz_w1.X/debug/pic32mz_w1_curiosity/matter_lighting_app_pic32mz_w1_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.pgmentry.voltage" value="low"/>

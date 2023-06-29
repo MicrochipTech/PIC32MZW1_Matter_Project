@@ -67,6 +67,7 @@
 #include "system/debug/sys_debug.h"
 #include "system/int/sys_int.h"
 #include "system/sys_random_h2_adapter.h"
+#include "peripheral/i2c/master/plib_i2c1_master.h"
 #include "system/sys_time_h2_adapter.h"
 #include "system/time/sys_time.h"
 #include "task.h"

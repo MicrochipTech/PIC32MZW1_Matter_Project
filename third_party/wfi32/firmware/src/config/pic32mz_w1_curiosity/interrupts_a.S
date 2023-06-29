@@ -178,6 +178,42 @@ IntVectorUART1_TX_Handler:
     nop
     portRESTORE_CONTEXT
     .end   IntVectorUART1_TX_Handler
+    .extern  I2C1_BUS_Handler
+
+    .section   .vector_41,code, keep
+    .equ     __vector_dispatch_41, IntVectorI2C1_BUS_Handler
+    .global  __vector_dispatch_41
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorI2C1_BUS_Handler
+
+IntVectorI2C1_BUS_Handler:
+    portSAVE_CONTEXT
+    la    s6,  I2C1_BUS_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorI2C1_BUS_Handler
+    .extern  I2C1_MASTER_Handler
+
+    .section   .vector_43,code, keep
+    .equ     __vector_dispatch_43, IntVectorI2C1_MASTER_Handler
+    .global  __vector_dispatch_43
+    .set     nomicromips
+    .set     noreorder
+    .set     nomips16
+    .set     noat
+    .ent  IntVectorI2C1_MASTER_Handler
+
+IntVectorI2C1_MASTER_Handler:
+    portSAVE_CONTEXT
+    la    s6,  I2C1_MASTER_Handler
+    jalr  s6
+    nop
+    portRESTORE_CONTEXT
+    .end   IntVectorI2C1_MASTER_Handler
     .extern  CHANGE_NOTICE_A_Handler
 
     .section   .vector_44,code, keep

@@ -231,10 +231,13 @@ CHIP_ERROR BLEManagerImpl::_Init()
     xSemaphoreTake(rnbd_read_bin_sem, portMAX_DELAY);
     ChipLogProgress(DeviceLayer, "BLEManagerImpl::_Init, log3");
     RNBD_ListCustomizeService(&ble_service_info);
+    xSemaphoreGive(rnbd_read_bin_sem);
     ChipLogProgress(DeviceLayer, "BLEManagerImpl::_Init, log4");
     ChipLogProgress(DeviceLayer, "ble service info: char uuid = %s", ble_service_info.characteristics[0].uuid);
     ChipLogProgress(DeviceLayer, "ble service info: char uuid = 0x%x", ble_service_info.characteristics[0].handle);
     ChipLogProgress(DeviceLayer, "ble service info: char uuid = 0x%x", ble_service_info.characteristics[0].properties);
+    
+    xSemaphoreTake(rnbd_read_bin_sem, portMAX_DELAY);
     res = RNBD_ClearAdvData(PERMANENT_CNAHGE_MODE);
     xSemaphoreGive(rnbd_read_bin_sem);
     if (!res)
@@ -376,7 +379,6 @@ uint16_t BLEManagerImpl::GetMTU(BLE_CONNECTION_OBJECT conId) const
 {
     ChipLogProgress(DeviceLayer, "BLEManagerImpl::GetMTU");
     
-    /* MTU size cannot be determined, return 0*/
     return 131;
 }
 

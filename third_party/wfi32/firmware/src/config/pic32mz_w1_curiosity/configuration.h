@@ -55,11 +55,11 @@
     define this configuration.
 */
 
-#include "device.h"
 #include "user.h"
+#include "device.h"
 
 // DOM-IGNORE-BEGIN
-#ifdef __cplusplus // Provide C++ Compatibility
+#ifdef __cplusplus  // Provide C++ Compatibility
 
 extern "C" {
 

@@ -68,6 +68,8 @@ void SPI1_TX_InterruptHandler( void );
 void UART1_FAULT_InterruptHandler( void );
 void UART1_RX_InterruptHandler( void );
 void UART1_TX_InterruptHandler( void );
+void I2C1_BUS_InterruptHandler( void );
+void I2C1_MASTER_InterruptHandler( void );
 void CHANGE_NOTICE_A_InterruptHandler( void );
 void CHANGE_NOTICE_B_InterruptHandler( void );
 void UART2_FAULT_InterruptHandler( void );
@@ -117,6 +119,16 @@ void UART1_RX_Handler (void)
 void UART1_TX_Handler (void)
 {
     UART1_TX_InterruptHandler();
+}
+
+void I2C1_BUS_Handler (void)
+{
+    I2C1_BUS_InterruptHandler();
+}
+
+void I2C1_MASTER_Handler (void)
+{
+    I2C1_MASTER_InterruptHandler();
 }
 
 void CHANGE_NOTICE_A_Handler (void)

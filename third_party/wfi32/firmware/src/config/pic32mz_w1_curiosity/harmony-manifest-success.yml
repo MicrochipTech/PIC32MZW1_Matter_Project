@@ -4,7 +4,7 @@
 
 
 project: wfi32
-creation_date: 2023-03-24T11:13:50.221+08:00[Asia/Shanghai]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
+creation_date: 2023-06-29T14:10:20.408+08:00[Asia/Shanghai]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
 operating_system: Windows 10
 mcc_mode: IDE            # [IDE|Standalone|Headless]
 mcc_version: v5.3.0
@@ -14,8 +14,9 @@ harmony_version: v1.2.0
 compiler: XC32 (v4.20) 
 
 modules:
-    - {name: "csp", version: "v3.10.0"}
+    - {name: "cryptoauthlib", version: "v3.3.2"}
     - {name: "core", version: "v3.10.0"}
+    - {name: "csp", version: "v3.10.0"}
     - {name: "wireless_wifi", version: "v3.6.1"}
     - {name: "dev_packs", version: "v3.10.0"}
     - {name: "wolfssl", version: "v4.7.0"}

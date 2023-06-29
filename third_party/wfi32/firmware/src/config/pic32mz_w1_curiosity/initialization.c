@@ -456,17 +456,18 @@ void SYS_Initialize ( void* data )
     NVM_Initialize();
 
     CORETIMER_Initialize();
-    UART2_Initialize();
 	UART3_Initialize();
 
 	UART1_Initialize();
 
 	BSP_Initialize();
+	UART2_Initialize();
 	
-
 	RNG_Initialize();
 
 	SPI1_Initialize();
+
+    I2C1_Initialize();
 
 
     /* Initialize the PIC32MZW1 Driver */
@@ -475,21 +476,21 @@ void SYS_Initialize ( void* data )
 
 
     sysObj.sysTime = SYS_TIME_Initialize(SYS_TIME_INDEX_0, (SYS_MODULE_INIT *)&sysTimeInitData);
+    sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
+
     sysObj.sysDebug = SYS_DEBUG_Initialize(SYS_DEBUG_INDEX_0, (SYS_MODULE_INIT*)&debugInit);
 
-
-    sysObj.sysConsole0 = SYS_CONSOLE_Initialize(SYS_CONSOLE_INDEX_0, (SYS_MODULE_INIT *)&sysConsole0Init);
 
 
     sysObj.ba414e = DRV_BA414E_Initialize(0, (SYS_MODULE_INIT*)&ba414eInitData);
 
-    CRYPT_WCCB_Initialize();
 
 /* TCPIP Stack Initialization */
   sysObj.tcpip = TCPIP_STACK_Init();
 SYS_ASSERT(sysObj.tcpip != SYS_MODULE_OBJ_INVALID, "TCPIP_STACK_Init Failed" );
 
 
+    CRYPT_WCCB_Initialize();
 
     EVIC_Initialize();
 
