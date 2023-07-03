@@ -12,11 +12,13 @@ This MPLAB example demonstrates the use of Matter protocol (also known as Projec
 
   - [Introduction](#introduction)
   - [Hardware Requirements](#hardware-requirements)
-  - [Setup CHIP Environment - Install Prerequisites](#setup-chip-environment---install-prerequisites)
   - [Software Requirements](#software-requirements)
-  - [Demo Setup](#demo-setup)
+  - [Setup CHIP Environment - Install Prerequisites](#setup-chip-environment---install-prerequisites)
+  - [Setup Hardware Platform](#setup-hardware-platform)
+  - [Demo Introduction](#demo-introduction)
   - [Features](#features)
   - [Checking out Matter Repository](#checking-out-matter-repository)
+  - [Wi-Fi Network Provisioning](#wi-fi-network-provisioning)
   - [Build and Flash the example](#build-and-flash-the-example)
   - [Commissioning and Controlling Matter device](#commissioning-and-controlling-matter-device)
   - [Attestation Certificate Provisioning](#attestation-certificate-provisioning)
@@ -36,24 +38,16 @@ This example is a starting point for Matter protocol demonstration over Microchi
 
 - Note: This example was developed and tested using MPLAB X IDE v6.00+, MPLAB XC32 compiler v4.20 on Ubuntu 20.04 LTS and 22.04 LTS and on Microsoft Windows 10 Pro.
 
+
 <a name="hwrequirements"></a>
 
 ## Hardware Requirements
 
 - [WFI32-IoT Board](https://www.microchip.com/en-us/development-tool/EV36W50A)
 - [RNBD451 Add On Board](https://www.microchip.com/en-us/development-tool/EV25F14A)
+- [ATECC608B TRUST board DT100104](https://www.microchip.com/en-us/development-tool/DT100104) (optional for test)
 - An Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk)
-- [ATECC608B TRUST board DT100104](https://www.microchip.com/en-us/development-tool/DT100104) 
 - Router/AP
-
-<a name="environment"></a>
-
-## Setup CHIP Environment - Install Prerequisites
-
-The project can support GN build system and MPLAB X IDE build. If you build with MPLAB X IDE, you can run on Windows or Linux environment. If you build with GN build system, you can run on Linux Environment.  
-Below is the OS environment that you can use.
-- Microsoft Windows OR
-- [Linux](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md#installing-prerequisites-on-linux) (Ubuntu release version 20.04 LTS, 22.04 LTS is preferred)
 
 <a name="softwarereq"></a>
 
@@ -81,9 +75,41 @@ Below is the OS environment that you can use.
 
     - To continue using the same terminal, run `source ~/.profile` or `source ~/.bashrc`
 
-<a name="demosetup"></a>
 
-## Demo setup
+<a name="environment"></a>
+
+## Setup CHIP Environment - Install Prerequisites
+
+The project can support GN build system and MPLAB X IDE build. If you build with MPLAB X IDE, you can run on Windows or Linux environment. If you build with GN build system, you can run on Linux Environment.  
+Below is the OS environment that you can use.
+- Microsoft Windows OR
+- [Linux](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md#installing-prerequisites-on-linux) (Ubuntu release version 20.04 LTS, 22.04 LTS is preferred)
+
+
+
+## Setup Hardware Platform
+To prepare the hardware platform:
+1. Load the apporiate FW to the RNBD451 Add On Board (you can contact Microchip Support to know more about the deatils of loading correct fw to RNBD451)
+2. Connect J2 jumper to select MikroBus interface on RNBD451 Add On Board
+</p>
+  <p align="center"><img width="200" src="assets/rnbd451_conf.png">
+  </p>
+3. Turn on SW1 switch 2 or 3 or 4 for the use of ECC608A TrustFlex
+</p>
+  <p align="center"><img width="200" src="assets/ecc608a_conf.png">
+  </p>
+4. Plug the [ECC608A Trust board](https://www.microchip.com/en-us/development-tool/DT100104) to the MikroBus connecto of the [WFI32-IoT board](https://www.microchip.com/en-us/development-tool/EV36W50A), and then plug the [RNBD451 Add On Board](https://www.microchip.com/en-us/development-tool/EV25F14A) on top of ECC608A Trust board.  
+Below picture show the details:
+
+</p>
+  <p align="center"><img width="600" src="assets/tss_compones.png">
+  </p>
+
+- **Notes:** ECC608A Trust board is optional for test, if you want to disable the use fo ECC608A. To disable the use of ECC608A, you can disable the definiation of "CHIP_DEVICE_CONFIG_ECC_INTEGRATION" in src/platform/wfi32/CHIPDevicePlatformConfig.h
+
+
+<a name="demosetup"></a>
+## Demo Introduction
 
 The demo setup for Matter Lighting example includes an Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk), WFI32-IoT board and Router/AP. The following diagram shows the demo setup for WFI32-IoT board.
 
@@ -277,7 +303,7 @@ The Google Home Sample App for Matter uses the [Google Home Mobile SDK](https://
   Control the Matter device by toggle your device On or Off on the APP.
 
   </p>
-    <p align="center"><img width="300" src="assets/googleHomeSampleAPP.png"><img height="400" src="assets/controlYellowLED.png">
+    <p align="center"><img width="300" src="assets/googleHomeSampleAPP.png"><img width="300" src="assets/controlYellowLED.png">
     </p>
 
    - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device. 
@@ -328,7 +354,9 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
   - Note: "Fabric ID" and "Device ID" fields will be auto populated.
 
   </p>
-    <p align="center"><img height="500" src="assets/controlYellowLED.png">   <img width="300" src="assets/controllingDevice.png">
+    <p align="center"><img width="300" src="assets/controlYellowLED.png">
+    </p>
+    <p align="center"><img width="300" src="assets/controllingDevice.png">
     </p>
 
   - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
@@ -337,44 +365,90 @@ Alternatively, [follow the instructions to install](https://www.javatpoint.com/h
 
 ## Attestation Certificate Provisioning
 
-Matter Device Attestation Certificate (DAC) need to be provisioing to the device for the commissioning process.  
-In this project, the DAC and the keys are stored in the ECC608 TrustFlex chip (secure element) , user need to create the Matter DAC first with the public key that stored in the ECC608 TrustFlex and run the python scripts to provision the certificate to the ECC608 chip.  
-  ### Retieve the public key from ECC608 TrustFlex
-  1. plug the ATECC608B TRUST board [DT100104](https://www.microchip.com/en-us/development-tool/DT100104) to WFI32-IoT Board through the MikroBus connector
-  2. connect PC to the WFI32-IoT Board with USB cable
-  3. Go to the direcotry third_party/wfi32/utilities/
-  4. run info.py scripts, the scripts extract the public key from the ECC608 Trustflex and output the file public_key.pem
-  ### Create the DAC
-  1. Go to directory src/tools/chip-cert, compile the chip-cert tool according to the readme file  
-  2. If you are doing test/ development, you can use the default Attestation Authority (PAA) certificate, Product Attestation Intermediate (PAI) in this source code tree, and create the Device Attestation Certificates (DAC) only  
-     a. Copy credentials/development/attestation/Matter-Development-PAI-noPID-Key.pem and Matter-Development-PAI-noPID-Cert.pem to the same direcotry of chip-cert.  
-     b. Create Product Device Attestation Certificates (DAC): 
+Matter Device Attestation Certificate (DAC) need to be provisioing to the ECC608A TrustFlex device for the commissioning process. It is used to proved that the device is certificed  and the manfacturer is the member of the Connectivity Standards Alliance (CSA).  
+In this project, the DAC and the keys are stored in the ECC608A TrustFlex (secure element) , users need to run scripts to generate the keypair in the ECC608A TrustFlex, create the Matter DAC and provision the certificate to the ECC608A TrustFlex.  
+
+### Environment Setup
+Before your prepare certificates, you need to perform below steps in the Linux Ubuntu to prepare the environment
+1. Go to the directory third_party/wfi32/utilities/cert_provision/ 
+2. Run command to install cmake
+    ```
+    sudo apt-get install cmake
+    ```
+3. Run command to install python libraries
+    ```
+    pip install -r requirements.txt
+    ```
+    - **Note:** In case it fail to run the python scripts, try re-install cryptoauthlib module by below commands:
       ```
-        ./chip-cert gen-att-cert --type d --subject-cn "Matter Development DAC 01" --subject-vid FFF1 --subject-pid 8001 --valid-from "2022-10-15 14:00:00" --lifetime 7305 --ca-key Matter-Development-PAI-noPID-Key.pem --ca-cert Matter-Development-PAI-noPID-Cert.pem --out Chip-DAC-Cert.pem 
+        pip3 uninstall cryptoauthlib
+        pip3 install --no-cache cryptoauthlib
       ```
-     
-  3.  If you need to create the whole certtifcate chains by your own, (self-signed roduct Attestation Authority (PAA) certificate, Product Attestation Intermediate (PAI) certificate and  Device Attestation Certificates (DAC)), perform below steps:  
-      
-      a. Create Product Attestation Authority (PAA) certificate and private key  
-        ```
-          ./chip-cert gen-att-cert --type a --subject-cn "Matter Development PAA 01" --valid-from "2020-10-15 14:00:00" --lifetime 7305 --out-key Chip-PAA-Key.pem --out Chip-PAA-Cert.pem  
-        ```
+4. Run command to install libudev-dev
+    ```
+    sudo apt-get install libudev-dev
+    ```
+5. The Linux HID HAL files also require a udev rule to be added to change the permissions of the USB HID Devices. Please add a new udev rule for the Microchip CryptoAuth USB devices.
+    ```
+    cd /etc/udev/rules.d
+    sudo touch mchp-cryptoauth.rules
+    ```
+    Edit the mchp-cryptoauth.rules file and add the following line to the file:
+    ```
+      Edit the mchp-cryptoauth.rules file and add the following line to the file:
+    ```
 
-      b. Create Product Attestation Intermediate (PAI) certificate and private key
+### Prepare chip-cert tool
+You need to compile the chip-cert tools on your Linux Ubuntu enviornment.  
+Below are the steps:
 
-        ```
-          ./chip-cert gen-att-cert --type i --subject-cn "Matter Development PAI 01" --subject-vid FFF1 --valid-from "2020-10-15 14:00:00" --lifetime 7305 --ca-key Chip-PAA-Key.pem --ca-cert Chip-PAA-Cert.pem --out-key Chip-PAI-Key.pem --out Chip-PAI-Cert.pem
-        ```
-      c. Create Product Device Attestation Certificates (DAC): 
+1. Go to directory src/tools/chip-cert/
+2. Compile the chip-cert tool according to steps shown in the readme file  
 
-      ```
-        ./chip-cert gen-att-cert --type d --subject-cn "Matter Development DAC 01" --subject-vid FFF1 --subject-pid 0123 --valid-from "2020-10-15 14:00:00" --lifetime 7305 --ca-key Chip-PAI-Key.pem --ca-cert Chip-PAI-Cert.pem --out Chip-DAC-Cert.pem
 
-      ```
-  ### Provision certificate
+### Certificates Provisioing (For development and tests)
+For project development and tests, you can perform below steps:
 
-  1. Go to the direcotry third_party/wfi32/utilities/
-  2. run provision.py scripts, the scripts load DAC to the ECC608 TrustFlex.
+
+1. Go to the directory third_party/wfi32/utilities/cert_provision/
+2. Copy the chip-cert tool from directory src/tools/chip-cert/ to the current directory
+3. Copy files Matter-Development-PAI-noPID-Cert.pem and Matter-Development-PAI-noPID-Key.pem (Product Attestation Intermediate (PAI) certificate and key) from directory credentials/development/attestation/ to current directory
+4. Use MPLABX IDE to open the project at directory third_party/wfi32/utilities/pic32mzw1_kitprotocol/firmware/pic32mzw1_kitprotocol.X, program the firmware to the WFI32-IoT Board
+5. Connect WFi32-IoT board (with ECC608A Trust Board) to your PC
+6. Execute below script 
+    ```
+      ./cert_create_and_prov.sh Matter-Development-PAI-noPID-Cert.pem Matter-Development-PAI-noPID-Key.pem
+    ```  
+    - **Note:** The above scripts do the below tasks:  
+    1. Extract the public key from ECC608A TrustFlex
+    2. Prepare the Device Attestation Certificates (DAC) using chip-tool, the DAC is signed by the (PAI) certificate and key
+    3. Store store the DAC into the slot 10 of ECC608A TrustFlex
+ 
+
+### Certificates Provisioing (For production)
+For end product production , every device need to be installed a Device Attestation Certificates (DAC) that signed from the Matter certification authorities (CAs). Selected organzations get the authorization from Connectivity Standards Alliance (CSA) to be the Matter CA. When your product is certified, you can obtain the Product Attestation Intermediate (PAI) certificate and key from the Matter CA to sign the DAC of your prodcut.  
+If you need to provision your device with the certificate that signed by the PAI from Matter CA, you can perform sames steps in above section (Certificates Provsioning (For development and tests) ) except you need to input the correct PAI certificat and key in step 4 when you execute the scripts cert_create_and_prov.sh
+
+Another options for production is that you are setting up your own Public Key Infractructure (PKI) and create your own Attestation Authority (PAA) certificate and Product Attestation Intermediate (PAI) certificate. To do this, you need to get the authorization from CSA to be the Matter CA by following the Matter Certification Policy. 
+
+You can perform below steps to created your won PAA and PAI and provision the device with the correspond DAC:
+
+1. Go to the directory third_party/wfi32/utilities/cert_provision/
+2. Copy the chip-cert tool from directory src/tools/chip-cert/ to the current directory
+3. Execute below command to generate Product Attestation Authority (PAA) certificate and private key:
+    ```
+      ./chip-cert gen-att-cert --type a --subject-cn "Matter Development PAA 01" --valid-from "2020-10-15 14:23:43" --lifetime 7305 --out-key Chip-PAA-Key.pem --out Chip-PAA-Cert.pem
+    ```
+4. Execute below command to generate Product Attestation Authority (PAI) certificate and private key:
+    ```
+      ./chip-cert gen-att-cert --type i --subject-cn "Matter Development PAI 01" --subject-vid FFF1 --valid-from "2020-10-15 14:23:43" --lifetime 7305 --ca-key Chip-PAA-Key.pem --ca-cert Chip-PAA-Cert.pem --out-key Chip-PAI-Key.pem --out Chip-PAI-Cert.pem
+    ```
+5. Use MPLABX IDE to open the project at directory third_party/wfi32/utilities/pic32mzw1_kitprotocol/firmware/pic32mzw1_kitprotocol.X, program the firmware to the WFI32-IoT Board
+6. Connect WFi32-IoT board (with ECC608A Trust Board) to your PC 
+7. Execute below script to generate DAC and provisioin it to the ECC608A TrustFlex
+    ```
+      ./cert_create_and_prov.sh Chip-PAI-Cert.pem Chip-PAI-Key.pem
+    ```   
 
 ## OTA Firmware Upgrade
 

@@ -47,7 +47,6 @@
 #define THREAD_ACTIVE_POLLING_INTERVAL_MS 100
 #define THREAD_INACTIVE_POLLING_INTERVAL_MS 1000
 
-#define APP_FACTORY_DATA_PROVIDER 1
 // PIC32 Logging
 #ifdef __cplusplus
 extern "C" {
