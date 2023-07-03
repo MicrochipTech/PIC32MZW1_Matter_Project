@@ -66,13 +66,15 @@ void GPIO_Initialize ( void )
     /* PORTC Initialization */
     /* PORTK Initialization */
 
-
-    /* PPS Input Remapping */
+    /* PORTC Initialization */
+    LATC = 0x0; /* Initial Latch Value */
+    TRISCCLR = 0x1600; /* Direction Control */
+    
+	/* PPS Input Remapping */
     U3RXR = 10;
 
     /* PPS Output Remapping */
     RPC14R = 1;
-
 
 }
 
