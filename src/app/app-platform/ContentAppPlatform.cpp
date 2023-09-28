@@ -19,12 +19,11 @@
  * @file Contains functions relating to Content App platform of the Video Player.
  */
 
-#include <app-common/zap-generated/attribute-id.h>
-#include <app-common/zap-generated/cluster-id.h>
 #include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
 #include <app/app-platform/ContentAppPlatform.h>
 #include <app/server/Server.h>
+#include <app/util/config.h>
 #include <lib/core/CHIPCore.h>
 #include <lib/core/DataModelTypes.h>
 #include <lib/support/CHIPArgParser.hpp>
@@ -61,6 +60,10 @@ EmberAfStatus emberAfExternalAttributeReadCallback(EndpointId endpoint, ClusterI
     {
         ret = app->HandleReadAttribute(clusterId, attributeMetadata->attributeId, buffer, maxReadLength);
     }
+    else
+    {
+        ret = AppPlatformExternalAttributeReadCallback(endpoint, clusterId, attributeMetadata, buffer, maxReadLength);
+    }
 
     return ret;
 }
@@ -79,12 +82,30 @@ EmberAfStatus emberAfExternalAttributeWriteCallback(EndpointId endpoint, Cluster
     {
         ret = app->HandleWriteAttribute(clusterId, attributeMetadata->attributeId, buffer);
     }
+    else
+    {
+        ret = AppPlatformExternalAttributeWriteCallback(endpoint, clusterId, attributeMetadata, buffer);
+    }
 
     return ret;
 }
 
 namespace chip {
 namespace AppPlatform {
+
+EmberAfStatus __attribute__((weak)) AppPlatformExternalAttributeReadCallback(EndpointId endpoint, ClusterId clusterId,
+                                                                             const EmberAfAttributeMetadata * attributeMetadata,
+                                                                             uint8_t * buffer, uint16_t maxReadLength)
+{
+    return (EMBER_ZCL_STATUS_FAILURE);
+}
+
+EmberAfStatus __attribute__((weak))
+AppPlatformExternalAttributeWriteCallback(EndpointId endpoint, ClusterId clusterId,
+                                          const EmberAfAttributeMetadata * attributeMetadata, uint8_t * buffer)
+{
+    return (EMBER_ZCL_STATUS_FAILURE);
+}
 
 EndpointId ContentAppPlatform::AddContentApp(ContentApp * app, EmberAfEndpointType * ep,
                                              const Span<DataVersion> & dataVersionStorage,
@@ -398,7 +419,7 @@ void ContentAppPlatform::SetCurrentApp(ContentApp * app)
 
 bool ContentAppPlatform::IsCurrentApp(ContentApp * app)
 {
-    if (HasCurrentApp())
+    if (!HasCurrentApp())
     {
         return false;
     }
@@ -455,25 +476,66 @@ uint32_t ContentAppPlatform::GetPincodeFromContentApp(uint16_t vendorId, uint16_
     return (uint32_t) strtol(pinString.c_str(), &eptr, 10);
 }
 
-constexpr EndpointId kTargetBindingClusterEndpointId = 0;
-constexpr EndpointId kLocalVideoPlayerEndpointId     = 1;
-constexpr EndpointId kLocalSpeakerEndpointId         = 2;
-constexpr ClusterId kClusterIdDescriptor             = 0x001d;
-constexpr ClusterId kClusterIdOnOff                  = 0x0006;
-constexpr ClusterId kClusterIdWakeOnLAN              = 0x0503;
-// constexpr ClusterId kClusterIdChannel             = 0x0504;
-// constexpr ClusterId kClusterIdTargetNavigator     = 0x0505;
-constexpr ClusterId kClusterIdMediaPlayback = 0x0506;
-// constexpr ClusterId kClusterIdMediaInput          = 0x0507;
-constexpr ClusterId kClusterIdLowPower        = 0x0508;
-constexpr ClusterId kClusterIdKeypadInput     = 0x0509;
-constexpr ClusterId kClusterIdContentLauncher = 0x050a;
-constexpr ClusterId kClusterIdAudioOutput     = 0x050b;
-// constexpr ClusterId kClusterIdApplicationLauncher = 0x050c;
-// constexpr ClusterId kClusterIdAccountLogin        = 0x050e;
+// Returns ACL entry with match subject or CHIP_ERROR_NOT_FOUND if no match is found
+CHIP_ERROR ContentAppPlatform::GetACLEntryIndex(size_t * foundIndex, FabricIndex fabricIndex, NodeId subjectNodeId)
+{
+    size_t index = 0;
+    if (Access::GetAccessControl().GetEntryCount(fabricIndex, index) == CHIP_NO_ERROR)
+    {
+        while (index)
+        {
+            Access::AccessControl::Entry entry;
+            CHIP_ERROR err = Access::GetAccessControl().ReadEntry(fabricIndex, --index, entry);
+            if (err != CHIP_NO_ERROR)
+            {
+                ChipLogDetail(DeviceLayer, "ContentAppPlatform::GetACLEntryIndex error reading entry %d err %s",
+                              static_cast<int>(index), ErrorStr(err));
+            }
+            else
+            {
+                size_t count;
+                err = entry.GetSubjectCount(count);
+                if (err != CHIP_NO_ERROR)
+                {
+                    ChipLogDetail(DeviceLayer,
+                                  "ContentAppPlatform::GetACLEntryIndex error reading subject count for entry %d err %s",
+                                  static_cast<int>(index), ErrorStr(err));
+                    continue;
+                }
+                if (count)
+                {
+                    ChipLogDetail(DeviceLayer, "subjects: %u", static_cast<unsigned>(count));
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        NodeId subject;
+                        err = entry.GetSubject(i, subject);
+                        if (err != CHIP_NO_ERROR)
+                        {
+                            ChipLogDetail(DeviceLayer,
+                                          "ContentAppPlatform::GetACLEntryIndex error reading subject %i for entry %d err %s",
+                                          static_cast<int>(i), static_cast<int>(index), ErrorStr(err));
+                            continue;
+                        }
+                        if (subject == subjectNodeId)
+                        {
+                            ChipLogDetail(DeviceLayer, "ContentAppPlatform::GetACLEntryIndex found matching subject at index %d",
+                                          static_cast<int>(index));
+                            *foundIndex = index;
+                            return CHIP_NO_ERROR;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return CHIP_ERROR_NOT_FOUND;
+}
 
+// Add ACLs on this device for the given client,
+// and create bindings on the given client so that it knows what it has access to.
 CHIP_ERROR ContentAppPlatform::ManageClientAccess(Messaging::ExchangeManager & exchangeMgr, SessionHandle & sessionHandle,
-                                                  uint16_t targetVendorId, NodeId localNodeId,
+                                                  uint16_t targetVendorId, uint16_t targetProductId, NodeId localNodeId,
+                                                  std::vector<Binding::Structs::TargetStruct::Type> bindings,
                                                   Controller::WriteResponseSuccessCallback successCb,
                                                   Controller::WriteResponseFailureCallback failureCb)
 {
@@ -482,14 +544,30 @@ CHIP_ERROR ContentAppPlatform::ManageClientAccess(Messaging::ExchangeManager & e
 
     Access::Privilege vendorPrivilege = mContentAppFactory->GetVendorPrivilege(targetVendorId);
 
+    NodeId subjectNodeId    = sessionHandle->GetPeer().GetNodeId();
+    FabricIndex fabricIndex = sessionHandle->GetFabricIndex();
+
+    // first, delete existing ACLs for this nodeId
+    {
+        size_t index;
+        CHIP_ERROR err;
+        while (CHIP_NO_ERROR == (err = GetACLEntryIndex(&index, fabricIndex, subjectNodeId)))
+        {
+            err = Access::GetAccessControl().DeleteEntry(nullptr, fabricIndex, index);
+            if (err != CHIP_NO_ERROR)
+            {
+                ChipLogDetail(DeviceLayer, "ContentAppPlatform::ManageClientAccess error entry %d err %s", static_cast<int>(index),
+                              ErrorStr(err));
+            }
+        }
+    }
+
     Access::AccessControl::Entry entry;
     ReturnErrorOnFailure(GetAccessControl().PrepareEntry(entry));
     ReturnErrorOnFailure(entry.SetAuthMode(Access::AuthMode::kCase));
-    entry.SetFabricIndex(sessionHandle->GetFabricIndex());
+    entry.SetFabricIndex(fabricIndex);
     ReturnErrorOnFailure(entry.SetPrivilege(vendorPrivilege));
-    ReturnErrorOnFailure(entry.AddSubject(nullptr, sessionHandle->GetPeer().GetNodeId()));
-
-    std::vector<Binding::Structs::TargetStruct::Type> bindings;
+    ReturnErrorOnFailure(entry.AddSubject(nullptr, subjectNodeId));
 
     /**
      * Here we are creating a single ACL entry containing:
@@ -502,10 +580,18 @@ CHIP_ERROR ContentAppPlatform::ManageClientAccess(Messaging::ExchangeManager & e
      * We could have organized things differently, for example,
      * - a single ACL for (a) and (b) which is shared by many subjects
      * - a single ACL entry per subject for (c)
+     *
+     * We are also creating the following set of bindings on the remote device:
+     * a) Video Player endpoint
+     * b) Speaker endpoint
+     * c) selection of content app endpoints (0 to many)
+     * The purpose of the bindings is to inform the client of its access to
+     * nodeId and endpoints on the app platform.
      */
 
     ChipLogProgress(Controller, "Create video player endpoint ACL and binding");
     {
+        bool hasClusterAccess = false;
         if (vendorPrivilege == Access::Privilege::kAdminister)
         {
             ChipLogProgress(Controller, "ContentAppPlatform::ManageClientAccess Admin privilege granted");
@@ -513,14 +599,14 @@ CHIP_ERROR ContentAppPlatform::ManageClientAccess(Messaging::ExchangeManager & e
             Access::AccessControl::Entry::Target target = { .flags    = Access::AccessControl::Entry::Target::kEndpoint,
                                                             .endpoint = kLocalVideoPlayerEndpointId };
             ReturnErrorOnFailure(entry.AddTarget(nullptr, target));
+            hasClusterAccess = true;
         }
         else
         {
             ChipLogProgress(Controller, "ContentAppPlatform::ManageClientAccess non-Admin privilege granted");
             // a vendor with non-admin privilege gets access to select clusters on ep1
-            std::list<ClusterId> allowedClusterList = { kClusterIdDescriptor,      kClusterIdOnOff,      kClusterIdWakeOnLAN,
-                                                        kClusterIdMediaPlayback,   kClusterIdLowPower,   kClusterIdKeypadInput,
-                                                        kClusterIdContentLauncher, kClusterIdAudioOutput };
+            std::list<ClusterId> allowedClusterList = mContentAppFactory->GetAllowedClusterListForStaticEndpoint(
+                kLocalVideoPlayerEndpointId, targetVendorId, targetProductId);
 
             for (const auto & clusterId : allowedClusterList)
             {
@@ -529,16 +615,21 @@ CHIP_ERROR ContentAppPlatform::ManageClientAccess(Messaging::ExchangeManager & e
                                                                 .cluster  = clusterId,
                                                                 .endpoint = kLocalVideoPlayerEndpointId };
                 ReturnErrorOnFailure(entry.AddTarget(nullptr, target));
+                hasClusterAccess = true;
             }
         }
 
-        bindings.push_back(Binding::Structs::TargetStruct::Type{
-            .node        = MakeOptional(localNodeId),
-            .group       = NullOptional,
-            .endpoint    = MakeOptional(kLocalVideoPlayerEndpointId),
-            .cluster     = NullOptional,
-            .fabricIndex = kUndefinedFabricIndex,
-        });
+        if (hasClusterAccess)
+        {
+            ChipLogProgress(Controller, "ContentAppPlatform::ManageClientAccess adding a binding on ep1");
+            bindings.push_back(Binding::Structs::TargetStruct::Type{
+                .node        = MakeOptional(localNodeId),
+                .group       = NullOptional,
+                .endpoint    = MakeOptional(kLocalVideoPlayerEndpointId),
+                .cluster     = NullOptional,
+                .fabricIndex = kUndefinedFabricIndex,
+            });
+        }
     }
 
     ChipLogProgress(Controller, "Create speaker endpoint ACL and binding");

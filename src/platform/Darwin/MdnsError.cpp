@@ -94,6 +94,21 @@ const char * ToString(DNSServiceErrorType errorCode)
     }
 }
 
+CHIP_ERROR ToChipError(DNSServiceErrorType errorCode)
+{
+    switch (errorCode)
+    {
+    case kDNSServiceErr_NoError:
+        return CHIP_NO_ERROR;
+    case kDNSServiceErr_NameConflict:
+        return CHIP_ERROR_MDNS_COLLISION;
+    case kDNSServiceErr_NoMemory:
+        return CHIP_ERROR_NO_MEMORY;
+    default:
+        return CHIP_ERROR_INTERNAL;
+    }
+}
+
 } // namespace Error
 } // namespace Dnssd
 } // namespace chip

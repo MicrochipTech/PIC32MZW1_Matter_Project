@@ -69,7 +69,7 @@ namespace chip {
 namespace DeviceLayer {
 
 ConnectivityManagerImpl ConnectivityManagerImpl::sInstance;
-static ConnectivityManager::WiFiStationState ConnectivityManagerImpl::mWiFiStationState =
+ConnectivityManager::WiFiStationState ConnectivityManagerImpl::mWiFiStationState =
     ConnectivityManager::kWiFiStationState_NotConnected;
 
 void ConnectivityManagerImpl::WifiStationStateChange(void)
@@ -86,8 +86,6 @@ void ConnectivityManagerImpl::WifiStationStateChange(void)
 
 void ConnectivityManagerImpl::DriveStationState()
 {
-
-exit:
     return;
 }
 
@@ -101,7 +99,7 @@ CHIP_ERROR ConnectivityManagerImpl::_SetWiFiStationMode(WiFiStationMode val)
     CHIP_ERROR err = CHIP_NO_ERROR;
 
     DeviceLayer::SystemLayer().ScheduleWork(DriveStationState, NULL);
-exit:
+
     return err;
 }
 
@@ -163,6 +161,16 @@ void ConnectivityManagerImpl::ChangeWiFiStationState(WiFiStationState newState)
         mWiFiStationState = newState;
         SystemLayer().ScheduleLambda([]() { NetworkCommissioning::BLWiFiDriver::GetInstance().OnNetworkStatusChange(); });
     }
+}
+
+void ConnectivityManagerImpl::OnIPv6AddressAvailable()
+{
+    ChipLogProgress(DeviceLayer, "IPv6 addr available.");
+
+    ChipDeviceEvent event;
+    event.Type                           = DeviceEventType::kInterfaceIpAddressChanged;
+    event.InterfaceIpAddressChanged.Type = InterfaceIpChangeType::kIpV6_Assigned;
+    PlatformMgr().PostEventOrDie(&event);
 }
 
 } // namespace DeviceLayer

@@ -96,6 +96,11 @@ private:
     CHIP_ERROR _Init(void);
     void _OnPlatformEvent(const ChipDeviceEvent * event);
 
+#if CHIP_DEVICE_CONFIG_ENABLE_ETHERNET
+    CHIP_ERROR InitEthernet(void);
+    void OnEthernetPlatformEvent(const ChipDeviceEvent * event);
+#endif
+
 #if CHIP_DEVICE_CONFIG_ENABLE_WIFI
     using Flags = GenericConnectivityManagerImpl_WiFi::ConnectivityFlags;
     // ===== Members that implement the ConnectivityManager abstract interface.
@@ -156,7 +161,7 @@ private:
     void UpdateInternetConnectivityState(void);
     void OnStationIPv4AddressAvailable(const ip_event_got_ip_t & got_ip);
     void OnStationIPv4AddressLost(void);
-    void OnIPv6AddressAvailable(const ip_event_got_ip6_t & got_ip);
+    void OnStationIPv6AddressAvailable(const ip_event_got_ip6_t & got_ip);
 #endif // CHIP_DEVICE_CONFIG_ENABLE_WIFI
 
     // ===== Members for internal use by the following friends.

@@ -27,7 +27,7 @@
 #include <app/server/Server.h>
 #include <credentials/DeviceAttestationCredsProvider.h>
 #include <matter_config.h>
-#ifdef EFR32_ATTESTATION_CREDENTIALS
+#ifdef SILABS_ATTESTATION_CREDENTIALS
 #include <examples/platform/efr32/EFR32DeviceAttestationCreds.h>
 #else
 #include <credentials/examples/DeviceAttestationCredsExample.h>
@@ -50,7 +50,7 @@ static chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
 int main(void)
 {
     init_efrPlatform();
-    if (EFR32MatterConfig::InitMatter(BLE_DEV_NAME) != CHIP_NO_ERROR)
+    if (SilabsMatterConfig::InitMatter(BLE_DEV_NAME) != CHIP_NO_ERROR)
         appError(CHIP_ERROR_INTERNAL);
 
     gExampleDeviceInfoProvider.SetStorageDelegate(&Server::GetInstance().GetPersistentStorage());
@@ -58,23 +58,23 @@ int main(void)
 
     chip::DeviceLayer::PlatformMgr().LockChipStack();
     // Initialize device attestation config
-#ifdef EFR32_ATTESTATION_CREDENTIALS
+#ifdef SILABS_ATTESTATION_CREDENTIALS
     SetDeviceAttestationCredentialsProvider(EFR32::GetEFR32DacProvider());
 #else
     SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
 #endif
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
 
-    EFR32_LOG("Starting App Task");
+    SILABS_LOG("Starting App Task");
     if (AppTask::GetAppTask().StartAppTask() != CHIP_NO_ERROR)
         appError(CHIP_ERROR_INTERNAL);
 
-    EFR32_LOG("Starting FreeRTOS scheduler");
+    SILABS_LOG("Starting FreeRTOS scheduler");
     sl_system_kernel_start();
 
     // Should never get here.
     chip::Platform::MemoryShutdown();
-    EFR32_LOG("vTaskStartScheduler() failed");
+    SILABS_LOG("vTaskStartScheduler() failed");
     appError(CHIP_ERROR_INTERNAL);
 }
 

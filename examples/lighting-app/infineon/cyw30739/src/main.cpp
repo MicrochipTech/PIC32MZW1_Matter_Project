@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2021 Project CHIP Authors
+ *    Copyright (c) 2022 Project CHIP Authors
  *    Copyright (c) 2019 Google LLC.
  *    All rights reserved.
  *
@@ -27,6 +27,7 @@
 #include <OTAConfig.h>
 #endif
 #include <app/clusters/identify-server/identify-server.h>
+#include <app/clusters/ota-requestor/OTATestEventTriggerDelegate.h>
 #include <app/server/OnboardingCodesUtil.h>
 #include <app/server/Server.h>
 #include <credentials/examples/DeviceAttestationCredsExample.h>
@@ -34,6 +35,7 @@
 #include <lib/shell/Engine.h>
 #include <lib/support/CHIPPlatformMemory.h>
 #include <mbedtls/platform.h>
+#include <platform/Infineon/CYW30739/FactoryDataProvider.h>
 #include <protocols/secure_channel/PASESession.h>
 #include <sparcommon.h>
 #include <stdio.h>
@@ -46,6 +48,8 @@ using namespace ::chip::DeviceLayer;
 using namespace ::chip::Shell;
 
 static chip::DeviceLayer::DeviceInfoProviderImpl gExampleDeviceInfoProvider;
+static FactoryDataProvider sFactoryDataProvider;
+
 static void InitApp(intptr_t args);
 static void LightManagerCallback(LightingManager::Actor_t actor, LightingManager::Action_t action, uint8_t value);
 
@@ -53,6 +57,11 @@ static wiced_led_config_t chip_lighting_led_config = {
     .led    = PLATFORM_LED_1,
     .bright = 50,
 };
+
+// NOTE! This key is for test/certification only and should not be available in production devices!
+uint8_t sTestEventTriggerEnableKey[chip::TestEventTriggerDelegate::kEnableKeyLength] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55,
+                                                                                         0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb,
+                                                                                         0xcc, 0xdd, 0xee, 0xff };
 
 /**********************************************************
  * Identify Callbacks
@@ -133,8 +142,12 @@ APPLICATION_START()
 
 #if CHIP_DEVICE_CONFIG_THREAD_FTD
     err = ConnectivityMgr().SetThreadDeviceType(ConnectivityManager::kThreadDeviceType_Router);
-#else  // !CHIP_DEVICE_CONFIG_THREAD_FTD
+#else // !CHIP_DEVICE_CONFIG_THREAD_FTD
+#if CHIP_DEVICE_CONFIG_ENABLE_SED
+    err = ConnectivityMgr().SetThreadDeviceType(ConnectivityManager::kThreadDeviceType_SleepyEndDevice);
+#else  /* !CHIP_DEVICE_CONFIG_ENABLE_SED */
     err = ConnectivityMgr().SetThreadDeviceType(ConnectivityManager::kThreadDeviceType_MinimalEndDevice);
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_SED */
 #endif // CHIP_DEVICE_CONFIG_THREAD_FTD
     if (err != CHIP_NO_ERROR)
     {
@@ -177,8 +190,10 @@ void InitApp(intptr_t args)
     // Print QR Code URL
     PrintOnboardingCodes(chip::RendezvousInformationFlag(chip::RendezvousInformationFlag::kBLE));
     /* Start CHIP datamodel server */
+    static chip::OTATestEventTriggerDelegate testEventTriggerDelegate{ chip::ByteSpan(sTestEventTriggerEnableKey) };
     static chip::CommonCaseDeviceServerInitParams initParams;
     (void) initParams.InitializeStaticResourcesBeforeServerInit();
+    initParams.testEventTriggerDelegate = &testEventTriggerDelegate;
     gExampleDeviceInfoProvider.SetStorageDelegate(initParams.persistentStorageDelegate);
     chip::DeviceLayer::SetDeviceInfoProvider(&gExampleDeviceInfoProvider);
     chip::Inet::EndPointStateOpenThread::OpenThreadEndpointInitParam nativeParams;
@@ -188,7 +203,7 @@ void InitApp(intptr_t args)
     initParams.endpointNativeParams    = static_cast<void *>(&nativeParams);
     chip::Server::GetInstance().Init(initParams);
 
-    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+    SetDeviceAttestationCredentialsProvider(&sFactoryDataProvider);
 
     LightMgr().Init();
     LightMgr().SetCallbacks(LightManagerCallback, nullptr);

@@ -21,6 +21,7 @@
 #include <utility>
 
 #include <lib/dnssd/minimal_mdns/core/DnsHeader.h>
+#include <platform/CHIPDeviceLayer.h>
 
 namespace mdns {
 namespace Minimal {
@@ -191,6 +192,12 @@ ServerBase::~ServerBase()
 
 void ServerBase::Shutdown()
 {
+    ShutdownEndpoints();
+    mIsInitialized = false;
+}
+
+void ServerBase::ShutdownEndpoints()
+{
     mEndpoints.ReleaseAll();
 }
 
@@ -216,7 +223,7 @@ bool ServerBase::IsListening() const
 CHIP_ERROR ServerBase::Listen(chip::Inet::EndPointManager<chip::Inet::UDPEndPoint> * udpEndPointManager, ListenIterator * it,
                               uint16_t port)
 {
-    Shutdown(); // ensure everything starts fresh
+    ShutdownEndpoints(); // ensure everything starts fresh
 
     chip::Inet::InterfaceId interfaceId = chip::Inet::InterfaceId::Null();
     chip::Inet::IPAddressType addressType;
@@ -271,6 +278,17 @@ CHIP_ERROR ServerBase::Listen(chip::Inet::EndPointManager<chip::Inet::UDPEndPoin
             mEndpoints.CreateObject(interfaceId, addressType, std::move(endPointHolder));
         }
 #endif
+
+        // If at least one IPv6 interface is used by the mDNS server, notify the application that DNS-SD is ready.
+        if (!mIsInitialized && addressType == chip::Inet::IPAddressType::kIPv6)
+        {
+#if !CHIP_DEVICE_LAYER_NONE
+            chip::DeviceLayer::ChipDeviceEvent event{};
+            event.Type = chip::DeviceLayer::DeviceEventType::kDnssdInitialized;
+            chip::DeviceLayer::PlatformMgr().PostEventOrDie(&event);
+#endif
+            mIsInitialized = true;
+        }
     }
 
     return autoShutdown.ReturnSuccess();
@@ -364,14 +382,20 @@ CHIP_ERROR ServerBase::BroadcastImpl(chip::System::PacketBufferHandle && data, u
             /// for sending via `CloneData`
             ///
             /// TODO: this wastes one copy of the data and that could be optimized away
-            if (info->mAddressType == chip::Inet::IPAddressType::kIPv6)
+            chip::System::PacketBufferHandle tempBuf = data.CloneData();
+            if (tempBuf.IsNull())
             {
-                err = udp->SendTo(mIpv6BroadcastAddress, port, data.CloneData(), udp->GetBoundInterface());
+                // Not enough memory available to clone pbuf
+                err = CHIP_ERROR_NO_MEMORY;
+            }
+            else if (info->mAddressType == chip::Inet::IPAddressType::kIPv6)
+            {
+                err = udp->SendTo(mIpv6BroadcastAddress, port, std::move(tempBuf), udp->GetBoundInterface());
             }
 #if INET_CONFIG_ENABLE_IPV4
             else if (info->mAddressType == chip::Inet::IPAddressType::kIPv4)
             {
-                err = udp->SendTo(mIpv4BroadcastAddress, port, data.CloneData(), udp->GetBoundInterface());
+                err = udp->SendTo(mIpv4BroadcastAddress, port, std::move(tempBuf), udp->GetBoundInterface());
             }
 #endif
             else

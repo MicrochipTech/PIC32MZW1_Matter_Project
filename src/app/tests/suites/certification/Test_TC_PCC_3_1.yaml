@@ -24,7 +24,7 @@ PICS:
 
 config:
     nodeId: 0x12344321
-    cluster: "Basic"
+    cluster: "Basic Information"
     endpoint: 0
 
 tests:
@@ -35,8 +35,10 @@ tests:
 
     - label:
           "DUT reads all supported mandatory attributes from TH one at a time in
-          a manufacturer specific order"
+          a manufacturer specific order."
       verification: |
+          Product maker needs to provide instructions for how to trigger the command on the DUT. For comparison, the DUT behavior for this test step can be simulated using chip-tool (when DUT is a commissioner/Client)
+
           ./chip-tool pumpconfigurationandcontrol read max-pressure 1 1
 
           verify on TH all-cluster-app receives the right ReadRequest for the data sent in the above command
@@ -191,9 +193,10 @@ tests:
 
     - label:
           "DUT reads all supported optional attributes from TH one at a time in
-          a manufacturer specific order"
+          a manufacturer specific order."
       verification: |
-          verify on Reference app receives the right response for the data sent in the above commands
+          Product maker needs to provide instructions for how to trigger the command on the DUT. For comparison, the DUT behavior for this test step can be simulated using chip-tool (when DUT is a commissioner/Client)
+
 
           ./chip-tool pumpconfigurationandcontrol read min-const-pressure 1 1
 
@@ -334,28 +337,6 @@ tests:
           [1651564124.346826][8748:8748] CHIP:DMG: },
           [1651564124.346941][8748:8748] CHIP:DMG: IM RH moving to [GeneratingReports]"
 
-          ./chip-tool pumpconfigurationandcontrol read min-const-flow 1 1
-
-          verify on TH all-cluster-app receives the right ReadRequest for the data sent in the above command
-
-          [1651564163.319315][8748:8748] CHIP:IM: Received Read request
-          [1651564163.319399][8748:8748] CHIP:DMG: ReadRequestMessage =
-          [1651564163.319447][8748:8748] CHIP:DMG: {
-          [1651564163.319488][8748:8748] CHIP:DMG:         AttributePathIBs =
-          [1651564163.319539][8748:8748] CHIP:DMG:         [
-          [1651564163.319584][8748:8748] CHIP:DMG:                 AttributePathIB =
-          [1651564163.319639][8748:8748] CHIP:DMG:                 {
-          [1651564163.319694][8748:8748] CHIP:DMG:                         Endpoint = 0x1,
-          [1651564163.319758][8748:8748] CHIP:DMG:                         Cluster = 0x200,
-          [1651564163.319822][8748:8748] CHIP:DMG:                         Attribute = 0x0000_0009,
-          [1651564163.319875][8748:8748] CHIP:DMG:                 }
-          [1651564163.319925][8748:8748] CHIP:DMG:
-          [1651564163.319975][8748:8748] CHIP:DMG:         ],
-          [1651564163.320027][8748:8748] CHIP:DMG:
-          [1651564163.320075][8748:8748] CHIP:DMG:         isFabricFiltered = true,
-          [1651564163.320122][8748:8748] CHIP:DMG:         InteractionModelRevision = 1
-          [1651564163.320165][8748:8748] CHIP:DMG: },
-          [1651564163.320291][8748:8748] CHIP:DMG: IM RH moving to [GeneratingReports]"
 
 
           ./chip-tool pumpconfigurationandcontrol read min-const-flow 1 1
@@ -582,9 +563,10 @@ tests:
 
     - label:
           "DUT writes a suitable value to all supported mandatory attributes on
-          the TH one at a time in a manufacturer specific order"
+          the TH one at a time in a manufacturer specific order."
       verification: |
-          verify on Reference app receives the right response for the data sent in the above commands
+          Product maker needs to provide instructions for how to trigger the command on the DUT. For comparison, the DUT behavior for this test step can be simulated using chip-tool (when DUT is a commissioner/Client)
+
 
           ./chip-tool pumpconfigurationandcontrol write operation-mode 0 1 1
 
@@ -621,9 +603,11 @@ tests:
 
     - label:
           "DUT writes a suitable value to all supported optional attributes on
-          the TH one at a time in a manufacturer specific order"
+          the TH one at a time in a manufacturer specific order."
       verification: |
-          verify on Reference app receives the right response for the data sent in the above commands
+          Product maker needs to provide instructions for how to trigger the command on the DUT. For comparison, the DUT behavior for this test step can be simulated using chip-tool (when DUT is a commissioner/Client)
+
+
 
           ./chip-tool pumpconfigurationandcontrol write control-mode 0 1 1
 
@@ -731,9 +715,11 @@ tests:
           "Configure TH such that it implements mandatory and none of the
           optional attributes of the server-side of the cluster, and that it
           also reflects this in global attributes such as FeatureMap and
-          AttributeList. Commission DUT to TH again"
+          AttributeList. Commission DUT to TH again."
       verification: |
-          verify on Reference app receives the right response for the data sent in the above commands
+          Product maker needs to provide instructions for how to trigger the command on the DUT. For comparison, the DUT behavior for this test step can be simulated using chip-tool (when DUT is a commissioner/Client)
+
+
 
            ./chip-tool pumpconfigurationandcontrol read attribute-list  1 1
 
@@ -944,9 +930,10 @@ tests:
 
     - label:
           "DUT reads all supported optional attributes from TH one at a time in
-          a manufacturer specific order"
+          a manufacturer specific order."
       verification: |
-          verify on Reference app receives the right response for the data sent in the above commands
+          Product maker needs to provide instructions for how to trigger the command on the DUT. For comparison, the DUT behavior for this test step can be simulated using chip-tool (when DUT is a commissioner/Client)
+
 
           "./chip-tool pumpconfigurationandcontrol read min-const-pressure 1 1
           General error: 0x86 (UNSUPPORTED_ATTRIBUTE)
@@ -1003,9 +990,10 @@ tests:
 
     - label:
           "DUT writes a suitable value to all supported optional attributes on
-          the TH one at a time in a manufacturer specific order"
+          the TH one at a time in a manufacturer specific order."
       verification: |
-          verify on Reference app receives the right response for the data sent in the above commands
+          Product maker needs to provide instructions for how to trigger the command on the DUT. For comparison, the DUT behavior for this test step can be simulated using chip-tool (when DUT is a commissioner/Client)
+
 
           ./chip-tool pumpconfigurationandcontrol write control-mode 0 1 1
           General error: 0x86 (UNSUPPORTED_ATTRIBUTE)

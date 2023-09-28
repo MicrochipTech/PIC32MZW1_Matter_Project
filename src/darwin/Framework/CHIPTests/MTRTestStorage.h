@@ -19,10 +19,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface MTRTestStorage : NSObject <MTRPersistentStorageDelegate>
+@interface MTRTestStorage : NSObject <MTRStorage>
 - (nullable NSData *)storageDataForKey:(NSString *)key;
 - (BOOL)setStorageData:(NSData *)value forKey:(NSString *)key;
 - (BOOL)removeStorageDataForKey:(NSString *)key;
+- (NSString *)dumpStorageToString;
 @end
 
 NS_ASSUME_NONNULL_END

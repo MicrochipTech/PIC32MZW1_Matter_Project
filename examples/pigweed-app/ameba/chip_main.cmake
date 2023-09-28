@@ -13,6 +13,10 @@ include(${prj_root}/GCC-RELEASE/project_hp/asdk/includepath.cmake)
 
 include(${pigweed_dir}/pw_build/pigweed.cmake)
 include(${pigweed_dir}/pw_protobuf_compiler/proto.cmake)
+include(${pigweed_dir}/pw_assert/backend.cmake)
+include(${pigweed_dir}/pw_log/backend.cmake)
+include(${pigweed_dir}/pw_sys_io/backend.cmake)
+include(${pigweed_dir}/pw_trace/backend.cmake)
 
 set(dir_pw_third_party_nanopb "${chip_dir}/third_party/nanopb/repo" CACHE STRING "" FORCE)
 
@@ -64,6 +68,7 @@ target_link_libraries(${chip_main} PUBLIC
     pw_log
     pw_rpc.nanopb.echo_service
     pw_rpc.server
+    pw_sys_io
     PwRpc
 )
 

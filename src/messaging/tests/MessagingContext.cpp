@@ -48,7 +48,8 @@ CHIP_ERROR MessagingContext::Init(TransportMgrBase * transport, IOContext * ioCo
 
     ReturnErrorOnFailure(mFabricTable.Init(initParams));
 
-    ReturnErrorOnFailure(mSessionManager.Init(&GetSystemLayer(), transport, &mMessageCounterManager, &mStorage, &mFabricTable));
+    ReturnErrorOnFailure(
+        mSessionManager.Init(&GetSystemLayer(), transport, &mMessageCounterManager, &mStorage, &mFabricTable, mSessionKeystore));
 
     ReturnErrorOnFailure(mExchangeManager.Init(&mSessionManager));
     ReturnErrorOnFailure(mMessageCounterManager.Init(&mExchangeManager));
@@ -95,6 +96,11 @@ void MessagingContext::ShutdownAndRestoreExisting(MessagingContext & existing)
     existing.mTransport->SetSessionManager(&existing.GetSecureSessionManager());
 }
 
+using namespace System::Clock::Literals;
+
+constexpr chip::System::Clock::Timeout MessagingContext::kResponsiveIdleRetransTimeout;
+constexpr chip::System::Clock::Timeout MessagingContext::kResponsiveActiveRetransTimeout;
+
 void MessagingContext::SetMRPMode(MRPMode mode)
 {
     if (mode == MRPMode::kDefault)
@@ -103,17 +109,37 @@ void MessagingContext::SetMRPMode(MRPMode mode)
         mSessionAliceToBob->AsSecureSession()->SetRemoteMRPConfig(GetDefaultMRPConfig());
         mSessionCharlieToDavid->AsSecureSession()->SetRemoteMRPConfig(GetDefaultMRPConfig());
         mSessionDavidToCharlie->AsSecureSession()->SetRemoteMRPConfig(GetDefaultMRPConfig());
+
+#if CONFIG_BUILD_FOR_HOST_UNIT_TEST
+        ClearLocalMRPConfigOverride();
+#else
+        //
+        // A test is calling this function assuming the overrides above are going to work
+        // when in fact, they won't because the compile flag is not set correctly.
+        //
+        VerifyOrDie(false);
+#endif
     }
     else
     {
-        mSessionBobToAlice->AsSecureSession()->SetRemoteMRPConfig(
-            ReliableMessageProtocolConfig(System::Clock::Milliseconds32(10), System::Clock::Milliseconds32(10)));
-        mSessionAliceToBob->AsSecureSession()->SetRemoteMRPConfig(
-            ReliableMessageProtocolConfig(System::Clock::Milliseconds32(10), System::Clock::Milliseconds32(10)));
-        mSessionCharlieToDavid->AsSecureSession()->SetRemoteMRPConfig(
-            ReliableMessageProtocolConfig(System::Clock::Milliseconds32(10), System::Clock::Milliseconds32(10)));
-        mSessionDavidToCharlie->AsSecureSession()->SetRemoteMRPConfig(
-            ReliableMessageProtocolConfig(System::Clock::Milliseconds32(10), System::Clock::Milliseconds32(10)));
+#if CONFIG_BUILD_FOR_HOST_UNIT_TEST
+        OverrideLocalMRPConfig(MessagingContext::kResponsiveIdleRetransTimeout, MessagingContext::kResponsiveActiveRetransTimeout);
+#else
+        //
+        // A test is calling this function assuming the overrides above are going to work
+        // when in fact, they won't because the compile flag is not set correctly.
+        //
+        VerifyOrDie(false);
+#endif
+
+        mSessionBobToAlice->AsSecureSession()->SetRemoteMRPConfig(ReliableMessageProtocolConfig(
+            MessagingContext::kResponsiveIdleRetransTimeout, MessagingContext::kResponsiveActiveRetransTimeout));
+        mSessionAliceToBob->AsSecureSession()->SetRemoteMRPConfig(ReliableMessageProtocolConfig(
+            MessagingContext::kResponsiveIdleRetransTimeout, MessagingContext::kResponsiveActiveRetransTimeout));
+        mSessionCharlieToDavid->AsSecureSession()->SetRemoteMRPConfig(ReliableMessageProtocolConfig(
+            MessagingContext::kResponsiveIdleRetransTimeout, MessagingContext::kResponsiveActiveRetransTimeout));
+        mSessionDavidToCharlie->AsSecureSession()->SetRemoteMRPConfig(ReliableMessageProtocolConfig(
+            MessagingContext::kResponsiveIdleRetransTimeout, MessagingContext::kResponsiveActiveRetransTimeout));
     }
 }
 

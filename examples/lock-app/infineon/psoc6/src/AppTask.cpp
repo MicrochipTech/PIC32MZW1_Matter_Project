@@ -21,12 +21,7 @@
 #include "AppEvent.h"
 #include "ButtonHandler.h"
 #include "LEDWidget.h"
-#include "qrcodegen.h"
-#include <app-common/zap-generated/af-structs.h>
-#include <app-common/zap-generated/attribute-id.h>
-#include <app-common/zap-generated/attribute-type.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
-#include <app-common/zap-generated/cluster-id.h>
 #include <app-common/zap-generated/cluster-objects.h>
 
 #include <app/clusters/door-lock-server/door-lock-server.h>
@@ -82,8 +77,8 @@ using namespace ::chip::System;
 #define APP_EVENT_QUEUE_SIZE 10
 
 using chip::app::Clusters::DoorLock::DlLockState;
-using chip::app::Clusters::DoorLock::DlOperationError;
-using chip::app::Clusters::DoorLock::DlOperationSource;
+using chip::app::Clusters::DoorLock::OperationErrorEnum;
+using chip::app::Clusters::DoorLock::OperationSourceEnum;
 namespace {
 
 TimerHandle_t sFunctionTimer; // FreeRTOS app sw timer.
@@ -132,6 +127,23 @@ void NetWorkCommissioningInstInit()
     sWiFiNetworkCommissioningInstance.Init();
 }
 
+void OnIdentifyStart(Identify *)
+{
+    ChipLogProgress(Zcl, "OnIdentifyStart");
+}
+
+void OnIdentifyStop(Identify *)
+{
+    ChipLogProgress(Zcl, "OnIdentifyStop");
+}
+
+static Identify gIdentify1 = {
+    chip::EndpointId{ 1 },
+    OnIdentifyStart,
+    OnIdentifyStop,
+    EMBER_ZCL_IDENTIFY_IDENTIFY_TYPE_NONE,
+};
+
 static void InitServer(intptr_t context)
 {
     // Init ZCL Data Model
@@ -147,6 +159,8 @@ static void InitServer(intptr_t context)
 #if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
     GetAppTask().InitOTARequestor();
 #endif
+
+    GetAppTask().lockMgr_Init();
 }
 
 CHIP_ERROR AppTask::StartAppTask()
@@ -163,55 +177,15 @@ CHIP_ERROR AppTask::StartAppTask()
     return (sAppTaskHandle == nullptr) ? APP_ERROR_CREATE_TASK_FAILED : CHIP_NO_ERROR;
 }
 
-CHIP_ERROR AppTask::Init()
+void AppTask::lockMgr_Init()
 {
     CHIP_ERROR err = CHIP_NO_ERROR;
-#if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
-    int rc = boot_set_confirmed();
-    if (rc != 0)
-    {
-        P6_LOG("boot_set_confirmed failed");
-        appError(CHIP_ERROR_WELL_UNINITIALIZED);
-    }
-#endif
-    // Register the callback to init the MDNS server when connectivity is available
-    PlatformMgr().AddEventHandler(
-        [](const ChipDeviceEvent * event, intptr_t arg) {
-            // Restart the server whenever an ip address is renewed
-            if (event->Type == DeviceEventType::kInternetConnectivityChange)
-            {
-                if (event->InternetConnectivityChange.IPv4 == kConnectivity_Established ||
-                    event->InternetConnectivityChange.IPv6 == kConnectivity_Established)
-                {
-                    chip::app::DnssdServer::Instance().StartServer();
-                }
-            }
-        },
-        0);
 
-    chip::DeviceLayer::PlatformMgr().ScheduleWork(InitServer, reinterpret_cast<intptr_t>(nullptr));
-
-    // Initialise WSTK buttons PB0 and PB1 (including debounce).
-    ButtonHandler::Init();
-
-    // Create FreeRTOS sw timer for Function Selection.
-    sFunctionTimer = xTimerCreate("FnTmr",          // Just a text name, not used by the RTOS kernel
-                                  1,                // == default timer period (mS)
-                                  false,            // no timer reload (==one-shot)
-                                  (void *) this,    // init timer id = app task obj context
-                                  TimerEventHandler // timer callback handler
-    );
-    if (sFunctionTimer == NULL)
-    {
-        P6_LOG("funct timer create failed");
-        appError(APP_ERROR_CREATE_TIMER_FAILED);
-    }
     NetWorkCommissioningInstInit();
     P6_LOG("Current Software Version: %d", CHIP_DEVICE_CONFIG_DEVICE_SOFTWARE_VERSION);
     // Initial lock state
     chip::app::DataModel::Nullable<chip::app::Clusters::DoorLock::DlLockState> state;
     chip::EndpointId endpointId{ 1 };
-    chip::DeviceLayer::PlatformMgr().LockChipStack();
     chip::app::Clusters::DoorLock::Attributes::LockState::Get(endpointId, state);
 
     uint8_t numberOfCredentialsPerUser = 0;
@@ -263,9 +237,6 @@ CHIP_ERROR AppTask::Init()
         numberOfHolidaySchedules = 10;
     }
 
-    chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-
-    // err = LockMgr().Init(state, maxCredentialsPerUser, numberOfSupportedUsers);
     err = LockMgr().Init(state,
                          ParamBuilder()
                              .SetNumberOfUsers(numberOfUsers)
@@ -279,11 +250,29 @@ CHIP_ERROR AppTask::Init()
         P6_LOG("LockMgr().Init() failed");
         appError(err);
     }
+
+    // Initialise WSTK buttons PB0 and PB1 (including debounce).
+    ButtonHandler::Init();
+
+    // Create FreeRTOS sw timer for Function Selection.
+    sFunctionTimer = xTimerCreate("FnTmr",          // Just a text name, not used by the RTOS kernel
+                                  1,                // == default timer period (mS)
+                                  false,            // no timer reload (==one-shot)
+                                  (void *) this,    // init timer id = app task obj context
+                                  TimerEventHandler // timer callback handler
+    );
+    if (sFunctionTimer == NULL)
+    {
+        P6_LOG("funct timer create failed");
+        appError(APP_ERROR_CREATE_TIMER_FAILED);
+    }
+
     LockMgr().SetCallbacks(ActionInitiated, ActionCompleted);
 
     // Initialize LEDs
     sStatusLED.Init(SYSTEM_STATE_LED);
     sLockLED.Init(LOCK_STATE_LED);
+
     if (state.Value() == DlLockState::kUnlocked)
     {
         sLockLED.Set(false);
@@ -294,24 +283,45 @@ CHIP_ERROR AppTask::Init()
     }
 
     ConfigurationMgr().LogDeviceConfig();
-
+    // Users and credentials should be checked once from flash on boot
+    LockMgr().ReadConfigValues();
     // Print setup info
     PrintOnboardingCodes(chip::RendezvousInformationFlag(chip::RendezvousInformationFlag::kBLE));
+}
 
-    return err;
+void AppTask::Init()
+{
+#if CHIP_DEVICE_CONFIG_ENABLE_OTA_REQUESTOR
+    int rc = boot_set_confirmed();
+    if (rc != 0)
+    {
+        P6_LOG("boot_set_confirmed failed");
+        appError(CHIP_ERROR_WELL_UNINITIALIZED);
+    }
+#endif
+    // Register the callback to init the MDNS server when connectivity is available
+    PlatformMgr().AddEventHandler(
+        [](const ChipDeviceEvent * event, intptr_t arg) {
+            // Restart the server whenever an ip address is renewed
+            if (event->Type == DeviceEventType::kInternetConnectivityChange)
+            {
+                if (event->InternetConnectivityChange.IPv4 == kConnectivity_Established ||
+                    event->InternetConnectivityChange.IPv6 == kConnectivity_Established)
+                {
+                    chip::app::DnssdServer::Instance().StartServer();
+                }
+            }
+        },
+        0);
+
+    chip::DeviceLayer::PlatformMgr().ScheduleWork(InitServer, reinterpret_cast<intptr_t>(nullptr));
 }
 
 void AppTask::AppTaskMain(void * pvParameter)
 {
     AppEvent event;
 
-    CHIP_ERROR err = sAppTask.Init();
-    if (err != CHIP_NO_ERROR)
-    {
-        P6_LOG("AppTask.Init() failed");
-        appError(err);
-    }
-
+    sAppTask.Init();
     P6_LOG("App Task started");
 
     while (true)
@@ -369,41 +379,53 @@ void AppTask::AppTaskMain(void * pvParameter)
 
 void AppTask::LockActionEventHandler(AppEvent * event)
 {
-    bool initiated = false;
     LockManager::Action_t action;
     int32_t actor;
-    CHIP_ERROR err = CHIP_NO_ERROR;
 
-    if (event->Type == AppEvent::kEventType_Lock)
+    switch (event->Type)
     {
+    case AppEvent::kEventType_Lock: {
         action = static_cast<LockManager::Action_t>(event->LockEvent.Action);
         actor  = event->LockEvent.Actor;
+        break;
     }
-    else if (event->Type == AppEvent::kEventType_Button)
-    {
-        if (LockMgr().NextState() == true)
+
+    case AppEvent::kEventType_Button: {
+
+        P6_LOG("%s [Action: %d]", __FUNCTION__, event->ButtonEvent.Action);
+
+        if (event->ButtonEvent.Action == APP_BUTTON_LONG_PRESS)
         {
-            action = LockManager::LOCK_ACTION;
+            P6_LOG("Sending a lock jammed event");
+
+            /* Generating Door Lock Jammed event */
+            DoorLockServer::Instance().SendLockAlarmEvent(1 /* Endpoint Id */, AlarmCodeEnum::kLockJammed);
+
+            return;
         }
         else
         {
-            action = LockManager::UNLOCK_ACTION;
+            if (LockMgr().NextState() == true)
+            {
+                action = LockManager::LOCK_ACTION;
+            }
+            else
+            {
+                action = LockManager::UNLOCK_ACTION;
+            }
+
+            actor = AppEvent::kEventType_Button;
         }
-        actor = AppEvent::kEventType_Button;
-    }
-    else
-    {
-        err = APP_ERROR_UNHANDLED_EVENT;
+        break;
     }
 
-    if (err == CHIP_NO_ERROR)
-    {
-        initiated = LockMgr().InitiateAction(actor, action);
+    default:
+        return;
+    }
 
-        if (!initiated)
-        {
-            P6_LOG("Action is already in progress or active.");
-        }
+    if (!LockMgr().InitiateAction(actor, action))
+    {
+        P6_LOG("Action is already in progress or active.");
     }
 }
 
@@ -633,7 +655,7 @@ void AppTask::UpdateCluster(intptr_t context)
     bool unlocked        = LockMgr().NextState();
     DlLockState newState = unlocked ? DlLockState::kUnlocked : DlLockState::kLocked;
 
-    DlOperationSource source = DlOperationSource::kUnspecified;
+    OperationSourceEnum source = OperationSourceEnum::kUnspecified;
 
     // write the new lock value
     EmberAfStatus status =

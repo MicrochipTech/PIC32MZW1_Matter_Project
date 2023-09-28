@@ -22,19 +22,35 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 import androidx.annotation.NonNull;
-import com.matter.tv.server.MatterCommissioningPrompter;
 import com.matter.tv.server.handlers.ContentAppEndpointManagerImpl;
 import com.matter.tv.server.model.ContentApp;
 import com.matter.tv.server.receivers.ContentAppDiscoveryService;
 import com.matter.tv.server.tvapp.AppPlatform;
+import com.matter.tv.server.utils.EndpointsDataStore;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * This class facilitates the communication with the ContentAppPlatform. It uses the JNI interface
+ * provided via the {@link AppPlatform} class to communicate with the linux layer of the
+ * platform-app. This class also manages the content app endpoints that get added via the
+ * ContentAppPlatform. It manages the persistence of the endpoints that were discovered to be able
+ * to reuse endpointIds after restart of the platform-app.
+ */
 public class AppPlatformService {
 
+  private static final String TAG = "AppPlatformService";
   private AppPlatform mAppPlatform;
   private BroadcastReceiver mBroadcastReceiver;
+  private EndpointsDataStore endpointsDataStore;
 
   private AppPlatformService() {}
+
+  public void reportAttributeChange(int endpointId, int clusterId, int attributeId) {
+    mAppPlatform.reportAttributeChange(endpointId, clusterId, attributeId);
+  }
 
   private static class SingletonHolder {
     static AppPlatformService instance = new AppPlatformService();
@@ -49,18 +65,52 @@ public class AppPlatformService {
 
   public void init(@NonNull Context context) {
     this.context = context;
-    mAppPlatform =
-        new AppPlatform(
-            new MatterCommissioningPrompter(activity), new ContentAppEndpointManagerImpl(context));
     ContentAppDiscoveryService.getReceiverInstance().registerSelf(context.getApplicationContext());
-    for (ContentApp app :
-        ContentAppDiscoveryService.getReceiverInstance().getDiscoveredContentApps().values()) {
-      addContentApp(app);
-    }
-    registerReceiver();
+    mAppPlatform = new AppPlatform(new ContentAppEndpointManagerImpl(context));
+    endpointsDataStore = EndpointsDataStore.getInstance(context);
+    initializeContentAppEndpoints();
+    registerContentAppUpdatesReceiver();
   }
 
-  private void registerReceiver() {
+  public void addSelfVendorAsAdmin() {
+    mAppPlatform.addSelfVendorAsAdmin();
+  }
+
+  private void initializeContentAppEndpoints() {
+
+    // Read the metadada of previously discovered endpoints.
+    Map<String, ContentApp> previouslyPersistedEndpoints =
+        new HashMap((Map<String, ContentApp>) endpointsDataStore.getAllPersistedContentApps());
+
+    // Get the list of currently discovered content apps.
+    Map<String, ContentApp> discoveredContentApps =
+        new HashMap<>(ContentAppDiscoveryService.getReceiverInstance().getDiscoveredContentApps());
+
+    // Iterate through the previously discovered endpoints
+    for (ContentApp persistedContentApp : previouslyPersistedEndpoints.values()) {
+      ContentApp discoveredContentApp =
+          discoveredContentApps.remove(persistedContentApp.getAppName());
+      if (discoveredContentApp != null) {
+        // If the content app for the persisted endpoint is present in currently discovered list,
+        // register endpoint with updated metadata and update the metadata in the persisted
+        // endpoints.
+        discoveredContentApp.setEndpointId(persistedContentApp.getEndpointId());
+        addContentApp(discoveredContentApp);
+      } else {
+        // If the content app for the persisted endpoint is not present register the endpoint with
+        // previously persisted data.
+        addContentApp(persistedContentApp);
+      }
+    }
+
+    // For newly discovered content apps register new endpoints and persist the metadata for future
+    // use
+    for (ContentApp discoveredContentApp : discoveredContentApps.values()) {
+      addContentApp(discoveredContentApp);
+    }
+  }
+
+  private void registerContentAppUpdatesReceiver() {
     mBroadcastReceiver =
         new BroadcastReceiver() {
           @Override
@@ -74,14 +124,24 @@ public class AppPlatformService {
                   ContentAppDiscoveryService.getReceiverInstance()
                       .getDiscoveredContentApps()
                       .get(packageName);
-              addContentApp(app);
-            } else if (action.equals(ContentAppDiscoveryService.DISCOVERY_APPAGENT_ACTION_REMOVE)) {
-              int endpointId =
-                  intent.getIntExtra(
-                      ContentAppDiscoveryService.DISCOVERY_APPAGENT_EXTRA_ENDPOINTID, -1);
-              if (endpointId != -1) {
-                removeContentApp(endpointId);
+              // if this app was already added as endpoint remove and add so that the app metadata
+              // stored by the content app platform is also updated
+              ContentApp persistedContentApp =
+                  endpointsDataStore.getAllPersistedContentApps().get(app.getAppName());
+              if (persistedContentApp != null) {
+                mAppPlatform.removeContentApp(persistedContentApp.getEndpointId());
+                app.setEndpointId(persistedContentApp.getEndpointId());
               }
+              addContentApp(app);
+              //            } else if
+              // (action.equals(ContentAppDiscoveryService.DISCOVERY_APPAGENT_ACTION_REMOVE)) {
+              //              int endpointId =
+              //                  intent.getIntExtra(
+              //
+              // ContentAppDiscoveryService.DISCOVERY_APPAGENT_EXTRA_ENDPOINTID, -1);
+              //              if (endpointId != -1) {
+              //                removeContentApp(endpointId, packageName);
+              //              }
             }
           }
         };
@@ -98,17 +158,33 @@ public class AppPlatformService {
   }
 
   public void addContentApp(ContentApp app) {
-    app.setEndpointId(
-        mAppPlatform.addContentApp(
-            app.getVendorName(),
-            app.getVendorId(),
-            app.getAppName(),
-            app.getProductId(),
-            "1.0",
-            new ContentAppEndpointManagerImpl(context)));
-  }
-
-  public int removeContentApp(int endpointID) {
-    return mAppPlatform.removeContentApp(endpointID);
+    int retEndpointId = -1;
+    int desiredEndpointId = app.getEndpointId();
+    if (desiredEndpointId > 0) {
+      retEndpointId =
+          mAppPlatform.addContentAppAtEndpoint(
+              app.getVendorName(),
+              app.getVendorId(),
+              app.getAppName(),
+              app.getProductId(),
+              app.getVersion(),
+              desiredEndpointId,
+              new ContentAppEndpointManagerImpl(context));
+    } else {
+      retEndpointId =
+          mAppPlatform.addContentApp(
+              app.getVendorName(),
+              app.getVendorId(),
+              app.getAppName(),
+              app.getProductId(),
+              app.getVersion(),
+              new ContentAppEndpointManagerImpl(context));
+    }
+    if (retEndpointId > 0) {
+      app.setEndpointId(retEndpointId);
+      endpointsDataStore.persistContentAppEndpoint(app);
+    } else {
+      Log.e(TAG, "Could not add content app as endpoint. App Name " + app.getAppName());
+    }
   }
 }

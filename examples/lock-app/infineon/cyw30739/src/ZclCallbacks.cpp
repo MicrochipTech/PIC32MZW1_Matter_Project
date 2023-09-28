@@ -27,55 +27,21 @@ using namespace chip;
 using namespace chip::app::Clusters;
 using namespace chip::DeviceLayer;
 
-void emberAfBasicClusterInitCallback(EndpointId endpoint)
-{
-    uint16_t year;
-    uint8_t month;
-    uint8_t dayOfMonth;
-    char cString[16] = "00000000";
-
-    if (GetDeviceInstanceInfoProvider()->GetManufacturingDate(year, month, dayOfMonth) == CHIP_NO_ERROR)
-    {
-        snprintf(cString, sizeof(cString), "%04u%02u%02u", year, month, dayOfMonth);
-    }
-    Basic::Attributes::ManufacturingDate::Set(endpoint, CharSpan(cString));
-}
-
-void MatterPostAttributeChangeCallback(const app::ConcreteAttributePath & attributePath, uint8_t type, uint16_t size,
+void MatterPostAttributeChangeCallback(const chip::app::ConcreteAttributePath & attributePath, uint8_t type, uint16_t size,
                                        uint8_t * value)
-
 {
-    switch (attributePath.mClusterId)
-    {
-    case DoorLock::Id:
-        if (attributePath.mAttributeId == DoorLock::Attributes::LockState::Id)
-        {
-            ChipLogProgress(Zcl, "Door lock cluster: " ChipLogFormatMEI, ChipLogValueMEI(attributePath.mClusterId));
-            printf("ZCL OnOff -> %u\n", *value);
-            LockMgr().InitiateAction(LockManager::ACTOR_ZCL_CMD, (*value) ? LockManager::LOCK_ACTION : LockManager::UNLOCK_ACTION);
-            return;
-        }
-        break;
-    case Identify::Id:
-        if (attributePath.mAttributeId == Identify::Attributes::IdentifyTime::Id)
-        {
-            uint16_t identifyTime;
-            if (EMBER_ZCL_STATUS_SUCCESS == Identify::Attributes::IdentifyTime::Get(attributePath.mEndpointId, &identifyTime))
-            {
-                ChipLogProgress(Zcl, "IdentifyTime %u", identifyTime);
-                return;
-            }
-        }
-        break;
-    default:
-        printf("Unhandled cluster ID: 0x%04lx\n", attributePath.mClusterId);
-        return;
-    }
+    ClusterId clusterId     = attributePath.mClusterId;
+    AttributeId attributeId = attributePath.mAttributeId;
+    ChipLogProgress(Zcl, "Cluster callback: " ChipLogFormatMEI, ChipLogValueMEI(clusterId));
 
-    printf("ERROR clusterId: 0x%04lx, unknown attribute ID: 0x%04lx\n", attributePath.mClusterId, attributePath.mAttributeId);
+    if (clusterId == DoorLock::Id && attributeId == DoorLock::Attributes::LockState::Id)
+    {
+        ChipLogProgress(Zcl, "Door lock cluster: " ChipLogFormatMEI, ChipLogValueMEI(clusterId));
+    }
 }
 
-bool emberAfPluginDoorLockOnDoorLockCommand(chip::EndpointId endpointId, const Optional<ByteSpan> & pinCode, DlOperationError & err)
+bool emberAfPluginDoorLockOnDoorLockCommand(chip::EndpointId endpointId, const Optional<ByteSpan> & pinCode,
+                                            OperationErrorEnum & err)
 {
     ChipLogProgress(Zcl, "Door Lock App: Lock Command endpoint=%d", endpointId);
     bool status = LockMgr().Lock(endpointId, pinCode, err);
@@ -87,7 +53,7 @@ bool emberAfPluginDoorLockOnDoorLockCommand(chip::EndpointId endpointId, const O
 }
 
 bool emberAfPluginDoorLockOnDoorUnlockCommand(chip::EndpointId endpointId, const Optional<ByteSpan> & pinCode,
-                                              DlOperationError & err)
+                                              OperationErrorEnum & err)
 {
     ChipLogProgress(Zcl, "Door Lock App: Unlock Command endpoint=%d", endpointId);
     bool status = LockMgr().Unlock(endpointId, pinCode, err);
@@ -99,7 +65,7 @@ bool emberAfPluginDoorLockOnDoorUnlockCommand(chip::EndpointId endpointId, const
     return status;
 }
 
-bool emberAfPluginDoorLockGetCredential(chip::EndpointId endpointId, uint16_t credentialIndex, DlCredentialType credentialType,
+bool emberAfPluginDoorLockGetCredential(chip::EndpointId endpointId, uint16_t credentialIndex, CredentialTypeEnum credentialType,
                                         EmberAfPluginDoorLockCredentialInfo & credential)
 {
     return LockMgr().GetCredential(endpointId, credentialIndex, credentialType, credential);
@@ -107,7 +73,7 @@ bool emberAfPluginDoorLockGetCredential(chip::EndpointId endpointId, uint16_t cr
 
 bool emberAfPluginDoorLockSetCredential(chip::EndpointId endpointId, uint16_t credentialIndex, chip::FabricIndex creator,
                                         chip::FabricIndex modifier, DlCredentialStatus credentialStatus,
-                                        DlCredentialType credentialType, const chip::ByteSpan & credentialData)
+                                        CredentialTypeEnum credentialType, const chip::ByteSpan & credentialData)
 {
     return LockMgr().SetCredential(endpointId, credentialIndex, creator, modifier, credentialStatus, credentialType,
                                    credentialData);
@@ -120,36 +86,48 @@ bool emberAfPluginDoorLockGetUser(chip::EndpointId endpointId, uint16_t userInde
 
 bool emberAfPluginDoorLockSetUser(chip::EndpointId endpointId, uint16_t userIndex, chip::FabricIndex creator,
                                   chip::FabricIndex modifier, const chip::CharSpan & userName, uint32_t uniqueId,
-                                  DlUserStatus userStatus, DlUserType usertype, DlCredentialRule credentialRule,
-                                  const DlCredential * credentials, size_t totalCredentials)
+                                  UserStatusEnum userStatus, UserTypeEnum usertype, CredentialRuleEnum credentialRule,
+                                  const CredentialStruct * credentials, size_t totalCredentials)
 {
 
     return LockMgr().SetUser(endpointId, userIndex, creator, modifier, userName, uniqueId, userStatus, usertype, credentialRule,
                              credentials, totalCredentials);
 }
 
-// TODO: These functions will be supported by door-lock-server in the future. These are set to return failure until implemented.
 DlStatus emberAfPluginDoorLockGetSchedule(chip::EndpointId endpointId, uint8_t weekdayIndex, uint16_t userIndex,
                                           EmberAfPluginDoorLockWeekDaySchedule & schedule)
 {
-    return DlStatus::kFailure;
+    return LockMgr().GetWeekdaySchedule(endpointId, weekdayIndex, userIndex, schedule);
 }
 
 DlStatus emberAfPluginDoorLockGetSchedule(chip::EndpointId endpointId, uint8_t yearDayIndex, uint16_t userIndex,
                                           EmberAfPluginDoorLockYearDaySchedule & schedule)
 {
-    return DlStatus::kFailure;
+    return LockMgr().GetYeardaySchedule(endpointId, yearDayIndex, userIndex, schedule);
+}
+
+DlStatus emberAfPluginDoorLockGetSchedule(chip::EndpointId endpointId, uint8_t holidayIndex,
+                                          EmberAfPluginDoorLockHolidaySchedule & holidaySchedule)
+{
+    return LockMgr().GetHolidaySchedule(endpointId, holidayIndex, holidaySchedule);
 }
 
 DlStatus emberAfPluginDoorLockSetSchedule(chip::EndpointId endpointId, uint8_t weekdayIndex, uint16_t userIndex,
-                                          DlScheduleStatus status, DlDaysMaskMap daysMask, uint8_t startHour, uint8_t startMinute,
+                                          DlScheduleStatus status, DaysMaskMap daysMask, uint8_t startHour, uint8_t startMinute,
                                           uint8_t endHour, uint8_t endMinute)
 {
-    return DlStatus::kFailure;
+    return LockMgr().SetWeekdaySchedule(endpointId, weekdayIndex, userIndex, status, daysMask, startHour, startMinute, endHour,
+                                        endMinute);
 }
 
 DlStatus emberAfPluginDoorLockSetSchedule(chip::EndpointId endpointId, uint8_t yearDayIndex, uint16_t userIndex,
                                           DlScheduleStatus status, uint32_t localStartTime, uint32_t localEndTime)
 {
-    return DlStatus::kFailure;
+    return LockMgr().SetYeardaySchedule(endpointId, yearDayIndex, userIndex, status, localStartTime, localEndTime);
+}
+
+DlStatus emberAfPluginDoorLockSetSchedule(chip::EndpointId endpointId, uint8_t holidayIndex, DlScheduleStatus status,
+                                          uint32_t localStartTime, uint32_t localEndTime, OperatingModeEnum operatingMode)
+{
+    return LockMgr().SetHolidaySchedule(endpointId, holidayIndex, status, localStartTime, localEndTime, operatingMode);
 }

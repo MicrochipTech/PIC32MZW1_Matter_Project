@@ -125,7 +125,7 @@ void ExchangeContext::UpdateSEDIntervalMode(bool activeMode)
     if (activeMode != IsRequestingActiveMode())
     {
         SetRequestingActiveMode(activeMode);
-        DeviceLayer::ConnectivityMgr().RequestSEDActiveMode(activeMode);
+        DeviceLayer::ConnectivityMgr().RequestSEDActiveMode(activeMode, true);
     }
 }
 #endif
@@ -480,6 +480,11 @@ void ExchangeContext::NotifyResponseTimeout(bool aCloseIfNeeded)
 {
     SetResponseExpected(false);
 
+    // Hold a ref to ourselves so we can make calls into our delegate that might
+    // decrease our refcount (e.g. by expiring out session) without worrying
+    // about use-after-free.
+    ExchangeHandle ref(*this);
+
     // mSession might be null if this timeout is due to the session being
     // evicted.
     if (mSession)
@@ -571,6 +576,18 @@ CHIP_ERROR ExchangeContext::HandleMessage(uint32_t messageCounter, const Payload
     {
         // The EphemeralExchange has done its job, since StandaloneAck is sent in previous FlushAcks() call.
         return CHIP_NO_ERROR;
+    }
+
+    if (IsMessageNotAcked())
+    {
+        // The only way we can get here is a spec violation on the other side:
+        // we sent a message that needs an ack, and the other side responded
+        // with a message that does not contain an ack for the message we sent.
+        // Just drop this message; if we delivered it to our delegate it might
+        // try to send another message-needing-an-ack in response, which would
+        // violate our internal invariants.
+        ChipLogError(ExchangeManager, "Dropping message without piggyback ack when we are waiting for an ack.");
+        return CHIP_ERROR_INCORRECT_STATE;
     }
 
     // Since we got the response, cancel the response timer.

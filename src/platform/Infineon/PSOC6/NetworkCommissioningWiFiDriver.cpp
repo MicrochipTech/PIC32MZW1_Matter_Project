@@ -186,34 +186,34 @@ exit:
     {
         ChipLogError(NetworkProvisioning, "Failed to connect to WiFi network:%s", chip::ErrorStr(err));
         mpConnectCallback = nullptr;
-        chip::DeviceLayer::PlatformMgr().LockChipStack();
         callback->OnResult(networkingStatus, CharSpan(), 0);
-        chip::DeviceLayer::PlatformMgr().UnlockChipStack();
     }
 }
 
-uint8_t P6WiFiDriver::ConvertSecuritytype(cy_wcm_security_t security)
+BitFlags<app::Clusters::NetworkCommissioning::WiFiSecurity> P6WiFiDriver::ConvertSecuritytype(cy_wcm_security_t security)
 {
-    uint8_t securityType = EMBER_ZCL_SECURITY_TYPE_UNSPECIFIED;
+    using app::Clusters::NetworkCommissioning::WiFiSecurity;
+
+    BitFlags<WiFiSecurity> securityType;
     if (security == CY_WCM_SECURITY_OPEN)
     {
-        securityType = EMBER_ZCL_SECURITY_TYPE_NONE;
+        securityType.Set(WiFiSecurity::kUnencrypted);
     }
     else if (security & WPA3_SECURITY)
     {
-        securityType = EMBER_ZCL_SECURITY_TYPE_WPA3;
+        securityType.Set(WiFiSecurity::kWpa3Personal);
     }
     else if (security & WPA2_SECURITY)
     {
-        securityType = EMBER_ZCL_SECURITY_TYPE_WPA2;
+        securityType.Set(WiFiSecurity::kWpa2Personal);
     }
     else if (security & WPA_SECURITY)
     {
-        securityType = EMBER_ZCL_SECURITY_TYPE_WPA;
+        securityType.Set(WiFiSecurity::kWpaPersonal);
     }
     else if (security & WEP_ENABLED)
     {
-        securityType = EMBER_ZCL_SECURITY_TYPE_WEP;
+        securityType.Set(WiFiSecurity::kWep);
     }
     return securityType;
 }
@@ -231,9 +231,9 @@ void P6WiFiDriver::scan_result_callback(cy_wcm_scan_result_t * result_ptr, void 
         {
             /* Copy Scan results and increment the AP count */
             memcpy(&scan_result_list[NumAP], (void *) result_ptr, sizeof(cy_wcm_scan_result_t));
-            /* Convert Security type to proper EmberAfSecurityType value */
-            scan_result_list[NumAP].security =
-                static_cast<cy_wcm_security_t>(P6WiFiDriver::GetInstance().ConvertSecuritytype(scan_result_list[NumAP].security));
+            /* Convert Security type to proper WiFiSecurity value */
+            scan_result_list[NumAP].security = static_cast<cy_wcm_security_t>(
+                P6WiFiDriver::GetInstance().ConvertSecuritytype(scan_result_list[NumAP].security).Raw());
             NumAP++;
         } /* end of if ( result_ptr != NULL ) */
     }     /* end of else */
@@ -365,8 +365,7 @@ void P6WiFiDriver::OnNetworkStatusChange()
     if (staConnected)
     {
         mpStatusChangeCallback->OnNetworkingStatusChange(
-            Status::kSuccess, MakeOptional(ByteSpan(configuredNetwork.networkID, configuredNetwork.networkIDLen)),
-            MakeOptional(GetLastDisconnectReason()));
+            Status::kSuccess, MakeOptional(ByteSpan(configuredNetwork.networkID, configuredNetwork.networkIDLen)), NullOptional);
         return;
     }
     mpStatusChangeCallback->OnNetworkingStatusChange(

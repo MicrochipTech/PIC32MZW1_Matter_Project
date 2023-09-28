@@ -17,6 +17,7 @@
 #pragma once
 
 #include <credentials/PersistentStorageOpCertStore.h>
+#include <crypto/DefaultSessionKeystore.h>
 #include <crypto/PersistentStorageOperationalKeystore.h>
 #include <lib/support/TestPersistentStorageDelegate.h>
 #include <messaging/ExchangeContext.h>
@@ -85,6 +86,12 @@ public:
                          //      i.e IDLE = 10ms, ACTIVE = 10ms
     };
 
+    //
+    // See above for a description of the values used.
+    //
+    static constexpr System::Clock::Timeout kResponsiveIdleRetransTimeout   = System::Clock::Milliseconds32(10);
+    static constexpr System::Clock::Timeout kResponsiveActiveRetransTimeout = System::Clock::Milliseconds32(10);
+
     MessagingContext() :
         mInitialized(false), mAliceAddress(Transport::PeerAddress::UDP(GetAddress(), CHIP_PORT + 1)),
         mBobAddress(Transport::PeerAddress::UDP(GetAddress(), CHIP_PORT))
@@ -125,6 +132,7 @@ public:
     Messaging::ExchangeManager & GetExchangeManager() { return mExchangeManager; }
     secure_channel::MessageCounterManager & GetMessageCounterManager() { return mMessageCounterManager; }
     FabricTable & GetFabricTable() { return mFabricTable; }
+    Crypto::DefaultSessionKeystore & GetSessionKeystore() { return mSessionKeystore; }
 
     FabricIndex GetAliceFabricIndex() { return mAliceFabricIndex; }
     FabricIndex GetBobFabricIndex() { return mBobFabricIndex; }
@@ -176,6 +184,7 @@ private:
     chip::TestPersistentStorageDelegate mStorage; // for SessionManagerInit
     chip::PersistentStorageOperationalKeystore mOpKeyStore;
     chip::Credentials::PersistentStorageOpCertStore mOpCertStore;
+    chip::Crypto::DefaultSessionKeystore mSessionKeystore;
 
     FabricIndex mAliceFabricIndex = kUndefinedFabricIndex;
     FabricIndex mBobFabricIndex   = kUndefinedFabricIndex;

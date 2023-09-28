@@ -20,8 +20,8 @@
 #include "AppTask.h"
 #include "AppConfig.h"
 #include "AppEvent.h"
+
 #include "LEDWidget.h"
-#include "sl_simple_led_instances.h"
 
 #ifdef DISPLAY_ENABLED
 #include "lcd.h"
@@ -30,12 +30,10 @@
 #endif // QR_CODE_ENABLED
 #endif // DISPLAY_ENABLED
 
-#include <app-common/zap-generated/attribute-id.h>
-#include <app-common/zap-generated/attribute-type.h>
-#include <app-common/zap-generated/cluster-id.h>
 #include <app/server/OnboardingCodesUtil.h>
 #include <app/server/Server.h>
 #include <app/util/attribute-storage.h>
+#include <app/util/config.h>
 
 #ifdef EMBER_AF_PLUGIN_IDENTIFY_SERVER
 #include <app/clusters/identify-server/identify-server.h>
@@ -46,13 +44,11 @@
 #include <setup_payload/QRCodeSetupPayloadGenerator.h>
 #include <setup_payload/SetupPayload.h>
 
-#include <platform/EFR32/freertos_bluetooth.h>
-
 #include <lib/support/CodeUtils.h>
 
 #include <platform/CHIPDeviceLayer.h>
 
-#define SYSTEM_STATE_LED &sl_led_led0
+#define SYSTEM_STATE_LED 0
 #define APP_FUNCTION_BUTTON &sl_button_btn0
 
 using namespace chip;
@@ -131,7 +127,7 @@ CHIP_ERROR AppTask::Init()
     err = BaseApplication::Init(&gIdentify);
     if (err != CHIP_NO_ERROR)
     {
-        EFR32_LOG("BaseApplication::Init() failed");
+        SILABS_LOG("BaseApplication::Init() failed");
         appError(err);
     }
 
@@ -151,11 +147,11 @@ void AppTask::AppTaskMain(void * pvParameter)
     CHIP_ERROR err = sAppTask.Init();
     if (err != CHIP_NO_ERROR)
     {
-        EFR32_LOG("AppTask.Init() failed");
+        SILABS_LOG("AppTask.Init() failed");
         appError(err);
     }
 
-    EFR32_LOG("App Task started");
+    SILABS_LOG("App Task started");
 
     while (true)
     {

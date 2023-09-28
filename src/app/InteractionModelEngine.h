@@ -114,7 +114,8 @@ public:
      *
      */
     CHIP_ERROR Init(Messaging::ExchangeManager * apExchangeMgr, FabricTable * apFabricTable,
-                    CASESessionManager * apCASESessionMgr = nullptr);
+                    CASESessionManager * apCASESessionMgr                         = nullptr,
+                    SubscriptionResumptionStorage * subscriptionResumptionStorage = nullptr);
 
     void Shutdown();
 
@@ -292,6 +293,10 @@ public:
     // virtual method from FabricTable::Delegate
     void OnFabricRemoved(const FabricTable & fabricTable, FabricIndex fabricIndex) override;
 
+    SubscriptionResumptionStorage * GetSubscriptionResumptionStorage() { return mpSubscriptionResumptionStorage; };
+
+    CHIP_ERROR ResumeSubscriptions();
+
 #if CONFIG_BUILD_FOR_HOST_UNIT_TEST
     //
     // Get direct access to the underlying read handler pool
@@ -377,6 +382,21 @@ private:
     CHIP_ERROR OnMessageReceived(Messaging::ExchangeContext * apExchangeContext, const PayloadHeader & aPayloadHeader,
                                  System::PacketBufferHandle && aPayload) override;
     void OnResponseTimeout(Messaging::ExchangeContext * ec) override;
+
+    /**
+     * This parses the attribute path list to ensure it is well formed. If so, for each path in the list, it will expand to a list
+     * of concrete paths and walk each path to check if it has privileges to read that attribute.
+     *
+     * If there is AT LEAST one "existent path" (as the spec calls it) that has sufficient privilege, aHasValidAttributePath
+     * will be set to true. Otherwise, it will be set to false.
+     *
+     * aRequestedAttributePathCount will be updated to reflect the number of attribute paths in the request.
+     *
+     *
+     */
+    static CHIP_ERROR ParseAttributePaths(const Access::SubjectDescriptor & aSubjectDescriptor,
+                                          AttributePathIBs::Parser & aAttributePathListParser, bool & aHasValidAttributePath,
+                                          size_t & aRequestedAttributePathCount);
 
     /**
      * Called when Interaction Model receives a Read Request message.  Errors processing
@@ -516,6 +536,8 @@ private:
     void ShutdownMatchingSubscriptions(const Optional<FabricIndex> & aFabricIndex = NullOptional,
                                        const Optional<NodeId> & aPeerNodeId       = NullOptional);
 
+    static void ResumeSubscriptionsTimerCallback(System::Layer * apSystemLayer, void * apAppState);
+
     template <typename T, size_t N>
     void ReleasePool(ObjectList<T> *& aObjectList, ObjectPool<ObjectList<T>, N> & aObjectPool);
     template <typename T, size_t N>
@@ -581,6 +603,8 @@ private:
 
     CASESessionManager * mpCASESessionMgr = nullptr;
 
+    SubscriptionResumptionStorage * mpSubscriptionResumptionStorage = nullptr;
+
     // A magic number for tracking values between stack Shutdown()-s and Init()-s.
     // An ObjectHandle is valid iff. its magic equals to this one.
     uint32_t mMagic = 0;
@@ -616,6 +640,13 @@ Protocols::InteractionModel::Status ServerClusterCommandExists(const ConcreteCom
 CHIP_ERROR ReadSingleClusterData(const Access::SubjectDescriptor & aSubjectDescriptor, bool aIsFabricFiltered,
                                  const ConcreteReadAttributePath & aPath, AttributeReportIBs::Builder & aAttributeReports,
                                  AttributeValueEncoder::AttributeEncodeState * apEncoderState);
+
+/**
+ *  Check whether concrete attribute path is an "existent attribute path" in spec terms.
+ *  @param[in]    aPath                 The concrete path of the data being read.
+ *  @retval  boolean
+ */
+bool ConcreteAttributePathExists(const ConcreteAttributePath & aPath);
 
 /**
  *  Get the registered attribute access override. nullptr when attribute access override is not found.

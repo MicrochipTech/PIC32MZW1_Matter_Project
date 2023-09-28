@@ -17,7 +17,7 @@
 #import "MTRDeviceControllerStartupParams.h"
 #import "MTRCertificates.h"
 #import "MTRDeviceControllerStartupParams_Internal.h"
-#import "MTRLogging.h"
+#import "MTRLogging_Internal.h"
 #import "MTRP256KeypairBridge.h"
 #import "NSDataSpanConversion.h"
 
@@ -30,29 +30,29 @@ using namespace chip;
 
 @implementation MTRDeviceControllerStartupParams
 
-- (instancetype)initWithSigningKeypair:(id<MTRKeypair>)nocSigner fabricId:(uint64_t)fabricId ipk:(NSData *)ipk
+- (instancetype)initWithIPK:(NSData *)ipk fabricID:(NSNumber *)fabricID nocSigner:(id<MTRKeypair>)nocSigner
 {
     if (!(self = [super init])) {
         return nil;
     }
 
-    if (!IsValidFabricId(fabricId)) {
-        MTR_LOG_ERROR("%llu is not a valid fabric id to initialize a device controller with", fabricId);
+    if (!IsValidFabricId(fabricID.unsignedLongLongValue)) {
+        MTR_LOG_ERROR("%llu is not a valid fabric id to initialize a device controller with", fabricID.unsignedLongLongValue);
         return nil;
     }
 
     _nocSigner = nocSigner;
-    _fabricId = fabricId;
-    _ipk = ipk;
+    _fabricID = [fabricID copy];
+    _ipk = [ipk copy];
 
     return self;
 }
 
-- (instancetype)initWithOperationalKeypair:(id<MTRKeypair>)operationalKeypair
-                    operationalCertificate:(NSData *)operationalCertificate
-                   intermediateCertificate:(nullable NSData *)intermediateCertificate
-                           rootCertificate:(NSData *)rootCertificate
-                                       ipk:(NSData *)ipk
+- (instancetype)initWithIPK:(NSData *)ipk
+         operationalKeypair:(id<MTRKeypair>)operationalKeypair
+     operationalCertificate:(MTRCertificateDERBytes)operationalCertificate
+    intermediateCertificate:(MTRCertificateDERBytes _Nullable)intermediateCertificate
+            rootCertificate:(MTRCertificateDERBytes)rootCertificate
 {
     if (!(self = [super init])) {
         return nil;
@@ -75,14 +75,14 @@ using namespace chip;
             MTR_LOG_ERROR("Unable to extract fabric id from operational certificate: %s", ErrorStr(err));
             return nil;
         }
-        _fabricId = fabricId;
+        _fabricID = @(fabricId);
     }
 
     _operationalKeypair = operationalKeypair;
-    _operationalCertificate = operationalCertificate;
-    _intermediateCertificate = intermediateCertificate;
-    _rootCertificate = rootCertificate;
-    _ipk = ipk;
+    _operationalCertificate = [operationalCertificate copy];
+    _intermediateCertificate = [intermediateCertificate copy];
+    _rootCertificate = [rootCertificate copy];
+    _ipk = [ipk copy];
 
     return self;
 }
@@ -94,14 +94,17 @@ using namespace chip;
     }
 
     _nocSigner = params.nocSigner;
-    _fabricId = params.fabricId;
+    _fabricID = params.fabricID;
     _ipk = params.ipk;
-    _vendorId = params.vendorId;
-    _nodeId = params.nodeId;
+    _vendorID = params.vendorID;
+    _nodeID = params.nodeID;
+    _caseAuthenticatedTags = params.caseAuthenticatedTags;
     _rootCertificate = params.rootCertificate;
     _intermediateCertificate = params.intermediateCertificate;
     _operationalCertificate = params.operationalCertificate;
     _operationalKeypair = params.operationalKeypair;
+    _operationalCertificateIssuer = params.operationalCertificateIssuer;
+    _operationalCertificateIssuerQueue = params.operationalCertificateIssuerQueue;
 
     return self;
 }
@@ -123,6 +126,53 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
     return AsData(derCert);
 }
 
+@implementation MTRDeviceControllerStartupParams (Deprecated)
+
+- (uint64_t)fabricId
+{
+    return self.fabricID.unsignedLongLongValue;
+}
+
+- (nullable NSNumber *)vendorId
+{
+    return self.vendorID;
+}
+
+- (void)setVendorId:(nullable NSNumber *)vendorId
+{
+    self.vendorID = vendorId;
+}
+
+- (nullable NSNumber *)nodeId
+{
+    return self.nodeID;
+}
+
+- (void)setNodeId:(nullable NSNumber *)nodeId
+{
+    self.nodeID = nodeId;
+}
+
+- (instancetype)initWithSigningKeypair:(id<MTRKeypair>)nocSigner fabricId:(uint64_t)fabricId ipk:(NSData *)ipk
+{
+    return [self initWithIPK:ipk fabricID:@(fabricId) nocSigner:nocSigner];
+}
+
+- (instancetype)initWithOperationalKeypair:(id<MTRKeypair>)operationalKeypair
+                    operationalCertificate:(MTRCertificateDERBytes)operationalCertificate
+                   intermediateCertificate:(MTRCertificateDERBytes _Nullable)intermediateCertificate
+                           rootCertificate:(MTRCertificateDERBytes)rootCertificate
+                                       ipk:(NSData *)ipk
+{
+    return [self initWithIPK:ipk
+             operationalKeypair:operationalKeypair
+         operationalCertificate:operationalCertificate
+        intermediateCertificate:intermediateCertificate
+                rootCertificate:rootCertificate];
+}
+
+@end
+
 @implementation MTRDeviceControllerStartupParamsInternal
 
 - (instancetype)initWithParams:(MTRDeviceControllerStartupParams *)params
@@ -136,8 +186,13 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
         return nil;
     }
 
-    if (self.operationalCertificate != nil && self.nodeId != nil) {
-        MTR_LOG_ERROR("nodeId must be nil if operationalCertificate is not nil");
+    if (self.operationalCertificate != nil && self.nodeID != nil) {
+        MTR_LOG_ERROR("nodeID must be nil if operationalCertificate is not nil");
+        return nil;
+    }
+
+    if (self.caseAuthenticatedTags != nil && self.nodeID == nil) {
+        MTR_LOG_ERROR("caseAuthenticatedTags must be nil if nodeID is nil");
         return nil;
     }
 
@@ -158,6 +213,7 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
 
 - (instancetype)initForNewFabric:(chip::FabricTable *)fabricTable
                         keystore:(chip::Crypto::OperationalKeystore *)keystore
+            advertiseOperational:(BOOL)advertiseOperational
                           params:(MTRDeviceControllerStartupParams *)params
 {
     if (!(self = [self initWithParams:params])) {
@@ -169,20 +225,20 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
         return nil;
     }
 
-    if (self.operationalCertificate == nil && self.nodeId == nil) {
+    if (self.operationalCertificate == nil && self.nodeID == nil) {
         // Just avoid setting the top bit, to avoid issues with node
         // ids outside the operational range.
         uint64_t nodeId = arc4random();
         nodeId = (nodeId << 31) | (arc4random() >> 1);
-        self.nodeId = @(nodeId);
+        self.nodeID = @(nodeId);
     }
 
     if (self.rootCertificate == nil) {
         NSError * error;
-        self.rootCertificate = [MTRCertificates generateRootCertificate:self.nocSigner
-                                                               issuerId:nil
-                                                               fabricId:@(self.fabricId)
-                                                                  error:&error];
+        self.rootCertificate = [MTRCertificates createRootCertificate:self.nocSigner
+                                                             issuerID:nil
+                                                             fabricID:self.fabricID
+                                                                error:&error];
         if (error != nil || self.rootCertificate == nil) {
             MTR_LOG_ERROR("Failed to generate root certificate: %@", error);
             return nil;
@@ -191,6 +247,7 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
 
     _fabricTable = fabricTable;
     _keystore = keystore;
+    _advertiseOperational = advertiseOperational;
 
     return self;
 }
@@ -198,6 +255,7 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
 - (instancetype)initForExistingFabric:(FabricTable *)fabricTable
                           fabricIndex:(FabricIndex)fabricIndex
                              keystore:(chip::Crypto::OperationalKeystore *)keystore
+                 advertiseOperational:(BOOL)advertiseOperational
                                params:(MTRDeviceControllerStartupParams *)params
 {
     if (!(self = [self initWithParams:params])) {
@@ -206,22 +264,24 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
 
     const FabricInfo * fabric = fabricTable->FindFabricWithIndex(fabricIndex);
 
-    if (self.vendorId == nil) {
-        self.vendorId = @(fabric->GetVendorId());
+    if (self.vendorID == nil) {
+        self.vendorID = @(fabric->GetVendorId());
     }
 
     BOOL usingExistingNOC = NO;
-    if (self.operationalCertificate == nil && self.nodeId == nil) {
-        self.nodeId = @(fabric->GetNodeId());
+    if (self.operationalCertificate == nil && self.nodeID == nil) {
+        self.nodeID = @(fabric->GetNodeId());
+
+        // Make sure to preserve caseAuthenticatedTags from the existing certificate.
+        uint8_t nocBuf[Credentials::kMaxCHIPCertLength];
+        MutableByteSpan noc(nocBuf);
+        CHIP_ERROR err = fabricTable->FetchNOCCert(fabric->GetFabricIndex(), noc);
+        if (err != CHIP_NO_ERROR) {
+            MTR_LOG_ERROR("Failed to get existing NOC: %s", ErrorStr(err));
+            return nil;
+        }
 
         if (self.operationalKeypair == nil) {
-            uint8_t nocBuf[Credentials::kMaxCHIPCertLength];
-            MutableByteSpan noc(nocBuf);
-            CHIP_ERROR err = fabricTable->FetchNOCCert(fabric->GetFabricIndex(), noc);
-            if (err != CHIP_NO_ERROR) {
-                MTR_LOG_ERROR("Failed to get existing NOC: %s", ErrorStr(err));
-                return nil;
-            }
             self.operationalCertificate = MatterCertToX509Data(noc);
             if (self.operationalCertificate == nil) {
                 MTR_LOG_ERROR("Failed to convert TLV NOC to DER X.509: %s", ErrorStr(err));
@@ -231,6 +291,26 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
                 MTR_LOG_ERROR("No existing operational key for fabric");
                 return nil;
             }
+        }
+
+        CATValues cats;
+        err = Credentials::ExtractCATsFromOpCert(noc, cats);
+        if (err != CHIP_NO_ERROR) {
+            MTR_LOG_ERROR("Failed to extract existing CATs: %s", ErrorStr(err));
+            return nil;
+        }
+
+        auto tagCount = cats.GetNumTagsPresent();
+        if (tagCount > 0) {
+            auto * catSet = [[NSMutableSet alloc] initWithCapacity:tagCount];
+            for (auto & value : cats.values) {
+                if (value != kUndefinedCAT) {
+                    [catSet addObject:@(value)];
+                }
+            }
+            self.caseAuthenticatedTags = [NSSet setWithSet:catSet];
+        } else {
+            self.caseAuthenticatedTags = nil;
         }
 
         usingExistingNOC = YES;
@@ -303,6 +383,7 @@ static NSData * _Nullable MatterCertToX509Data(const ByteSpan & cert)
     _fabricTable = fabricTable;
     _fabricIndex.Emplace(fabricIndex);
     _keystore = keystore;
+    _advertiseOperational = advertiseOperational;
 
     return self;
 }

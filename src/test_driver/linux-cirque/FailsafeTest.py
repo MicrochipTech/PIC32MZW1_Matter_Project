@@ -17,8 +17,6 @@ limitations under the License.
 
 import logging
 import os
-import pprint
-import time
 import sys
 
 from helper.CHIPTestBase import CHIPVirtualHome
@@ -83,8 +81,11 @@ class TestFailsafe(CHIPVirtualHome):
                    if device['type'] == 'MobileDevice']
 
         for server in server_ids:
-            self.execute_device_cmd(server, "CHIPCirqueDaemon.py -- run gdb -return-child-result -q -ex \"set pagination off\" -ex run -ex \"bt 25\" --args {} --thread --discriminator {}".format(
-                os.path.join(CHIP_REPO, "out/debug/standalone/chip-all-clusters-app"), TEST_DISCRIMINATOR))
+            self.execute_device_cmd(
+                server,
+                ("CHIPCirqueDaemon.py -- run gdb -return-child-result -q -ex \"set pagination off\" "
+                 "-ex run -ex \"bt 25\" --args {} --thread --discriminator {}").format(
+                    os.path.join(CHIP_REPO, "out/debug/standalone/chip-all-clusters-app"), TEST_DISCRIMINATOR))
 
         self.reset_thread_devices(server_ids)
 

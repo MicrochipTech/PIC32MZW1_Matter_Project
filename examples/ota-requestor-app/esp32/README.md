@@ -13,7 +13,6 @@ guides to get started.
 -   [Prerequisite](#prerequisite)
 -   [Query for an OTA Image](#query-for-an-ota-image)
 -   [ESP32 OTA Requestor with Linux OTA Provider](#esp32-ota-requestor-with-linux-ota-provider)
--   [Generate OTA image](#generate-ota-image)
 -   [RPC console and Device Tracing](../../../docs/guides/esp32/rpc_console.md)
 
 ---
@@ -38,7 +37,7 @@ application of OTA image.
 
 ### ESP32 OTA Requestor with Linux OTA Provider
 
--   Build the [Linux OTA Provider](../../ota-provider-app/linux)
+-   Build the [Linux OTA Provider](../../ota-provider-app/linux/README.md)
 -   Run the Linux OTA Provider with OTA image.
 
 ```
@@ -50,3 +49,9 @@ application of OTA image.
 ```
 ./out/debug/chip-tool pairing onnetwork 12345 20202021
 ```
+
+### Note
+
+While trying out example ota-requestor-app bump the software version from
+`CMakeList.txt` and not from `idf.py menuconfig`. And software version of the
+image which is being ota should be greater than current software version.

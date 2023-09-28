@@ -25,12 +25,13 @@ typedef NS_ENUM(NSUInteger, MTROnboardingPayloadType) {
     MTROnboardingPayloadTypeQRCode = 0,
     MTROnboardingPayloadTypeManualCode,
     MTROnboardingPayloadTypeNFC
-};
+} MTR_NEWLY_DEPRECATED("MTROnboardingPayloadType is unused");
 
+MTR_NEWLY_DEPRECATED("Please use [MTRSetupPayload setupPayloadWithOnboardingPayload:error:]")
 @interface MTROnboardingPayloadParser : NSObject
 
-+ (nullable MTRSetupPayload *)setupPayloadForOnboardingPayload:(NSString *)onboardingPayload
-                                                         error:(NSError * __autoreleasing *)error;
++ (MTRSetupPayload * _Nullable)setupPayloadForOnboardingPayload:(NSString *)onboardingPayload
+                                                          error:(NSError * __autoreleasing *)error;
 
 @end
 

@@ -17,7 +17,6 @@ limitations under the License.
 
 import logging
 import os
-import time
 import sys
 
 from helper.CHIPTestBase import CHIPVirtualHome

@@ -20,7 +20,6 @@
  * @brief Implementation for the Descriptor Server Cluster
  ***************************************************************************/
 
-#include <app-common/zap-generated/af-structs.h>
 #include <app-common/zap-generated/cluster-objects.h>
 #include <app-common/zap-generated/ids/Attributes.h>
 #include <app-common/zap-generated/ids/Clusters.h>
@@ -112,7 +111,7 @@ CHIP_ERROR DescriptorAttrAccess::ReadPartsAttribute(EndpointId endpoint, Attribu
 CHIP_ERROR DescriptorAttrAccess::ReadDeviceAttribute(EndpointId endpoint, AttributeValueEncoder & aEncoder)
 {
     CHIP_ERROR err = aEncoder.EncodeList([&endpoint](const auto & encoder) -> CHIP_ERROR {
-        Descriptor::Structs::DeviceType::Type deviceStruct;
+        Descriptor::Structs::DeviceTypeStruct::Type deviceStruct;
         CHIP_ERROR err2;
 
         auto deviceTypeList = emberAfDeviceTypeListFromEndpoint(endpoint, err2);
@@ -120,8 +119,8 @@ CHIP_ERROR DescriptorAttrAccess::ReadDeviceAttribute(EndpointId endpoint, Attrib
 
         for (auto & deviceType : deviceTypeList)
         {
-            deviceStruct.type     = deviceType.deviceId;
-            deviceStruct.revision = deviceType.deviceVersion;
+            deviceStruct.deviceType = deviceType.deviceId;
+            deviceStruct.revision   = deviceType.deviceVersion;
             ReturnErrorOnFailure(encoder.Encode(deviceStruct));
         }
 
@@ -161,7 +160,7 @@ CHIP_ERROR DescriptorAttrAccess::Read(const ConcreteReadAttributePath & aPath, A
 
     switch (aPath.mAttributeId)
     {
-    case DeviceList::Id: {
+    case DeviceTypeList::Id: {
         return ReadDeviceAttribute(aPath.mEndpointId, aEncoder);
     }
     case ServerList::Id: {
@@ -184,7 +183,7 @@ CHIP_ERROR DescriptorAttrAccess::Read(const ConcreteReadAttributePath & aPath, A
 }
 } // anonymous namespace
 
-void MatterDescriptorPluginServerInitCallback(void)
+void MatterDescriptorPluginServerInitCallback()
 {
     registerAttributeAccessOverride(&gAttrAccess);
 }

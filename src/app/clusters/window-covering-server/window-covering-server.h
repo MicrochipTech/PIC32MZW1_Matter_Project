@@ -17,10 +17,11 @@
 
 #pragma once
 
-#include <app-common/zap-generated/attribute-id.h>
+#include "window-covering-delegate.h"
 #include <app-common/zap-generated/cluster-objects.h>
 #include <app-common/zap-generated/enums.h>
 #include <app/util/af-types.h>
+#include <protocols/interaction_model/StatusCode.h>
 
 #include <app/data-model/Nullable.h>
 
@@ -37,9 +38,9 @@ namespace WindowCovering {
 typedef DataModel::Nullable<Percent> NPercent;
 typedef DataModel::Nullable<Percent100ths> NPercent100ths;
 typedef DataModel::Nullable<uint16_t> NAbsolute;
-
 typedef Optional<Percent> OPercent;
 typedef Optional<Percent100ths> OPercent100ths;
+
 // Match directly with OperationalStatus 2 bits Fields
 enum class OperationalState : uint8_t
 {
@@ -68,7 +69,7 @@ struct AbsoluteLimits
     uint16_t closed;
 };
 
-bool HasFeature(chip::EndpointId endpoint, Feature feature);
+bool HasFeature(chip::EndpointId endpoint, WindowCoveringFeature feature);
 bool HasFeaturePaLift(chip::EndpointId endpoint);
 bool HasFeaturePaTilt(chip::EndpointId endpoint);
 
@@ -115,7 +116,7 @@ uint16_t TiltToPercent100ths(chip::EndpointId endpoint, uint16_t tilt);
 uint16_t Percent100thsToTilt(chip::EndpointId endpoint, uint16_t percent100ths);
 void TiltPositionSet(chip::EndpointId endpoint, NPercent100ths position);
 
-EmberAfStatus GetMotionLockStatus(chip::EndpointId endpoint);
+Protocols::InteractionModel::Status GetMotionLockStatus(chip::EndpointId endpoint);
 
 /**
  * @brief PostAttributeChange is called when an Attribute is modified.
@@ -128,6 +129,8 @@ EmberAfStatus GetMotionLockStatus(chip::EndpointId endpoint);
  * @param[in] attributeId
  */
 void PostAttributeChange(chip::EndpointId endpoint, chip::AttributeId attributeId);
+
+void SetDefaultDelegate(EndpointId endpoint, Delegate * delegate);
 
 } // namespace WindowCovering
 } // namespace Clusters

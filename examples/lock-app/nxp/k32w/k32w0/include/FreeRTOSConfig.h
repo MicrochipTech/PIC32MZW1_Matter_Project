@@ -54,7 +54,7 @@
 #if defined(cPWR_UsePowerDownMode) && (cPWR_UsePowerDownMode)
 #define configMINIMAL_STACK_SIZE ((unsigned short) 250)
 #else
-#define configMINIMAL_STACK_SIZE ((unsigned short) 90)
+#define configMINIMAL_STACK_SIZE ((unsigned short) 450)
 #endif
 
 #define configMAX_TASK_NAME_LEN 20
@@ -67,7 +67,10 @@
 #define configUSE_ALTERNATIVE_API 0 /* Deprecated! */
 #define configQUEUE_REGISTRY_SIZE 8
 #define configUSE_QUEUE_SETS 0
-#define configUSE_TIME_SLICING 0
+/* make sure that Thread task can interrupt lengthy Matter
+ * processing in case priority inversion occurs
+ */
+#define configUSE_TIME_SLICING 1
 #define configUSE_NEWLIB_REENTRANT 0
 #define configENABLE_BACKWARD_COMPATIBILITY 1
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
@@ -84,13 +87,7 @@
 #define configTOTAL_HEAP_SIZE ((size_t)(gTotalHeapSize_c))
 #define configAPPLICATION_ALLOCATED_HEAP 1
 
-/* Hook function related definitions. */
-#if defined(cPWR_UsePowerDownMode) && (cPWR_UsePowerDownMode)
 #define configUSE_IDLE_HOOK 1
-#else
-#define configUSE_IDLE_HOOK 0
-#endif
-
 #define configUSE_TICK_HOOK 0
 #define configCHECK_FOR_STACK_OVERFLOW 0
 #ifndef configUSE_MALLOC_FAILED_HOOK

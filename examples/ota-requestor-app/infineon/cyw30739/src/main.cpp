@@ -26,6 +26,7 @@
 #include <lib/shell/Engine.h>
 #include <lib/support/CHIPPlatformMemory.h>
 #include <mbedtls/platform.h>
+#include <platform/Infineon/CYW30739/FactoryDataProvider.h>
 #include <protocols/secure_channel/PASESession.h>
 #include <sparcommon.h>
 #include <stdio.h>
@@ -36,6 +37,8 @@ using namespace chip;
 using namespace chip::Credentials;
 using namespace chip::DeviceLayer;
 using namespace chip::Shell;
+
+static FactoryDataProvider sFactoryDataProvider;
 
 static void InitApp(intptr_t args);
 
@@ -73,8 +76,12 @@ APPLICATION_START()
 
 #if CHIP_DEVICE_CONFIG_THREAD_FTD
     err = ConnectivityMgr().SetThreadDeviceType(ConnectivityManager::kThreadDeviceType_Router);
-#else  // !CHIP_DEVICE_CONFIG_THREAD_FTD
+#else // !CHIP_DEVICE_CONFIG_THREAD_FTD
+#if CHIP_DEVICE_CONFIG_ENABLE_SED
+    err = ConnectivityMgr().SetThreadDeviceType(ConnectivityManager::kThreadDeviceType_SleepyEndDevice);
+#else  /* !CHIP_DEVICE_CONFIG_ENABLE_SED */
     err = ConnectivityMgr().SetThreadDeviceType(ConnectivityManager::kThreadDeviceType_MinimalEndDevice);
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_SED */
 #endif // CHIP_DEVICE_CONFIG_THREAD_FTD
     if (err != CHIP_NO_ERROR)
     {
@@ -123,7 +130,7 @@ void InitApp(intptr_t args)
     initParams.endpointNativeParams    = static_cast<void *>(&nativeParams);
     chip::Server::GetInstance().Init(initParams);
 
-    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
+    SetDeviceAttestationCredentialsProvider(&sFactoryDataProvider);
 
     OTAConfig::Init();
 }

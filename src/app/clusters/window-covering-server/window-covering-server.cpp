@@ -17,18 +17,16 @@
 
 #include "window-covering-server.h"
 
-#include <app-common/zap-generated/attribute-id.h>
 #include <app-common/zap-generated/attributes/Accessors.h>
-#include <app-common/zap-generated/cluster-id.h>
 #include <app-common/zap-generated/cluster-objects.h>
-#include <app-common/zap-generated/command-id.h>
 #include <app/CommandHandler.h>
 #include <app/ConcreteCommandPath.h>
 #include <app/reporting/reporting.h>
-#include <app/util/af-event.h>
 #include <app/util/af-types.h>
 #include <app/util/af.h>
 #include <app/util/attribute-storage.h>
+#include <app/util/config.h>
+#include <app/util/error-mapping.h>
 #include <lib/support/TypeTraits.h>
 #include <string.h>
 
@@ -37,20 +35,36 @@
 #endif // EMBER_AF_PLUGIN_SCENES
 
 using namespace chip;
+using namespace chip::app::Clusters;
 using namespace chip::app::Clusters::WindowCovering;
+using chip::Protocols::InteractionModel::Status;
 
 #define CHECK_BOUNDS_INVALID(MIN, VAL, MAX) ((VAL < MIN) || (VAL > MAX))
 #define CHECK_BOUNDS_VALID(MIN, VAL, MAX) (!CHECK_BOUNDS_INVALID(MIN, VAL, MAX))
 
 #define FAKE_MOTION_DELAY_MS 5000
 
+namespace {
+
+constexpr size_t kWindowCoveringDelegateTableSize =
+    EMBER_AF_WINDOW_COVERING_CLUSTER_SERVER_ENDPOINT_COUNT + CHIP_DEVICE_CONFIG_DYNAMIC_ENDPOINT_COUNT;
+
+Delegate * gDelegateTable[kWindowCoveringDelegateTableSize] = { nullptr };
+
+Delegate * GetDelegate(EndpointId endpoint)
+{
+    uint16_t ep = emberAfFindClusterServerEndpointIndex(endpoint, WindowCovering::Id);
+    return ((ep == kInvalidEndpointId || ep >= EMBER_AF_WINDOW_COVERING_CLUSTER_SERVER_ENDPOINT_COUNT) ? nullptr
+                                                                                                       : gDelegateTable[ep]);
+}
+
 /*
  * ConvertValue: Converts values from one range to another
  * Range In  -> from  inputLowValue to   inputHighValue
  * Range Out -> from outputLowValue to outputtHighValue
  */
-static uint16_t ConvertValue(uint16_t inputLowValue, uint16_t inputHighValue, uint16_t outputLowValue, uint16_t outputHighValue,
-                             uint16_t value)
+uint16_t ConvertValue(uint16_t inputLowValue, uint16_t inputHighValue, uint16_t outputLowValue, uint16_t outputHighValue,
+                      uint16_t value)
 {
     uint16_t inputMin = inputLowValue, inputMax = inputHighValue, inputRange = UINT16_MAX;
     uint16_t outputMin = outputLowValue, outputMax = outputHighValue, outputRange = UINT16_MAX;
@@ -88,17 +102,18 @@ static uint16_t ConvertValue(uint16_t inputLowValue, uint16_t inputHighValue, ui
     return outputMax;
 }
 
-static Percent100ths ValueToPercent100ths(AbsoluteLimits limits, uint16_t absolute)
+Percent100ths ValueToPercent100ths(AbsoluteLimits limits, uint16_t absolute)
 {
     return ConvertValue(limits.open, limits.closed, WC_PERCENT100THS_MIN_OPEN, WC_PERCENT100THS_MAX_CLOSED, absolute);
 }
+} // namespace
 
 namespace chip {
 namespace app {
 namespace Clusters {
 namespace WindowCovering {
 
-bool HasFeature(chip::EndpointId endpoint, Feature feature)
+bool HasFeature(chip::EndpointId endpoint, WindowCoveringFeature feature)
 {
     bool hasFeature     = false;
     uint32_t featureMap = 0;
@@ -114,12 +129,12 @@ bool HasFeature(chip::EndpointId endpoint, Feature feature)
 
 bool HasFeaturePaLift(chip::EndpointId endpoint)
 {
-    return (HasFeature(endpoint, Feature::kLift) && HasFeature(endpoint, Feature::kPositionAwareLift));
+    return (HasFeature(endpoint, WindowCoveringFeature::kLift) && HasFeature(endpoint, WindowCoveringFeature::kPositionAwareLift));
 }
 
 bool HasFeaturePaTilt(chip::EndpointId endpoint)
 {
-    return (HasFeature(endpoint, Feature::kTilt) && HasFeature(endpoint, Feature::kPositionAwareTilt));
+    return (HasFeature(endpoint, WindowCoveringFeature::kTilt) && HasFeature(endpoint, WindowCoveringFeature::kPositionAwareTilt));
 }
 
 void TypeSet(chip::EndpointId endpoint, Type type)
@@ -199,6 +214,7 @@ void OperationalStatusSet(chip::EndpointId endpoint, chip::BitMask<OperationalSt
     // Filter changes
     if (newStatus != prevStatus)
     {
+        OperationalStatusPrint(newStatus);
         Attributes::OperationalStatus::Set(endpoint, newStatus);
     }
 }
@@ -490,72 +506,6 @@ Percent100ths ComputePercent100thsStep(OperationalState direction, Percent100ths
     return percent100ths;
 }
 
-void emberAfPluginWindowCoveringFinalizeFakeMotionEventHandler(EndpointId endpoint)
-{
-    NPercent100ths position;
-
-    OperationalState opLift = OperationalStateGet(endpoint, OperationalStatus::kLift);
-    OperationalState opTilt = OperationalStateGet(endpoint, OperationalStatus::kTilt);
-
-    emberAfWindowCoveringClusterPrint("WC DELAYED CALLBACK 100ms w/ OpLift=0x%02X OpTilt=0x%02X", (unsigned char) opLift,
-                                      (unsigned char) opTilt);
-
-    /* Update position to simulate movement to pass the CI */
-    if (OperationalState::Stall != opLift)
-    {
-        Attributes::TargetPositionLiftPercent100ths::Get(endpoint, position);
-        if (!position.IsNull())
-        {
-            LiftPositionSet(endpoint, position);
-        }
-    }
-
-    /* Update position to simulate movement to pass the CI */
-    if (OperationalState::Stall != opTilt)
-    {
-        Attributes::TargetPositionTiltPercent100ths::Get(endpoint, position);
-        if (!position.IsNull())
-        {
-            TiltPositionSet(endpoint, position);
-        }
-    }
-}
-
-/**
- * @brief Get event control object for an endpoint
- *
- * @param[in] endpoint
- * @return EmberEventControl*
- */
-EmberEventControl * GetEventControl(EndpointId endpoint)
-{
-    static EmberEventControl eventControls[EMBER_AF_WINDOW_COVERING_CLUSTER_SERVER_ENDPOINT_COUNT];
-    uint16_t index            = emberAfFindClusterServerEndpointIndex(endpoint, WindowCovering::Id);
-    EmberEventControl * event = nullptr;
-
-    if (index < ArraySize(eventControls))
-    {
-        event = &eventControls[index];
-    }
-    return event;
-}
-
-/**
- * @brief Configure Fake Motion event control object for an endpoint
- *
- * @param[in] endpoint
- * @return EmberEventControl*
- */
-EmberEventControl * ConfigureFakeMotionEventControl(EndpointId endpoint)
-{
-    EmberEventControl * controller = GetEventControl(endpoint);
-
-    controller->endpoint = endpoint;
-    controller->callback = &emberAfPluginWindowCoveringFinalizeFakeMotionEventHandler;
-
-    return controller;
-}
-
 void PostAttributeChange(chip::EndpointId endpoint, chip::AttributeId attributeId)
 {
     // all-cluster-app: simulation for the CI testing
@@ -571,27 +521,23 @@ void PostAttributeChange(chip::EndpointId endpoint, chip::AttributeId attributeI
 
     switch (attributeId)
     {
-    /* RO OperationalStatus */
-    case Attributes::OperationalStatus::Id:
-        if (OperationalState::Stall != OperationalStateGet(endpoint, OperationalStatus::kGlobal))
-        {
-            // Finish the fake motion attribute update:
-            emberEventControlSetDelayMS(ConfigureFakeMotionEventControl(endpoint), FAKE_MOTION_DELAY_MS);
-        }
-        break;
     /* ============= Positions for Position Aware ============= */
     case Attributes::CurrentPositionLiftPercent100ths::Id:
-        if (OperationalState::Stall != opLift)
+        Attributes::TargetPositionLiftPercent100ths::Get(endpoint, target);
+        Attributes::CurrentPositionLiftPercent100ths::Get(endpoint, current);
+        if ((OperationalState::Stall != opLift) && (current == target))
         {
-            opLift = OperationalState::Stall;
             emberAfWindowCoveringClusterPrint("Lift stop");
+            OperationalStateSet(endpoint, OperationalStatus::kLift, OperationalState::Stall);
         }
         break;
     case Attributes::CurrentPositionTiltPercent100ths::Id:
-        if (OperationalState::Stall != opTilt)
+        Attributes::TargetPositionTiltPercent100ths::Get(endpoint, target);
+        Attributes::CurrentPositionTiltPercent100ths::Get(endpoint, current);
+        if ((OperationalState::Stall != opTilt) && (current == target))
         {
-            opTilt = OperationalState::Stall;
             emberAfWindowCoveringClusterPrint("Tilt stop");
+            OperationalStateSet(endpoint, OperationalStatus::kTilt, OperationalState::Stall);
         }
         break;
     /* For a device supporting Position Awareness : Changing the Target triggers motions on the real or simulated device */
@@ -599,12 +545,14 @@ void PostAttributeChange(chip::EndpointId endpoint, chip::AttributeId attributeI
         Attributes::TargetPositionLiftPercent100ths::Get(endpoint, target);
         Attributes::CurrentPositionLiftPercent100ths::Get(endpoint, current);
         opLift = ComputeOperationalState(target, current);
+        OperationalStateSet(endpoint, OperationalStatus::kLift, opLift);
         break;
     /* For a device supporting Position Awareness : Changing the Target triggers motions on the real or simulated device */
     case Attributes::TargetPositionTiltPercent100ths::Id:
         Attributes::TargetPositionTiltPercent100ths::Get(endpoint, target);
         Attributes::CurrentPositionTiltPercent100ths::Get(endpoint, current);
         opTilt = ComputeOperationalState(target, current);
+        OperationalStateSet(endpoint, OperationalStatus::kTilt, opTilt);
         break;
     /* Mode change is either internal from the application or external from a write request */
     case Attributes::Mode::Id:
@@ -619,13 +567,9 @@ void PostAttributeChange(chip::EndpointId endpoint, chip::AttributeId attributeI
     default:
         break;
     }
-
-    /* This decides and triggers fake motion for the selected endpoint */
-    OperationalStateSet(endpoint, OperationalStatus::kLift, opLift);
-    OperationalStateSet(endpoint, OperationalStatus::kTilt, opTilt);
 }
 
-EmberAfStatus GetMotionLockStatus(chip::EndpointId endpoint)
+Status GetMotionLockStatus(chip::EndpointId endpoint)
 {
     BitMask<Mode> mode                 = ModeGet(endpoint);
     BitMask<ConfigStatus> configStatus = ConfigStatusGet(endpoint);
@@ -636,17 +580,32 @@ EmberAfStatus GetMotionLockStatus(chip::EndpointId endpoint)
         if (mode.Has(Mode::kMaintenanceMode))
         {
             // Mainterance Mode
-            return EMBER_ZCL_STATUS_BUSY;
+            return Status::Busy;
         }
 
         if (mode.Has(Mode::kCalibrationMode))
         {
             // Calibration Mode
-            return EMBER_ZCL_STATUS_FAILURE;
+            return Status::Failure;
         }
     }
 
-    return EMBER_ZCL_STATUS_SUCCESS;
+    return Status::Success;
+}
+
+void SetDefaultDelegate(EndpointId endpoint, Delegate * delegate)
+{
+    uint16_t ep = emberAfFindClusterServerEndpointIndex(endpoint, WindowCovering::Id);
+
+    // if endpoint is found and is not a dynamic endpoint
+    if (ep != 0xFFFF && ep < EMBER_AF_WINDOW_COVERING_CLUSTER_SERVER_ENDPOINT_COUNT)
+    {
+        gDelegateTable[ep] = delegate;
+    }
+    else
+    {
+        emberAfWindowCoveringClusterPrint("Failed to set WindowCovering delegate for endpoint:%u", endpoint);
+    }
 }
 
 } // namespace WindowCovering
@@ -658,19 +617,6 @@ EmberAfStatus GetMotionLockStatus(chip::EndpointId endpoint)
 // Callbacks
 //------------------------------------------------------------------------------
 
-/** @brief Window Covering Cluster Init
- *
- * Cluster Init
- *
- * @param endpoint    Endpoint that is being initialized
- */
-void emberAfWindowCoveringClusterInitCallback(chip::EndpointId endpoint)
-{
-    emberAfWindowCoveringClusterPrint("Window Covering Cluster init");
-
-    ConfigStatusUpdateFeatures(endpoint);
-}
-
 /**
  * @brief  Cluster UpOrOpen Command callback (from client)
  */
@@ -681,23 +627,43 @@ bool emberAfWindowCoveringClusterUpOrOpenCallback(app::CommandHandler * commandO
 
     emberAfWindowCoveringClusterPrint("UpOrOpen command received");
 
-    EmberAfStatus status = GetMotionLockStatus(endpoint);
-    if (EMBER_ZCL_STATUS_SUCCESS != status)
+    Status status = GetMotionLockStatus(endpoint);
+    if (Status::Success != status)
     {
         emberAfWindowCoveringClusterPrint("Err device locked");
-        emberAfSendImmediateDefaultResponse(status);
+        commandObj->AddStatus(commandPath, status);
         return true;
     }
 
-    if (HasFeature(endpoint, Feature::kLift))
+    if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareLift))
     {
         Attributes::TargetPositionLiftPercent100ths::Set(endpoint, WC_PERCENT100THS_MIN_OPEN);
     }
-    if (HasFeature(endpoint, Feature::kTilt))
+    if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareTilt))
     {
         Attributes::TargetPositionTiltPercent100ths::Set(endpoint, WC_PERCENT100THS_MIN_OPEN);
     }
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+
+    Delegate * delegate = GetDelegate(endpoint);
+    if (delegate)
+    {
+        if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareLift))
+        {
+            LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Lift));
+        }
+
+        if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareTilt))
+        {
+            LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Tilt));
+        }
+    }
+    else
+    {
+        emberAfWindowCoveringClusterPrint("WindowCovering has no delegate set for endpoint:%u", endpoint);
+    }
+
+    commandObj->AddStatus(commandPath, Status::Success);
+
     return true;
 }
 
@@ -711,23 +677,42 @@ bool emberAfWindowCoveringClusterDownOrCloseCallback(app::CommandHandler * comma
 
     emberAfWindowCoveringClusterPrint("DownOrClose command received");
 
-    EmberAfStatus status = GetMotionLockStatus(endpoint);
-    if (EMBER_ZCL_STATUS_SUCCESS != status)
+    Status status = GetMotionLockStatus(endpoint);
+    if (Status::Success != status)
     {
         emberAfWindowCoveringClusterPrint("Err device locked");
-        emberAfSendImmediateDefaultResponse(status);
+        commandObj->AddStatus(commandPath, status);
         return true;
     }
 
-    if (HasFeature(endpoint, Feature::kLift))
+    if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareLift))
     {
         Attributes::TargetPositionLiftPercent100ths::Set(endpoint, WC_PERCENT100THS_MAX_CLOSED);
     }
-    if (HasFeature(endpoint, Feature::kTilt))
+    if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareTilt))
     {
         Attributes::TargetPositionTiltPercent100ths::Set(endpoint, WC_PERCENT100THS_MAX_CLOSED);
     }
-    emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+    commandObj->AddStatus(commandPath, Status::Success);
+
+    Delegate * delegate = GetDelegate(endpoint);
+    if (delegate)
+    {
+        if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareLift))
+        {
+            LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Lift));
+        }
+
+        if (HasFeature(endpoint, WindowCoveringFeature::kPositionAwareTilt))
+        {
+            LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Tilt));
+        }
+    }
+    else
+    {
+        emberAfWindowCoveringClusterPrint("WindowCovering has no delegate set for endpoint:%u", endpoint);
+    }
+
     return true;
 }
 
@@ -742,27 +727,50 @@ bool emberAfWindowCoveringClusterStopMotionCallback(app::CommandHandler * comman
 
     emberAfWindowCoveringClusterPrint("StopMotion command received");
 
-    EmberAfStatus status = GetMotionLockStatus(endpoint);
-    if (EMBER_ZCL_STATUS_SUCCESS != status)
+    Status status = GetMotionLockStatus(endpoint);
+    if (Status::Success != status)
     {
         emberAfWindowCoveringClusterPrint("Err device locked");
-        emberAfSendImmediateDefaultResponse(status);
+        commandObj->AddStatus(commandPath, status);
         return true;
     }
 
-    if (HasFeaturePaLift(endpoint))
+    bool changeTarget = true;
+
+    Delegate * delegate = GetDelegate(endpoint);
+    if (delegate)
     {
-        (void) Attributes::CurrentPositionLiftPercent100ths::Get(endpoint, current);
-        (void) Attributes::TargetPositionLiftPercent100ths::Set(endpoint, current);
+        CHIP_ERROR err = delegate->HandleStopMotion();
+        if (err == CHIP_ERROR_IN_PROGRESS)
+        {
+            changeTarget = false;
+        }
+        else
+        {
+            LogErrorOnFailure(err);
+        }
+    }
+    else
+    {
+        emberAfWindowCoveringClusterPrint("WindowCovering has no delegate set for endpoint:%u", endpoint);
     }
 
-    if (HasFeaturePaTilt(endpoint))
+    if (changeTarget)
     {
-        (void) Attributes::CurrentPositionTiltPercent100ths::Get(endpoint, current);
-        (void) Attributes::TargetPositionTiltPercent100ths::Set(endpoint, current);
+        if (HasFeaturePaLift(endpoint))
+        {
+            (void) Attributes::CurrentPositionLiftPercent100ths::Get(endpoint, current);
+            (void) Attributes::TargetPositionLiftPercent100ths::Set(endpoint, current);
+        }
+
+        if (HasFeaturePaTilt(endpoint))
+        {
+            (void) Attributes::CurrentPositionTiltPercent100ths::Get(endpoint, current);
+            (void) Attributes::TargetPositionTiltPercent100ths::Set(endpoint, current);
+        }
     }
 
-    return EMBER_SUCCESS == emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+    return CHIP_NO_ERROR == commandObj->AddStatus(commandPath, Status::Success);
 }
 
 /**
@@ -778,23 +786,32 @@ bool emberAfWindowCoveringClusterGoToLiftValueCallback(app::CommandHandler * com
 
     emberAfWindowCoveringClusterPrint("GoToLiftValue %u command received", liftValue);
 
-    EmberAfStatus status = GetMotionLockStatus(endpoint);
-    if (EMBER_ZCL_STATUS_SUCCESS != status)
+    Status status = GetMotionLockStatus(endpoint);
+    if (Status::Success != status)
     {
         emberAfWindowCoveringClusterPrint("Err device locked");
-        emberAfSendImmediateDefaultResponse(status);
+        commandObj->AddStatus(commandPath, status);
         return true;
     }
 
-    if (HasFeature(endpoint, Feature::kAbsolutePosition) && HasFeaturePaLift(endpoint))
+    if (HasFeature(endpoint, WindowCoveringFeature::kAbsolutePosition) && HasFeaturePaLift(endpoint))
     {
         Attributes::TargetPositionLiftPercent100ths::Set(endpoint, LiftToPercent100ths(endpoint, liftValue));
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+        Delegate * delegate = GetDelegate(endpoint);
+        if (delegate)
+        {
+            LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Lift));
+        }
+        else
+        {
+            emberAfWindowCoveringClusterPrint("WindowCovering has no delegate set for endpoint:%u", endpoint);
+        }
+        commandObj->AddStatus(commandPath, Status::Success);
     }
     else
     {
         emberAfWindowCoveringClusterPrint("Err Device is not PA LF");
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+        commandObj->AddStatus(commandPath, Status::Failure);
     }
     return true;
 }
@@ -811,11 +828,11 @@ bool emberAfWindowCoveringClusterGoToLiftPercentageCallback(app::CommandHandler 
 
     emberAfWindowCoveringClusterPrint("GoToLiftPercentage %u command received", percent100ths);
 
-    EmberAfStatus status = GetMotionLockStatus(endpoint);
-    if (EMBER_ZCL_STATUS_SUCCESS != status)
+    Status status = GetMotionLockStatus(endpoint);
+    if (Status::Success != status)
     {
         emberAfWindowCoveringClusterPrint("Err device locked");
-        emberAfSendImmediateDefaultResponse(status);
+        commandObj->AddStatus(commandPath, status);
         return true;
     }
 
@@ -824,17 +841,26 @@ bool emberAfWindowCoveringClusterGoToLiftPercentageCallback(app::CommandHandler 
         if (IsPercent100thsValid(percent100ths))
         {
             Attributes::TargetPositionLiftPercent100ths::Set(endpoint, percent100ths);
-            emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+            Delegate * delegate = GetDelegate(endpoint);
+            if (delegate)
+            {
+                LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Lift));
+            }
+            else
+            {
+                emberAfWindowCoveringClusterPrint("WindowCovering has no delegate set for endpoint:%u", endpoint);
+            }
+            commandObj->AddStatus(commandPath, Status::Success);
         }
         else
         {
-            emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
+            commandObj->AddStatus(commandPath, Status::ConstraintError);
         }
     }
     else
     {
         emberAfWindowCoveringClusterPrint("Err Device is not PA LF");
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+        commandObj->AddStatus(commandPath, Status::Failure);
     }
     return true;
 }
@@ -852,23 +878,32 @@ bool emberAfWindowCoveringClusterGoToTiltValueCallback(app::CommandHandler * com
 
     emberAfWindowCoveringClusterPrint("GoToTiltValue %u command received", tiltValue);
 
-    EmberAfStatus status = GetMotionLockStatus(endpoint);
-    if (EMBER_ZCL_STATUS_SUCCESS != status)
+    Status status = GetMotionLockStatus(endpoint);
+    if (Status::Success != status)
     {
         emberAfWindowCoveringClusterPrint("Err device locked");
-        emberAfSendImmediateDefaultResponse(status);
+        commandObj->AddStatus(commandPath, status);
         return true;
     }
 
-    if (HasFeature(endpoint, Feature::kAbsolutePosition) && HasFeaturePaTilt(endpoint))
+    if (HasFeature(endpoint, WindowCoveringFeature::kAbsolutePosition) && HasFeaturePaTilt(endpoint))
     {
         Attributes::TargetPositionTiltPercent100ths::Set(endpoint, TiltToPercent100ths(endpoint, tiltValue));
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+        Delegate * delegate = GetDelegate(endpoint);
+        if (delegate)
+        {
+            LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Tilt));
+        }
+        else
+        {
+            emberAfWindowCoveringClusterPrint("WindowCovering has no delegate set for endpoint:%u", endpoint);
+        }
+        commandObj->AddStatus(commandPath, Status::Success);
     }
     else
     {
         emberAfWindowCoveringClusterPrint("Err Device is not PA TL");
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+        commandObj->AddStatus(commandPath, Status::Failure);
     }
     return true;
 }
@@ -885,11 +920,11 @@ bool emberAfWindowCoveringClusterGoToTiltPercentageCallback(app::CommandHandler 
 
     emberAfWindowCoveringClusterPrint("GoToTiltPercentage %u command received", percent100ths);
 
-    EmberAfStatus status = GetMotionLockStatus(endpoint);
-    if (EMBER_ZCL_STATUS_SUCCESS != status)
+    Status status = GetMotionLockStatus(endpoint);
+    if (Status::Success != status)
     {
         emberAfWindowCoveringClusterPrint("Err device locked");
-        emberAfSendImmediateDefaultResponse(status);
+        commandObj->AddStatus(commandPath, status);
         return true;
     }
 
@@ -898,17 +933,26 @@ bool emberAfWindowCoveringClusterGoToTiltPercentageCallback(app::CommandHandler 
         if (IsPercent100thsValid(percent100ths))
         {
             Attributes::TargetPositionTiltPercent100ths::Set(endpoint, percent100ths);
-            emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_SUCCESS);
+            Delegate * delegate = GetDelegate(endpoint);
+            if (delegate)
+            {
+                LogErrorOnFailure(delegate->HandleMovement(WindowCoveringType::Tilt));
+            }
+            else
+            {
+                emberAfWindowCoveringClusterPrint("WindowCovering has no delegate set for endpoint:%u", endpoint);
+            }
+            commandObj->AddStatus(commandPath, Status::Success);
         }
         else
         {
-            emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_INVALID_VALUE);
+            commandObj->AddStatus(commandPath, Status::ConstraintError);
         }
     }
     else
     {
         emberAfWindowCoveringClusterPrint("Err Device is not PA TL");
-        emberAfSendImmediateDefaultResponse(EMBER_ZCL_STATUS_FAILURE);
+        commandObj->AddStatus(commandPath, Status::Failure);
     }
     return true;
 }

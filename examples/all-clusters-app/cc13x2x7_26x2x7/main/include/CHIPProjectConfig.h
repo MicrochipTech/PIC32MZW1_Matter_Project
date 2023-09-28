@@ -73,14 +73,6 @@
 #define CHIP_DEVICE_CONFIG_ENABLE_CHIPOBLE 1
 
 /**
- * CHIP_DEVICE_CONFIG_ENABLE_CHIP_TIME_SERVICE_TIME_SYNC
- *
- * Enables synchronizing the device's real time clock with a remote CHIP Time service
- * using the CHIP Time Sync protocol.
- */
-// #define CHIP_DEVICE_CONFIG_ENABLE_CHIP_TIME_SERVICE_TIME_SYNC 1
-
-/**
  * CHIP_DEVICE_CONFIG_EVENT_LOGGING_DEBUG_BUFFER_SIZE
  *
  * A size, in bytes, of the individual debug event logging buffer.
@@ -124,5 +116,9 @@
  * @brief Defines the maximum number of WriteHandler, limits the number of active write transactions on server.
  */
 #define CHIP_IM_MAX_NUM_WRITE_HANDLER 1
+
+// All clusters app has 3 group endpoints. This needs to defined here so that
+// CHIP_CONFIG_MAX_GROUPS_PER_FABRIC is properly configured.
+#define CHIP_CONFIG_MAX_GROUP_ENDPOINTS_PER_FABRIC 3
 
 #endif // CHIP_PROJECT_CONFIG_H

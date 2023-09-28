@@ -19,6 +19,7 @@ AccessControlEntry
 accessor
 AccountLogin
 acdbc
+ack
 ACKed
 ACL
 ACLs
@@ -53,7 +54,7 @@ AmebaZ
 amebaz2
 announcementReason
 AnnounceOTAProvider
-AnnounceOtaProviderRequest
+AnnounceOTAProviderRequest
 APIs
 apk
 AppConfig
@@ -124,6 +125,7 @@ backtrace
 BallastConfiguration
 BarrierControl
 BasicCHIPRegression
+BasicInformation
 baudrate
 BD
 BDX
@@ -157,7 +159,7 @@ bouffalolab
 BRD
 breakpoint
 bredr
-BridgedDeviceBasic
+BridgedDeviceBasicInformation
 bridgedLightEndpoint
 bringup
 BromateConcentrationMeasurement
@@ -253,6 +255,7 @@ ClusterTestGeneration
 cmake
 CMakeLists
 CMD
+CMS
 CMSIS
 CMVH
 cn
@@ -290,8 +293,8 @@ connstring
 conntype
 const
 ContentApp
-ContentAppPlatform
 ContentApp's
+ContentAppPlatform
 ContentLaunch
 ContentLauncher
 continuousHinting
@@ -299,6 +302,7 @@ contrib
 controllee
 conv
 CopperConcentrationMeasurement
+Corstone
 cortexa
 cp
 cpio
@@ -328,6 +332,7 @@ cxx
 CY
 CYW
 DAC
+DACs
 dadbdcdddedf
 DAP
 DAPLINK
@@ -411,6 +416,7 @@ diffsyms
 dimmable
 dirname
 dirs
+disableNotifyUpdateApplied
 disambiguated
 discoverable
 DispatchEvent
@@ -428,6 +434,7 @@ Dnsmasq
 dnsmasqd
 DNSSD
 DNSStubListener
+docbuild
 Dockerfile
 Dockerfiles
 Don'ts
@@ -445,6 +452,7 @@ dryrun
 DS
 duplicative
 DUT
+DUTS
 DV
 DVK
 dynload
@@ -592,6 +600,7 @@ GPL
 GPLv
 Gradle
 gradlew
+Groupcast
 GroupId
 GroupKeyManagement
 groupKeySecurityPolicy
@@ -671,7 +680,6 @@ instantiation
 integrations
 IntelliSense
 InteractionModelVersion
-Interation
 Interoperable
 introvideos
 InvokeCommandRequests
@@ -826,6 +834,7 @@ mdash
 MDNS
 MediaInput
 MediaPlayback
+MediaTek
 mem
 memdf
 MemMonitoring
@@ -880,6 +889,7 @@ MyPASSWORD
 MySSID
 NAMESERVER
 NAMESPACE
+namespaces
 namespacing
 nano
 natively
@@ -975,6 +985,7 @@ otatesting
 otaURL
 OTBR
 otcli
+outform
 outgoingCommands
 OxygenConcentrationMeasurement
 OzoneConcentrationMeasurement
@@ -983,6 +994,7 @@ PAAs
 PacketBuffer
 PAI
 PairDevice
+PAIs
 PAKE
 palletsprojects
 pankore
@@ -1013,6 +1025,7 @@ Pigweed
 PinCode
 pinrequest
 pkgconfig
+PKI
 plaintext
 PlatformManager
 PlatformManagerImpl
@@ -1112,8 +1125,8 @@ REPL
 repo
 req
 Requestor
-RequestorCanConsent
 Requestor's
+RequestorCanConsent
 Requestors
 responder
 RestrictedEvent
@@ -1137,11 +1150,13 @@ rsn
 RSSI
 RST
 rsync
+RTC
 rtd
 RTL
 rtld
 RTOS
 RTT
+RTX
 RUNAS
 RunMain
 runtime
@@ -1152,6 +1167,8 @@ saveAs
 sbin
 scalability
 scalable
+schema
+schemas
 scm
 sco
 scp
@@ -1160,11 +1177,12 @@ SDB
 SDC
 SDHC
 SDK
-sdkconfig
 SDK's
+sdkconfig
 SDKs
 SDKTARGETSYSROOT
 sdl
+SecureCertDACProvider
 SED
 SEGGER
 semver
@@ -1189,7 +1207,9 @@ sexualized
 sfv
 SHA
 ShadeConfiguration
+SHAs
 showDocumentation
+showsdks
 shubhamdp
 SIGINT
 SiLabs
@@ -1197,6 +1217,7 @@ Silabs's
 SiliconLabs
 SimpleFileExFlags
 SimpleLink
+SiWx
 sizedb
 sl
 SLAAC
@@ -1247,6 +1268,7 @@ subdirectory
 subfolder
 submodule
 submodules
+subnet
 subprocess
 SubscribeResponse
 SubscriptionId
@@ -1312,11 +1334,13 @@ ths
 Thunderboard
 timedInteractionTimeoutMs
 TimeFormatLocalization
+timeframe
 timeoutMs
 TimeSynchronization
 tinycrypt
 Tizen
 TKIP
+TLS
 tlsr
 TLV
 tmp
@@ -1367,14 +1391,17 @@ ug
 ui
 uint
 ULA
+Ultrafast
 UNBLUR
 uncommissioned
+Unencrypted
 unfocus
 Unicast
 UniFlash
 UnitLocalization
 unpair
 unprovisioned
+Unsecure
 untrusted
 updateAvailable
 updateNotAvailable
@@ -1410,6 +1437,7 @@ ver
 Verifier
 Verifiers
 VID
+vids
 virtualenv
 visualstudio
 vlatest
@@ -1436,6 +1464,7 @@ wic
 WiFiNetworkDiagnostics
 WindowCovering
 WindowCoveringGoToLiftPercentage
+WiseMCU
 wlan
 wmm
 WPA
@@ -1456,6 +1485,7 @@ xbef
 xc
 xcd
 Xcode
+xcodebuild
 xcodeproj
 xcworkspace
 xd

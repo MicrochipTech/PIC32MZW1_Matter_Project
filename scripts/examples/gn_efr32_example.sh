@@ -16,7 +16,7 @@
 #    limitations under the License.
 #
 
-# Build script for GN EFT32 examples GitHub workflow.
+# Build script for GN EFR32 examples GitHub workflow.
 
 set -e
 
@@ -28,14 +28,17 @@ else
     CHIP_ROOT="$MATTER_ROOT"
 fi
 
-source "$CHIP_ROOT/scripts/activate.sh"
-
 set -x
 env
 USE_WIFI=false
+USE_DOCKER=false
+USE_GIT_SHA_FOR_VERSION=true
+USE_SLC=false
+GN_PATH=gn
+GN_PATH_PROVIDED=false
 
 SILABS_THREAD_TARGET=\""../silabs:ot-efr32-cert"\"
-USAGE="./scripts/examples/gn_efr32_example.sh <AppRootFolder> <outputFolder> <efr32_board_name> [<Build options>]"
+USAGE="./scripts/examples/gn_efr32_example.sh <AppRootFolder> <outputFolder> <silabs_board_name> [<Build options>]"
 
 if [ "$#" == "0" ]; then
     echo "Build script for EFR32 Matter apps
@@ -48,7 +51,7 @@ if [ "$#" == "0" ]; then
     <outputFolder>
         Desired location for the output files
 
-    <efr32_board_name>
+    <silabs_board_name>
         Identifier of the board for which this app is built
         Currently Supported :
             BRD4161A
@@ -78,33 +81,56 @@ if [ "$#" == "0" ]; then
             Thresholds: 30 <= kvs_max_entries <= 255
         show_qr_code
             Enables QR code on LCD for devices with an LCD
-        setupDiscriminator
-            Discriminatoor value used for BLE connexion. (Default 3840)
-        setupPinCode
-            PIN code for PASE session establishment. (Default 20202021)
         enable_sleepy_device
             Enable Sleepy end device. (Default false)
             Must also set chip_openthread_ftd=false
-        use_rs911x
-            Build wifi example with extension board rs911x. (Default false)
+        use_rs9116
+            Build wifi example with extension board rs9116. (Default false)
+        use_SiWx917
+            Build wifi example with extension board SiWx917. (Default false)
         use_wf200
             Build wifi example with extension board wf200. (Default false)
         'import("//with_pw_rpc.gni")'
             Use to build the example with pigweed RPC
-        OTA_periodic_query_timeout
+        ota_periodic_query_timeout_sec
             Periodic query timeout variable for OTA in seconds
         rs91x_wpa3_only
             Support for WPA3 only mode on RS91x
+        sl_matter_version
+            Use provided software version at build time
+        sl_matter_version_str
+            Set a Matter sotfware version string for the Silabs examples
+            Used and formatted by default in this script.
+        sl_hardware_version
+            Use provided hardware version at build time
+        siwx917_commissionable_data
+            Build with the commissionable data given in DeviceConfig.h (only for SiWx917)
         Presets
         --sed
             enable sleepy end device, set thread mtd
-            For minimum consumption, disable openthread cli and qr code
-        --wifi <wf200 | rs911x>
+            For minimum consumption, add --low-power
+        --low-power
+            disables all power consuming features for the most power efficient build
+            This flag is to be used with --sed
+        --wifi <wf200 | rs9116>
             build wifi example variant for given exansion board
         --additional_data_advertising
             enable Addition data advertissing and rotating device ID
         --use_ot_lib
             use the silabs openthread library
+        --use_chip_lwip_lib
+            use the chip lwip library
+        --release
+            Remove all logs and debugs features (including the LCD). Yield the smallest image size possible
+        --docker
+            Change GSDK root for docker builds
+        --uart_log
+            Forward Logs to Uart instead of RTT
+        --slc_generate
+            Generate files with SLC for current board and options Requires an SLC-CLI installation or running in Docker.
+        --slc_reuse_files
+            Use generated files without running slc again.
+
     "
 elif [ "$#" -lt "2" ]; then
     echo "Invalid number of arguments
@@ -115,7 +141,7 @@ else
     OUTDIR=$2
 
     if [ "$#" -gt "2" ]; then
-        EFR32_BOARD=$3
+        SILABS_BOARD=$3
         shift
     fi
 
@@ -123,17 +149,23 @@ else
     shift
     while [ $# -gt 0 ]; do
         case $1 in
+            --clean)
+                DIR_CLEAN=true
+                shift
+                ;;
             --wifi)
                 if [ -z "$2" ]; then
-                    echo "--wifi requires rs911x or wf200"
+                    echo "--wifi requires rs9116 or SiWx917 or wf200"
                     exit 1
                 fi
-                if [ "$2" = "rs911x" ]; then
-                    optArgs+="use_rs911x=true"
+                if [ "$2" = "rs9116" ]; then
+                    optArgs+="use_rs9116=true "
+                elif [ "$2" = "SiWx917" ]; then
+                    optArgs+="use_SiWx917=true "
                 elif [ "$2" = "wf200" ]; then
-                    optArgs+="use_wf200=true"
+                    optArgs+="use_wf200=true "
                 else
-                    echo "Wifi usage: --wifi rs911x|wf200"
+                    echo "Wifi usage: --wifi rs9116|SiWx917|wf200"
                     exit 1
                 fi
                 USE_WIFI=true
@@ -144,8 +176,12 @@ else
                 optArgs+="enable_sleepy_device=true chip_openthread_ftd=false "
                 shift
                 ;;
+            --low-power)
+                optArgs+="chip_build_libshell=false enable_openthread_cli=false show_qr_code=false disable_lcd=true "
+                shift
+                ;;
             --chip_enable_wifi_ipv4)
-                optArgs+="chip_enable_wifi_ipv4=true "
+                ipArgs="chip_enable_wifi_ipv4=true chip_inet_config_enable_ipv4=true "
                 shift
                 ;;
             --additional_data_advertising)
@@ -160,35 +196,122 @@ else
                 optArgs+="use_silabs_thread_lib=true chip_openthread_target=$SILABS_THREAD_TARGET openthread_external_platform=\"""\" use_thread_coap_lib=true "
                 shift
                 ;;
+            --use_chip_lwip_lib)
+                optArgs+="lwip_root=\""//third_party/connectedhomeip/third_party/lwip"\" "
+                shift
+                ;;
+            # Option not to be used until ot-efr32 github is updated
+            # --use_ot_github_sources)
+            #   optArgs+="openthread_root=\"//third_party/connectedhomeip/third_party/openthread/ot-efr32/openthread\" openthread_efr32_root=\"//third_party/connectedhomeip/third_party/openthread/ot-efr32/src/src\""
+            #    shift
+            #    ;;
+            --release)
+                optArgs+="is_debug=false disable_lcd=true chip_build_libshell=false enable_openthread_cli=false use_external_flash=false chip_logging=false silabs_log_enabled=false "
+                shift
+                ;;
+            --docker)
+                optArgs+="efr32_sdk_root=\"$GSDK_ROOT\" "
+                USE_DOCKER=true
+                shift
+                ;;
+            --uart_log)
+                optArgs+="sl_uart_log_output=true "
+                shift
+                ;;
+
+            --slc_generate)
+                optArgs+="slc_generate=true "
+                USE_SLC=true
+                shift
+                ;;
+            --slc_reuse_files)
+                optArgs+="slc_reuse_files=true "
+                USE_SLC=true
+                shift
+                ;;
+            --gn_path)
+                if [ -z "$2" ]; then
+                    echo "--gn_path requires a path to GN"
+                    exit 1
+                else
+                    GN_PATH="$2"
+                fi
+                GN_PATH_PROVIDED=true
+                shift
+                shift
+                ;;
+            *"sl_matter_version_str="*)
+                optArgs+="$1 "
+                USE_GIT_SHA_FOR_VERSION=false
+                shift
+                ;;
             *)
-                if [ "$1" =~ *"use_rs911x=true"* ] || [ "$1" =~ *"use_wf200=true"* ]; then
+                if [ "$1" =~ *"use_rs9116=true"* ] || [ "$1" =~ *"use_SiWx917=true"* ] || [ "$1" =~ *"use_wf200=true"* ]; then
                     USE_WIFI=true
                 fi
-
                 optArgs+=$1" "
                 shift
                 ;;
         esac
     done
 
-    if [ -z "$EFR32_BOARD" ]; then
-        echo "EFR32_BOARD not defined"
+    if [ -z "$SILABS_BOARD" ]; then
+        echo "SILABS_BOARD not defined"
         exit 1
     fi
 
-    BUILD_DIR=$OUTDIR/$EFR32_BOARD
+    if [ "$USE_GIT_SHA_FOR_VERSION" == true ]; then
+        {
+            ShortCommitSha=$(git describe --always --dirty --exclude '*')
+            branchName=$(git rev-parse --abbrev-ref HEAD)
+            optArgs+="sl_matter_version_str=\"v1.0-$branchName-$ShortCommitSha\" "
+        } &>/dev/null
+    fi
+
+    if [ "$USE_SLC" == true ]; then
+        PYTHON_PATH="/usr/bin/python3"
+        if [ "$GN_PATH_PROVIDED" == false ]; then
+            GN_PATH=./.environment/cipd/packages/pigweed/gn
+        fi
+    elif [ "$USE_SLC" == false ]; then
+        # Activation needs to be after SLC generation which is done in gn gen.
+        # Zap generation requires activation and is done in the build phase
+        source "$CHIP_ROOT/scripts/activate.sh"
+        PYTHON_PATH=$VIRTUAL_ENV"/bin/python3"
+    fi
+
+    BUILD_DIR=$OUTDIR/$SILABS_BOARD
     echo BUILD_DIR="$BUILD_DIR"
+
+    if [ "$DIR_CLEAN" == true ]; then
+        rm -rf "$BUILD_DIR"
+    fi
+
     if [ "$USE_WIFI" == true ]; then
-        gn gen --check --fail-on-unused-args --export-compile-commands --root="$ROOT" --dotfile="$ROOT"/build_for_wifi_gnfile.gn --args="efr32_board=\"$EFR32_BOARD\" $optArgs" "$BUILD_DIR"
+        # wifi build
+        # NCP mode EFR32 + wifi module
+        optArgs+="$ipArgs"
+        "$GN_PATH" gen --check --fail-on-unused-args --export-compile-commands --root="$ROOT" --dotfile="$ROOT"/build_for_wifi_gnfile.gn --args="silabs_board=\"$SILABS_BOARD\" $optArgs" "$BUILD_DIR"
     else
-        # thread build
+        # OpenThread/SoC build
         #
+        if [ "$USE_DOCKER" == true ]; then
+            optArgs+="openthread_root=\"$GSDK_ROOT/util/third_party/openthread\" "
+        fi
+
         if [ -z "$optArgs" ]; then
-            gn gen --check --fail-on-unused-args --export-compile-commands --root="$ROOT" --args="efr32_board=\"$EFR32_BOARD\"" "$BUILD_DIR"
+            "$GN_PATH" gen --check --script-executable="$PYTHON_PATH" --fail-on-unused-args --export-compile-commands --root="$ROOT" --args="silabs_board=\"$SILABS_BOARD\"" "$BUILD_DIR"
         else
-            gn gen --check --fail-on-unused-args --export-compile-commands --root="$ROOT" --args="efr32_board=\"$EFR32_BOARD\" $optArgs" "$BUILD_DIR"
+            "$GN_PATH" gen --check --script-executable="$PYTHON_PATH" --fail-on-unused-args --export-compile-commands --root="$ROOT" --args="silabs_board=\"$SILABS_BOARD\" $optArgs" "$BUILD_DIR"
         fi
     fi
+
+    if [ "$USE_SLC" == true ]; then
+        # Activation needs to be after SLC generation which is done in gn gen.
+        # Zap generation requires activation and is done in the build phase
+        source "$CHIP_ROOT/scripts/activate.sh"
+    fi
+
     ninja -v -C "$BUILD_DIR"/
     #print stats
     arm-none-eabi-size -A "$BUILD_DIR"/*.out

@@ -19,7 +19,7 @@
 #pragma once
 
 #ifdef CONFIG_USE_LOCAL_STORAGE
-#include "../../config/PersistentStorage.h"
+#include <controller/ExamplePersistentStorage.h>
 #endif // CONFIG_USE_LOCAL_STORAGE
 
 #include "Command.h"
@@ -29,6 +29,7 @@
 #include <credentials/GroupDataProviderImpl.h>
 #include <credentials/PersistentStorageOpCertStore.h>
 #include <crypto/PersistentStorageOperationalKeystore.h>
+#include <crypto/RawKeySessionKeystore.h>
 
 #pragma once
 
@@ -84,7 +85,7 @@ public:
         AddArgument("trace_log", 0, 1, &mTraceLog);
         AddArgument("trace_decode", 0, 1, &mTraceDecode);
 #endif // CHIP_CONFIG_TRANSPORT_TRACE_ENABLED
-        AddArgument("ble-adapter", 0, UINT64_MAX, &mBleAdapterId);
+        AddArgument("ble-adapter", 0, UINT16_MAX, &mBleAdapterId);
     }
 
     /////////// Command Interface /////////
@@ -93,6 +94,14 @@ public:
     void SetCommandExitStatus(CHIP_ERROR status)
     {
         mCommandExitStatus = status;
+        // In interactive mode the stack is not shut down once a command is ended.
+        // That means calling `ErrorStr(err)` from the main thread when command
+        // completion is signaled may race since `ErrorStr` uses a static sErrorStr
+        // buffer for computing the error string.  Call it here instead.
+        if (IsInteractive() && CHIP_NO_ERROR != status)
+        {
+            ChipLogError(chipTool, "Run command failure: %s", chip::ErrorStr(status));
+        }
         StopWaiting();
     }
 
@@ -123,20 +132,30 @@ protected:
     // use member values that Shutdown will normally reset.
     virtual bool DeferInteractiveCleanup() { return false; }
 
+    // If true, the controller will be created with server capabilities enabled,
+    // such as advertising operational nodes over DNS-SD and accepting incoming
+    // CASE sessions.
+    virtual bool NeedsOperationalAdvertising() { return false; }
+
     // Execute any deferred cleanups.  Used when exiting interactive mode.
     static void ExecuteDeferredCleanups(intptr_t ignored);
 
 #ifdef CONFIG_USE_LOCAL_STORAGE
     PersistentStorage mDefaultStorage;
+    // TODO: It's pretty weird that we re-init mCommissionerStorage for every
+    // identity without shutting it down or something in between...
     PersistentStorage mCommissionerStorage;
 #endif // CONFIG_USE_LOCAL_STORAGE
     chip::PersistentStorageOperationalKeystore mOperationalKeystore;
     chip::Credentials::PersistentStorageOpCertStore mOpCertStore;
+    chip::Crypto::RawKeySessionKeystore mSessionKeystore;
 
     static chip::Credentials::GroupDataProviderImpl sGroupDataProvider;
     CredentialIssuerCommands * mCredIssuerCmds;
 
     std::string GetIdentity();
+    CHIP_ERROR GetIdentityNodeId(std::string identity, chip::NodeId * nodeId);
+    CHIP_ERROR GetIdentityRootCertificate(std::string identity, chip::ByteSpan & span);
     void SetIdentity(const char * name);
 
     // This method returns the commissioner instance to be used for running the command.
@@ -152,10 +171,32 @@ private:
 
     CHIP_ERROR EnsureCommissionerForIdentity(std::string identity);
 
-    CHIP_ERROR InitializeCommissioner(std::string key, chip::FabricId fabricId);
-    void ShutdownCommissioner(std::string key);
+    // Commissioners are keyed by name and local node id.
+    struct CommissionerIdentity
+    {
+        bool operator<(const CommissionerIdentity & other) const
+        {
+            return mName < other.mName || (mName == other.mName && mLocalNodeId < other.mLocalNodeId);
+        }
+        std::string mName;
+        chip::NodeId mLocalNodeId;
+        uint8_t mRCAC[chip::Controller::kMaxCHIPDERCertLength] = {};
+        uint8_t mICAC[chip::Controller::kMaxCHIPDERCertLength] = {};
+        uint8_t mNOC[chip::Controller::kMaxCHIPDERCertLength]  = {};
+
+        size_t mRCACLen;
+        size_t mICACLen;
+        size_t mNOCLen;
+    };
+
+    // InitializeCommissioner uses various members, so can't be static.  This is
+    // obviously a little odd, since the commissioners are then shared across
+    // multiple commands in interactive mode...
+    CHIP_ERROR InitializeCommissioner(CommissionerIdentity & identity, chip::FabricId fabricId);
+    void ShutdownCommissioner(const CommissionerIdentity & key);
     chip::FabricId CurrentCommissionerId();
-    static std::map<std::string, std::unique_ptr<ChipDeviceCommissioner>> mCommissioners;
+
+    static std::map<CommissionerIdentity, std::unique_ptr<ChipDeviceCommissioner>> mCommissioners;
     static std::set<CHIPCommand *> sDeferredCleanups;
 
     chip::Optional<char *> mCommissionerName;

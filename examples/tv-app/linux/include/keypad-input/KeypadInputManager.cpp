@@ -18,6 +18,7 @@
 
 #include "KeypadInputManager.h"
 #include <app-common/zap-generated/attributes/Accessors.h>
+#include <app/util/config.h>
 
 using namespace chip;
 using namespace chip::app::Clusters::KeypadInput;
@@ -98,7 +99,7 @@ void KeypadInputManager::HandleSendKey(CommandResponseHelper<SendKeyResponseType
 
 uint32_t KeypadInputManager::GetFeatureMap(chip::EndpointId endpoint)
 {
-    if (endpoint >= EMBER_AF_CONTENT_LAUNCH_CLUSTER_SERVER_ENDPOINT_COUNT)
+    if (endpoint >= EMBER_AF_CONTENT_LAUNCHER_CLUSTER_SERVER_ENDPOINT_COUNT)
     {
         return mDynamicEndpointFeatureMap;
     }

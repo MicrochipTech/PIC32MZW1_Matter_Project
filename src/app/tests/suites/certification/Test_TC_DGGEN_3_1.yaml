@@ -20,7 +20,7 @@ PICS:
 
 config:
     nodeId: 0x12344321
-    cluster: "Basic"
+    cluster: "Basic Information"
     endpoint: 0
 
 tests:
@@ -31,7 +31,7 @@ tests:
 
     - label: "Commission TH to DUT"
       verification: |
-          verification step to be updated.
+
       disabled: true
 
     - label: "DUT reads NetworkInterfaces structure attribute from TH."

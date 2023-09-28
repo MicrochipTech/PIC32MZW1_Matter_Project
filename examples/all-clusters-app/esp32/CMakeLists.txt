@@ -27,7 +27,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/third_party/connectedhomeip/examples/common/cm
 set(EXTRA_COMPONENT_DIRS
     "${CMAKE_CURRENT_LIST_DIR}/third_party/connectedhomeip/config/esp32/components"
     "${CMAKE_CURRENT_LIST_DIR}/third_party/connectedhomeip/examples/common/QRCode"
-    "${IDF_PATH}/examples/common_components/led_strip"
 )
 if(${IDF_TARGET} STREQUAL "esp32")
     list(APPEND EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_LIST_DIR}/third_party/connectedhomeip/examples/common/m5stack-tft/repo/components/tft"
@@ -48,11 +47,17 @@ idf_build_set_property(COMPILE_OPTIONS "-Wno-format-nonliteral;-Wno-format-secur
 # See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
 idf_build_set_property(COMPILE_OPTIONS "-Wno-error=maybe-uninitialized" APPEND)
 
+idf_build_set_property(COMPILE_OPTIONS "-Wno-error=array-bounds" APPEND)
+
 flashing_script()
 
 if (CONFIG_ENABLE_PW_RPC)
 get_filename_component(CHIP_ROOT ./third_party/connectedhomeip REALPATH)
 include(third_party/connectedhomeip/third_party/pigweed/repo/pw_build/pigweed.cmake)
+include($ENV{PW_ROOT}/pw_assert/backend.cmake)
+include($ENV{PW_ROOT}/pw_log/backend.cmake)
+include($ENV{PW_ROOT}/pw_sys_io/backend.cmake)
+include($ENV{PW_ROOT}/pw_trace/backend.cmake)
 
 pw_set_module_config(pw_rpc_CONFIG pw_rpc.disable_global_mutex_config)
 
@@ -66,8 +71,4 @@ add_subdirectory(third_party/connectedhomeip/third_party/pigweed/repo)
 add_subdirectory(third_party/connectedhomeip/third_party/nanopb/repo)
 add_subdirectory(third_party/connectedhomeip/examples/platform/esp32/pw_sys_io)
 
-get_target_property(_target_cxx_flags pw_build.cpp17 INTERFACE_COMPILE_OPTIONS)
-list(REMOVE_ITEM _target_cxx_flags $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
-list(APPEND _target_cxx_flags $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17>)
-set_target_properties(pw_build.cpp17 PROPERTIES INTERFACE_COMPILE_OPTIONS "${_target_cxx_flags}")
 endif(CONFIG_ENABLE_PW_RPC)

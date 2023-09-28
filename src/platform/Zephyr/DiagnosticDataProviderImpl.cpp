@@ -28,13 +28,13 @@
 #include <platform/Zephyr/DiagnosticDataProviderImpl.h>
 #include <platform/Zephyr/SysHeapMalloc.h>
 
-#include <drivers/hwinfo.h>
-#include <sys/util.h>
+#include <zephyr/drivers/hwinfo.h>
+#include <zephyr/sys/util.h>
 
 #if CHIP_DEVICE_LAYER_TARGET_NRFCONNECT
 #include <platform/nrfconnect/Reboot.h>
 #elif defined(CONFIG_MCUBOOT_IMG_MANAGER)
-#include <dfu/mcuboot.h>
+#include <zephyr/dfu/mcuboot.h>
 #endif
 
 #include <malloc.h>
@@ -116,7 +116,7 @@ DiagnosticDataProviderImpl & DiagnosticDataProviderImpl::GetDefaultInstance()
     return sInstance;
 }
 
-inline DiagnosticDataProviderImpl::DiagnosticDataProviderImpl() : mBootReason(DetermineBootReason())
+DiagnosticDataProviderImpl::DiagnosticDataProviderImpl() : mBootReason(DetermineBootReason())
 {
     ChipLogDetail(DeviceLayer, "Boot reason: %u", static_cast<uint16_t>(mBootReason));
 }
@@ -226,7 +226,7 @@ CHIP_ERROR DiagnosticDataProviderImpl::GetTotalOperationalHours(uint32_t & total
 
     ReturnErrorOnFailure(ConfigurationMgr().GetTotalOperationalHours(reinterpret_cast<uint32_t &>(totalHours)));
 
-    totalOperationalHours = totalHours + deltaTime < UINT32_MAX ? totalHours + deltaTime : UINT32_MAX;
+    totalOperationalHours = static_cast<uint32_t>(totalHours + deltaTime < UINT32_MAX ? totalHours + deltaTime : UINT32_MAX);
 
     return CHIP_NO_ERROR;
 }
@@ -258,19 +258,19 @@ CHIP_ERROR DiagnosticDataProviderImpl::GetNetworkInterfaces(NetworkInterface ** 
             switch (interfaceType)
             {
             case Inet::InterfaceType::Unknown:
-                ifp->type = EMBER_ZCL_INTERFACE_TYPE_UNSPECIFIED;
+                ifp->type = EMBER_ZCL_INTERFACE_TYPE_ENUM_UNSPECIFIED;
                 break;
             case Inet::InterfaceType::WiFi:
-                ifp->type = EMBER_ZCL_INTERFACE_TYPE_WI_FI;
+                ifp->type = EMBER_ZCL_INTERFACE_TYPE_ENUM_WI_FI;
                 break;
             case Inet::InterfaceType::Ethernet:
-                ifp->type = EMBER_ZCL_INTERFACE_TYPE_ETHERNET;
+                ifp->type = EMBER_ZCL_INTERFACE_TYPE_ENUM_ETHERNET;
                 break;
             case Inet::InterfaceType::Thread:
-                ifp->type = EMBER_ZCL_INTERFACE_TYPE_THREAD;
+                ifp->type = EMBER_ZCL_INTERFACE_TYPE_ENUM_THREAD;
                 break;
             case Inet::InterfaceType::Cellular:
-                ifp->type = EMBER_ZCL_INTERFACE_TYPE_CELLULAR;
+                ifp->type = EMBER_ZCL_INTERFACE_TYPE_ENUM_CELLULAR;
                 break;
             }
         }
@@ -282,8 +282,23 @@ CHIP_ERROR DiagnosticDataProviderImpl::GetNetworkInterfaces(NetworkInterface ** 
         ifp->offPremiseServicesReachableIPv4.SetNull();
         ifp->offPremiseServicesReachableIPv6.SetNull();
 
+        CHIP_ERROR error;
         uint8_t addressSize;
-        if (interfaceIterator.GetHardwareAddress(ifp->MacAddress, addressSize, sizeof(ifp->MacAddress)) != CHIP_NO_ERROR)
+
+#if CHIP_DEVICE_CONFIG_ENABLE_THREAD
+        if (interfaceType == Inet::InterfaceType::Thread)
+        {
+            static_assert(OT_EXT_ADDRESS_SIZE <= sizeof(ifp->MacAddress), "Unexpected extended address size");
+            error       = ThreadStackMgr().GetPrimary802154MACAddress(ifp->MacAddress);
+            addressSize = OT_EXT_ADDRESS_SIZE;
+        }
+        else
+#endif
+        {
+            error = interfaceIterator.GetHardwareAddress(ifp->MacAddress, addressSize, sizeof(ifp->MacAddress));
+        }
+
+        if (error != CHIP_NO_ERROR)
         {
             ChipLogError(DeviceLayer, "Failed to get network hardware address");
         }
@@ -326,11 +341,6 @@ void DiagnosticDataProviderImpl::ReleaseNetworkInterfaces(NetworkInterface * net
         netifp                 = netifp->Next;
         delete del;
     }
-}
-
-DiagnosticDataProvider & GetDiagnosticDataProviderImpl()
-{
-    return DiagnosticDataProviderImpl::GetDefaultInstance();
 }
 
 } // namespace DeviceLayer

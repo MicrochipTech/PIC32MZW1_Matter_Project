@@ -17,10 +17,14 @@ name: Build example - QPG
 on:
     push:
     pull_request:
+    merge_group:
 
 concurrency:
     group: ${{ github.ref }}-${{ github.workflow }}-${{ (github.event_name == 'pull_request' && github.event.number) || (github.event_name == 'workflow_dispatch' && github.run_number) || github.sha }}
     cancel-in-progress: true
+
+env:
+    CHIP_NO_LOG_TIMESTAMPS: true
 
 jobs:
     qpg:
@@ -34,11 +38,11 @@ jobs:
         if: github.actor != 'restyled-io[bot]'
 
         container:
-            image: connectedhomeip/chip-build:0.5.91
+            image: connectedhomeip/chip-build:0.7.0
             volumes:
                 - "/tmp/bloat_reports:/tmp/bloat_reports"
         steps:
-            - uses: Wandalen/wretry.action@v1.0.15
+            - uses: Wandalen/wretry.action@v1.0.36
               name: Checkout
               with:
                   action: actions/checkout@v3
@@ -47,7 +51,7 @@ jobs:
                   attempt_limit: 3
                   attempt_delay: 2000
             - name: Checkout submodules
-              run: scripts/checkout_submodules.py --shallow --platform qpg
+              run: scripts/checkout_submodules.py --allow-changing-global-git-config --shallow --platform qpg
 
             - name: Set up environment for size reports
               if: ${{ !env.ACT }}
@@ -55,24 +59,36 @@ jobs:
                   GH_CONTEXT: ${{ toJson(github) }}
               run: scripts/tools/memory/gh_sizes_environment.py "${GH_CONTEXT}"
 
+            - name: Bootstrap cache
+              uses: actions/cache@v3
+              timeout-minutes: 10
+              with:
+                  key: ${{ runner.os }}-env-${{ hashFiles('scripts/setup/*', 'third_party/pigweed/**') }}
+                  path: |
+                      .environment
+                      build_overrides/pigweed_environment.gni
             - name: Bootstrap
               timeout-minutes: 25
               run: scripts/build/gn_bootstrap.sh
             - name: Uploading bootstrap logs
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               if: ${{ always() && !env.ACT }}
               with:
                   name: bootstrap-logs
                   path: |
                       .environment/gn_out/.ninja_log
                       .environment/pigweed-venv/*.log
+
             - name: Build QPG6105 example apps
               timeout-minutes: 20
               run: |
                   ./scripts/run_in_build_env.sh \
                      "./scripts/build/build_examples.py \
                         --enable-flashbundle \
-                        --target-glob 'qpg-{lock,light,shell,persistent-storage}' \
+                        --target qpg-qpg6105-lock \
+                        --target qpg-qpg6105-light \
+                        --target qpg-qpg6105-shell \
+                        --target qpg-qpg6105-persistent-storage \
                         build \
                         --copy-artifacts-to out/artifacts \
                      "
@@ -85,15 +101,15 @@ jobs:
               run: |
                   .environment/pigweed-venv/bin/python3 scripts/tools/memory/gh_sizes.py \
                     qpg qpg6105+debug lighting-app \
-                    out/qpg-light/chip-qpg6105-lighting-example.out \
+                    out/qpg-qpg6105-light/chip-qpg6105-lighting-example.out \
                     /tmp/bloat_reports/
                   .environment/pigweed-venv/bin/python3 scripts/tools/memory/gh_sizes.py \
                     qpg qpg6105+debug lock-app \
-                    out/qpg-lock/chip-qpg6105-lock-example.out \
+                    out/qpg-qpg6105-lock/chip-qpg6105-lock-example.out \
                     /tmp/bloat_reports/
 
             - name: Uploading Size Reports
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               if: ${{ !env.ACT }}
               with:
                   name: Size,QPG-Examples,${{ env.GH_EVENT_PR }},${{ env.GH_EVENT_HASH }},${{ env.GH_EVENT_PARENT }},${{ github.event_name }}

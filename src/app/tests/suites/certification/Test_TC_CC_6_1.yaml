@@ -84,7 +84,7 @@ tests:
       command: "MoveToColorTemperature"
       arguments:
           values:
-              - name: "colorTemperature"
+              - name: "ColorTemperatureMireds"
                 value: 310
               - name: "TransitionTime"
                 value: 0
@@ -94,6 +94,7 @@ tests:
                 value: 0
 
     - label: "Wait 100ms"
+      PICS: CC.S.F04
       cluster: "DelayCommands"
       command: "WaitForMs"
       arguments:
@@ -108,7 +109,7 @@ tests:
       command: "MoveToColorTemperature"
       arguments:
           values:
-              - name: "colorTemperature"
+              - name: "ColorTemperatureMireds"
                 value: 250
               - name: "TransitionTime"
                 value: 300
@@ -118,6 +119,7 @@ tests:
                 value: 0
 
     - label: "Wait 10s"
+      PICS: CC.S.F04
       cluster: "DelayCommands"
       command: "WaitForMs"
       arguments:
@@ -131,10 +133,11 @@ tests:
       attribute: "ColorTemperatureMireds"
       response:
           constraints:
-              minValue: 275
-              maxValue: 305
+              minValue: 246
+              maxValue: 334
 
     - label: "Wait 10s"
+      PICS: CC.S.F04
       cluster: "DelayCommands"
       command: "WaitForMs"
       arguments:
@@ -148,10 +151,11 @@ tests:
       attribute: "ColorTemperatureMireds"
       response:
           constraints:
-              minValue: 255
-              maxValue: 285
+              minValue: 230
+              maxValue: 310
 
     - label: "Wait 10s"
+      PICS: CC.S.F04
       cluster: "DelayCommands"
       command: "WaitForMs"
       arguments:
@@ -165,10 +169,11 @@ tests:
       attribute: "ColorTemperatureMireds"
       response:
           constraints:
-              minValue: 250
-              maxValue: 280
+              minValue: 212
+              maxValue: 288
 
     - label: "Wait 5s"
+      PICS: CC.S.F04
       cluster: "DelayCommands"
       command: "WaitForMs"
       arguments:
@@ -181,7 +186,9 @@ tests:
       command: "readAttribute"
       attribute: "ColorTemperatureMireds"
       response:
-          value: 250
+          constraints:
+              minValue: 212
+              maxValue: 288
 
     - label: "TH reads ColorMode attribute from DUT"
       PICS: CC.S.F04 && CC.S.A0008

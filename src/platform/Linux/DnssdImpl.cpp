@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2020 Project CHIP Authors
+ *    Copyright (c) 2020-2022 Project CHIP Authors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -572,7 +572,7 @@ DnssdServiceProtocol GetProtocolInType(const char * type)
 
     if (deliminator == nullptr)
     {
-        ChipLogError(Discovery, "Failed to find protocol in type: %s", type);
+        ChipLogError(Discovery, "Failed to find protocol in type: %s", StringOrNullMarker(type));
         return DnssdServiceProtocol::kDnssdProtocolUnknown;
     }
 
@@ -585,7 +585,7 @@ DnssdServiceProtocol GetProtocolInType(const char * type)
         return DnssdServiceProtocol::kDnssdProtocolUdp;
     }
 
-    ChipLogError(Discovery, "Unknown protocol in type: %s", type);
+    ChipLogError(Discovery, "Unknown protocol in type: %s", StringOrNullMarker(type));
     return DnssdServiceProtocol::kDnssdProtocolUnknown;
 }
 
@@ -616,7 +616,7 @@ void MdnsAvahi::HandleBrowse(AvahiServiceBrowser * browser, AvahiIfIndex interfa
     switch (event)
     {
     case AVAHI_BROWSER_FAILURE:
-        context->mCallback(context->mContext, nullptr, 0, CHIP_ERROR_INTERNAL);
+        context->mCallback(context->mContext, nullptr, 0, true, CHIP_ERROR_INTERNAL);
         avahi_service_browser_free(browser);
         chip::Platform::Delete(context);
         break;
@@ -642,7 +642,7 @@ void MdnsAvahi::HandleBrowse(AvahiServiceBrowser * browser, AvahiIfIndex interfa
         break;
     case AVAHI_BROWSER_ALL_FOR_NOW:
         ChipLogProgress(DeviceLayer, "Avahi browse: all for now");
-        context->mCallback(context->mContext, context->mServices.data(), context->mServices.size(), CHIP_NO_ERROR);
+        context->mCallback(context->mContext, context->mServices.data(), context->mServices.size(), true, CHIP_NO_ERROR);
         avahi_service_browser_free(browser);
         chip::Platform::Delete(context);
         break;
@@ -731,7 +731,7 @@ void MdnsAvahi::HandleResolve(AvahiServiceResolver * resolver, AvahiIfIndex inte
     case AVAHI_RESOLVER_FOUND:
         DnssdService result = {};
 
-        ChipLogError(DeviceLayer, "Avahi resolve found");
+        ChipLogProgress(DeviceLayer, "Avahi resolve found");
 
         Platform::CopyString(result.mName, name);
         CopyTypeWithoutProtocol(result.mType, type);
@@ -850,9 +850,16 @@ CHIP_ERROR ChipDnssdFinalizeServiceUpdate()
 }
 
 CHIP_ERROR ChipDnssdBrowse(const char * type, DnssdServiceProtocol protocol, chip::Inet::IPAddressType addressType,
-                           chip::Inet::InterfaceId interface, DnssdBrowseCallback callback, void * context)
+                           chip::Inet::InterfaceId interface, DnssdBrowseCallback callback, void * context,
+                           intptr_t * browseIdentifier)
 {
+    *browseIdentifier = reinterpret_cast<intptr_t>(nullptr);
     return MdnsAvahi::GetInstance().Browse(type, protocol, addressType, interface, callback, context);
+}
+
+CHIP_ERROR ChipDnssdStopBrowse(intptr_t browseIdentifier)
+{
+    return CHIP_ERROR_NOT_IMPLEMENTED;
 }
 
 CHIP_ERROR ChipDnssdResolve(DnssdService * browseResult, chip::Inet::InterfaceId interface, DnssdResolveCallback callback,
@@ -863,6 +870,13 @@ CHIP_ERROR ChipDnssdResolve(DnssdService * browseResult, chip::Inet::InterfaceId
 
     return MdnsAvahi::GetInstance().Resolve(browseResult->mName, browseResult->mType, browseResult->mProtocol,
                                             browseResult->mAddressType, Inet::IPAddressType::kAny, interface, callback, context);
+}
+
+void ChipDnssdResolveNoLongerNeeded(const char * instanceName) {}
+
+CHIP_ERROR ChipDnssdReconfirmRecord(const char * hostname, chip::Inet::IPAddress address, chip::Inet::InterfaceId interface)
+{
+    return CHIP_ERROR_NOT_IMPLEMENTED;
 }
 
 } // namespace Dnssd

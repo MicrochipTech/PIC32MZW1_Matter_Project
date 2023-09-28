@@ -37,12 +37,15 @@ mw320_sdk("sdk") {
     "include/FreeRTOSConfig.h",
   ]
 
-  defines = []
+  defines = [ "CHIP_CONFIG_MAX_FABRICS=5" ]
 
   if (is_debug) {
     defines += [ "BUILD_RELEASE=0" ]
   } else {
     defines += [ "BUILD_RELEASE=1" ]
+  }
+  if (wifi_conn_abort_support == true) {
+    defines += [ "WIFI_CONN_ABORT_SUPPORT" ]
   }
 }
 
@@ -59,6 +62,8 @@ mw320_executable("shell_mw320") {
     "${chip_root}/src/lib/shell",
     "${chip_root}/src/setup_payload",
   ]
+
+  deps = [ "${chip_root}/src/platform:syscalls_stub" ]
 
   include_dirs = [
     "${chip_root}/src/platform/nxp/mw320",
@@ -81,7 +86,10 @@ mw320_executable("shell_mw320") {
 
   ldscript = "${examples_plat_dir}/app/ldscripts/88MW320_xx_xxxx_flash.ld"
 
-  ldflags = [ "-T" + rebase_path(ldscript, root_build_dir) ]
+  ldflags = [
+    "-T" + rebase_path(ldscript, root_build_dir),
+    "-Wl,--no-warn-rwx-segment",
+  ]
   defines = [
     "MW320_SHELL_STREAMER",
     "SHELL_STREAMER_APP_SPECIFIC",

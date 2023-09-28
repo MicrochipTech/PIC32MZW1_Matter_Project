@@ -19,7 +19,7 @@
 #pragma once
 
 #ifdef CONFIG_USE_LOCAL_STORAGE
-#include "../../config/PersistentStorage.h"
+#include <controller/ExamplePersistentStorage.h>
 #endif // CONFIG_USE_LOCAL_STORAGE
 
 #include "../common/CHIPCommand.h"
@@ -70,7 +70,7 @@ private:
     std::vector<chip::EndpointId> mEndPointId;
 
     static void OnDeviceConnectedFn(void * context, chip::Messaging::ExchangeManager & exchangeMgr,
-                                    chip::SessionHandle & sessionHandle);
+                                    const chip::SessionHandle & sessionHandle);
     static void OnDeviceConnectionFailureFn(void * context, const chip::ScopedNodeId & peerId, CHIP_ERROR error);
 
     chip::Callback::Callback<chip::OnDeviceConnected> mOnDeviceConnectedCallback;

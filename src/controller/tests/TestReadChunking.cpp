@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2021 Project CHIP Authors
+ *    Copyright (c) 2021-2023 Project CHIP Authors
  *    All rights reserved.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,7 @@
 #include <app/AttributeAccessInterface.h>
 #include <app/BufferedReadCallback.h>
 #include <app/CommandHandlerInterface.h>
+#include <app/GlobalAttributes.h>
 #include <app/InteractionModelEngine.h>
 #include <app/data-model/Decode.h>
 #include <app/tests/AppTestContext.h>
@@ -45,6 +46,7 @@
 
 using TestContext = chip::Test::AppContext;
 using namespace chip;
+using namespace chip::app;
 using namespace chip::app::Clusters;
 
 namespace {
@@ -68,10 +70,10 @@ constexpr AttributeId kTestListAttribute = 6;
 constexpr AttributeId kTestBadAttribute =
     7; // Reading this attribute will return CHIP_ERROR_NO_MEMORY but nothing is actually encoded.
 
-class TestCommandInteraction
+class TestReadChunking
 {
 public:
-    TestCommandInteraction() {}
+    TestReadChunking() {}
     static void TestChunking(nlTestSuite * apSuite, void * apContext);
     static void TestListChunking(nlTestSuite * apSuite, void * apContext);
     static void TestBadChunking(nlTestSuite * apSuite, void * apContext);
@@ -88,7 +90,7 @@ DECLARE_DYNAMIC_ATTRIBUTE(0x00000001, INT8U, 1, 0), DECLARE_DYNAMIC_ATTRIBUTE(0x
     DECLARE_DYNAMIC_ATTRIBUTE(0x00000005, INT8U, 1, 0), DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(testEndpointClusters)
-DECLARE_DYNAMIC_CLUSTER(TestCluster::Id, testClusterAttrs, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
+DECLARE_DYNAMIC_CLUSTER(Clusters::UnitTesting::Id, testClusterAttrs, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 DECLARE_DYNAMIC_ENDPOINT(testEndpoint, testEndpointClusters);
 
@@ -97,7 +99,7 @@ DECLARE_DYNAMIC_ATTRIBUTE(kTestListAttribute, ARRAY, 1, 0), DECLARE_DYNAMIC_ATTR
     DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(testEndpoint3Clusters)
-DECLARE_DYNAMIC_CLUSTER(TestCluster::Id, testClusterAttrsOnEndpoint3, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
+DECLARE_DYNAMIC_CLUSTER(Clusters::UnitTesting::Id, testClusterAttrsOnEndpoint3, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 DECLARE_DYNAMIC_ENDPOINT(testEndpoint3, testEndpoint3Clusters);
 
@@ -105,7 +107,7 @@ DECLARE_DYNAMIC_ATTRIBUTE_LIST_BEGIN(testClusterAttrsOnEndpoint4)
 DECLARE_DYNAMIC_ATTRIBUTE(0x00000001, INT8U, 1, 0), DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(testEndpoint4Clusters)
-DECLARE_DYNAMIC_CLUSTER(TestCluster::Id, testClusterAttrsOnEndpoint4, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
+DECLARE_DYNAMIC_CLUSTER(Clusters::UnitTesting::Id, testClusterAttrsOnEndpoint4, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 DECLARE_DYNAMIC_ENDPOINT(testEndpoint4, testEndpoint4Clusters);
 
@@ -115,7 +117,7 @@ DECLARE_DYNAMIC_ATTRIBUTE(0x00000001, INT8U, 1, 0), DECLARE_DYNAMIC_ATTRIBUTE(0x
     DECLARE_DYNAMIC_ATTRIBUTE(0x00000003, INT8U, 1, 0), DECLARE_DYNAMIC_ATTRIBUTE_LIST_END();
 
 DECLARE_DYNAMIC_CLUSTER_LIST_BEGIN(testEndpoint5Clusters)
-DECLARE_DYNAMIC_CLUSTER(TestCluster::Id, testClusterAttrsOnEndpoint5, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
+DECLARE_DYNAMIC_CLUSTER(Clusters::UnitTesting::Id, testClusterAttrsOnEndpoint5, nullptr, nullptr), DECLARE_DYNAMIC_CLUSTER_LIST_END;
 
 DECLARE_DYNAMIC_ENDPOINT(testEndpoint5, testEndpoint5Clusters);
 
@@ -173,6 +175,12 @@ void TestReadCallback::OnAttributeData(const app::ConcreteDataAttributePath & aP
         NL_TEST_ASSERT(gSuite, v.ComputeSize(&arraySize) == CHIP_NO_ERROR);
         NL_TEST_ASSERT(gSuite, arraySize == 0);
     }
+#if CHIP_CONFIG_ENABLE_EVENTLIST_ATTRIBUTE
+    else if (aPath.mAttributeId == Globals::Attributes::EventList::Id)
+    {
+        // Nothing to check for this one; depends on the endpoint.
+    }
+#endif // CHIP_CONFIG_ENABLE_EVENTLIST_ATTRIBUTE
     else if (aPath.mAttributeId == Globals::Attributes::AttributeList::Id)
     {
         // Nothing to check for this one; depends on the endpoint.
@@ -211,7 +219,7 @@ public:
     {
         app::AttributePathParams path;
         path.mEndpointId  = kTestEndpointId5;
-        path.mClusterId   = TestCluster::Id;
+        path.mClusterId   = Clusters::UnitTesting::Id;
         path.mAttributeId = attr;
         app::InteractionModelEngine::GetInstance()->GetReportingEngine().SetDirty(path);
     }
@@ -245,7 +253,7 @@ class TestAttrAccess : public app::AttributeAccessInterface
 {
 public:
     // Register for the Test Cluster cluster on all endpoints.
-    TestAttrAccess() : AttributeAccessInterface(Optional<EndpointId>::Missing(), TestCluster::Id)
+    TestAttrAccess() : AttributeAccessInterface(Optional<EndpointId>::Missing(), Clusters::UnitTesting::Id)
     {
         registerAttributeAccessOverride(this);
     }
@@ -319,7 +327,7 @@ void TestMutableReadCallback::OnAttributeData(const app::ConcreteDataAttributePa
                                               const app::StatusIB & aStatus)
 {
     VerifyOrReturn(apData != nullptr);
-    NL_TEST_ASSERT(gSuite, aPath.mClusterId == TestCluster::Id);
+    NL_TEST_ASSERT(gSuite, aPath.mClusterId == Clusters::UnitTesting::Id);
 
     mAttributeCount++;
     if (aPath.mAttributeId <= 5)
@@ -359,20 +367,20 @@ void TestMutableReadCallback::OnAttributeData(const app::ConcreteDataAttributePa
  * as we can possibly cover.
  *
  */
-void TestCommandInteraction::TestChunking(nlTestSuite * apSuite, void * apContext)
+void TestReadChunking::TestChunking(nlTestSuite * apSuite, void * apContext)
 {
     TestContext & ctx                    = *static_cast<TestContext *>(apContext);
     auto sessionHandle                   = ctx.GetSessionBobToAlice();
     app::InteractionModelEngine * engine = app::InteractionModelEngine::GetInstance();
 
     // Initialize the ember side server logic
-    InitDataModelHandler(&ctx.GetExchangeManager());
+    InitDataModelHandler();
 
     // Register our fake dynamic endpoint.
     DataVersion dataVersionStorage[ArraySize(testEndpointClusters)];
     emberAfSetDynamicEndpoint(0, kTestEndpointId, &testEndpoint, Span<DataVersion>(dataVersionStorage));
 
-    app::AttributePathParams attributePath(kTestEndpointId, app::Clusters::TestCluster::Id);
+    app::AttributePathParams attributePath(kTestEndpointId, app::Clusters::UnitTesting::Id);
     app::ReadPrepareParams readParams(sessionHandle);
 
     readParams.mpAttributePathParamsList    = &attributePath;
@@ -402,11 +410,9 @@ void TestCommandInteraction::TestChunking(nlTestSuite * apSuite, void * apContex
         NL_TEST_ASSERT(apSuite, readCallback.mOnReportEnd);
 
         //
-        // Always returns the same number of attributes read (5 + revision +
-        // AttributeList + AcceptedCommandList +
-        // GeneratedCommandList = 9).
+        // Always returns the same number of attributes read (5 + revision + GlobalAttributesNotInMetadata).
         //
-        NL_TEST_ASSERT(apSuite, readCallback.mAttributeCount == 9);
+        NL_TEST_ASSERT(apSuite, readCallback.mAttributeCount == 6 + ArraySize(GlobalAttributesNotInMetadata));
         readCallback.mAttributeCount = 0;
 
         NL_TEST_ASSERT(apSuite, ctx.GetExchangeManager().GetNumActiveExchanges() == 0);
@@ -424,20 +430,20 @@ void TestCommandInteraction::TestChunking(nlTestSuite * apSuite, void * apContex
 }
 
 // Similar to the test above, but for the list chunking feature.
-void TestCommandInteraction::TestListChunking(nlTestSuite * apSuite, void * apContext)
+void TestReadChunking::TestListChunking(nlTestSuite * apSuite, void * apContext)
 {
     TestContext & ctx                    = *static_cast<TestContext *>(apContext);
     auto sessionHandle                   = ctx.GetSessionBobToAlice();
     app::InteractionModelEngine * engine = app::InteractionModelEngine::GetInstance();
 
     // Initialize the ember side server logic
-    InitDataModelHandler(&ctx.GetExchangeManager());
+    InitDataModelHandler();
 
     // Register our fake dynamic endpoint.
     DataVersion dataVersionStorage[ArraySize(testEndpoint3Clusters)];
     emberAfSetDynamicEndpoint(0, kTestEndpointId3, &testEndpoint3, Span<DataVersion>(dataVersionStorage));
 
-    app::AttributePathParams attributePath(kTestEndpointId3, app::Clusters::TestCluster::Id, kTestListAttribute);
+    app::AttributePathParams attributePath(kTestEndpointId3, app::Clusters::UnitTesting::Id, kTestListAttribute);
     app::ReadPrepareParams readParams(sessionHandle);
 
     readParams.mpAttributePathParamsList    = &attributePath;
@@ -488,14 +494,14 @@ void TestCommandInteraction::TestListChunking(nlTestSuite * apSuite, void * apCo
 }
 
 // Read an attribute that can never fit into the buffer. Result in an empty report, server should shutdown the transaction.
-void TestCommandInteraction::TestBadChunking(nlTestSuite * apSuite, void * apContext)
+void TestReadChunking::TestBadChunking(nlTestSuite * apSuite, void * apContext)
 {
     TestContext & ctx                    = *static_cast<TestContext *>(apContext);
     auto sessionHandle                   = ctx.GetSessionBobToAlice();
     app::InteractionModelEngine * engine = app::InteractionModelEngine::GetInstance();
 
     // Initialize the ember side server logic
-    InitDataModelHandler(&ctx.GetExchangeManager());
+    InitDataModelHandler();
 
     app::InteractionModelEngine::GetInstance()->GetReportingEngine().SetWriterReserved(0);
 
@@ -503,7 +509,7 @@ void TestCommandInteraction::TestBadChunking(nlTestSuite * apSuite, void * apCon
     DataVersion dataVersionStorage[ArraySize(testEndpoint3Clusters)];
     emberAfSetDynamicEndpoint(0, kTestEndpointId3, &testEndpoint3, Span<DataVersion>(dataVersionStorage));
 
-    app::AttributePathParams attributePath(kTestEndpointId3, app::Clusters::TestCluster::Id, kTestBadAttribute);
+    app::AttributePathParams attributePath(kTestEndpointId3, app::Clusters::UnitTesting::Id, kTestBadAttribute);
     app::ReadPrepareParams readParams(sessionHandle);
 
     readParams.mpAttributePathParamsList    = &attributePath;
@@ -540,14 +546,14 @@ void TestCommandInteraction::TestBadChunking(nlTestSuite * apSuite, void * apCon
 /*
  * This test contains two parts, one is to enable a new endpoint on the fly, another is to disable it and re-enable it.
  */
-void TestCommandInteraction::TestDynamicEndpoint(nlTestSuite * apSuite, void * apContext)
+void TestReadChunking::TestDynamicEndpoint(nlTestSuite * apSuite, void * apContext)
 {
     TestContext & ctx                    = *static_cast<TestContext *>(apContext);
     auto sessionHandle                   = ctx.GetSessionBobToAlice();
     app::InteractionModelEngine * engine = app::InteractionModelEngine::GetInstance();
 
     // Initialize the ember side server logic
-    InitDataModelHandler(&ctx.GetExchangeManager());
+    InitDataModelHandler();
 
     // Register our fake dynamic endpoint.
     DataVersion dataVersionStorage[ArraySize(testEndpoint4Clusters)];
@@ -565,24 +571,25 @@ void TestCommandInteraction::TestDynamicEndpoint(nlTestSuite * apSuite, void * a
 
         app::ReadClient readClient(engine, &ctx.GetExchangeManager(), readCallback.mBufferedCallback,
                                    app::ReadClient::InteractionType::Subscribe);
+        // Enable the new endpoint
+        emberAfSetDynamicEndpoint(0, kTestEndpointId, &testEndpoint, Span<DataVersion>(dataVersionStorage));
 
         NL_TEST_ASSERT(apSuite, readClient.SendRequest(readParams) == CHIP_NO_ERROR);
 
         ctx.DrainAndServiceIO();
 
-        // We should not receive any reports in initial reports, so check mOnSubscriptionEstablished instead.
         NL_TEST_ASSERT(apSuite, readCallback.mOnSubscriptionEstablished);
         readCallback.mAttributeCount = 0;
 
-        // Enable the new endpoint
         emberAfSetDynamicEndpoint(0, kTestEndpointId4, &testEndpoint4, Span<DataVersion>(dataVersionStorage));
 
         ctx.DrainAndServiceIO();
 
         // Ensure we have received the report, we do not care about the initial report here.
-        // AcceptedCommandList / GeneratedCommandList / AttributeList attribute are not included in
-        // testClusterAttrsOnEndpoint4.
-        NL_TEST_ASSERT(apSuite, readCallback.mAttributeCount == ArraySize(testClusterAttrsOnEndpoint4) + 3);
+        // GlobalAttributesNotInMetadata attributes are not included in testClusterAttrsOnEndpoint4.
+        NL_TEST_ASSERT(apSuite,
+                       readCallback.mAttributeCount ==
+                           ArraySize(testClusterAttrsOnEndpoint4) + ArraySize(GlobalAttributesNotInMetadata));
 
         // We have received all report data.
         NL_TEST_ASSERT(apSuite, readCallback.mOnReportEnd);
@@ -606,9 +613,10 @@ void TestCommandInteraction::TestDynamicEndpoint(nlTestSuite * apSuite, void * a
         ctx.DrainAndServiceIO();
 
         // Ensure we have received the report, we do not care about the initial report here.
-        // AcceptedCommandList / GeneratedCommandList / AttributeList attribute are not include in
-        // testClusterAttrsOnEndpoint4.
-        NL_TEST_ASSERT(apSuite, readCallback.mAttributeCount == ArraySize(testClusterAttrsOnEndpoint4) + 3);
+        // GlobalAttributesNotInMetadata attributes are not included in testClusterAttrsOnEndpoint4.
+        NL_TEST_ASSERT(apSuite,
+                       readCallback.mAttributeCount ==
+                           ArraySize(testClusterAttrsOnEndpoint4) + ArraySize(GlobalAttributesNotInMetadata));
 
         // We have received all report data.
         NL_TEST_ASSERT(apSuite, readCallback.mOnReportEnd);
@@ -623,7 +631,6 @@ void TestCommandInteraction::TestDynamicEndpoint(nlTestSuite * apSuite, void * a
 
     emberAfClearDynamicEndpoint(0);
 }
-
 /*
  * The tests below are for testing deatiled bwhavior when the attributes are modified between two chunks. In this test, we only care
  * above whether we will receive correct attribute values in reasonable messages with reduced reporting traffic.
@@ -649,7 +656,7 @@ auto TouchAttrOp(AttributeIdWithEndpointId attr)
     return [=]() {
         app::AttributePathParams path;
         path.mEndpointId  = attr.first;
-        path.mClusterId   = TestCluster::Id;
+        path.mClusterId   = Clusters::UnitTesting::Id;
         path.mAttributeId = attr.second;
         gIterationCount++;
         app::InteractionModelEngine::GetInstance()->GetReportingEngine().SetDirty(path);
@@ -737,7 +744,7 @@ void DoTest(TestMutableReadCallback * callback, Instruction instruction)
 
 }; // namespace TestSetDirtyBetweenChunksUtil
 
-void TestCommandInteraction::TestSetDirtyBetweenChunks(nlTestSuite * apSuite, void * apContext)
+void TestReadChunking::TestSetDirtyBetweenChunks(nlTestSuite * apSuite, void * apContext)
 {
     using namespace TestSetDirtyBetweenChunksUtil;
     TestContext & ctx                    = *static_cast<TestContext *>(apContext);
@@ -748,7 +755,7 @@ void TestCommandInteraction::TestSetDirtyBetweenChunks(nlTestSuite * apSuite, vo
     gSuite = apSuite;
 
     // Initialize the ember side server logic
-    InitDataModelHandler(&ctx.GetExchangeManager());
+    InitDataModelHandler();
 
     app::InteractionModelEngine::GetInstance()->GetReportingEngine().SetWriterReserved(0);
     app::InteractionModelEngine::GetInstance()->GetReportingEngine().SetMaxAttributesPerChunk(2);
@@ -843,9 +850,9 @@ void TestCommandInteraction::TestSetDirtyBetweenChunks(nlTestSuite * apSuite, vo
         app::AttributePathParams attributePath[3];
         app::ReadPrepareParams readParams(sessionHandle);
 
-        attributePath[0] = app::AttributePathParams(kTestEndpointId5, TestCluster::Id, Attr1);
-        attributePath[1] = app::AttributePathParams(kTestEndpointId5, TestCluster::Id, Attr2);
-        attributePath[2] = app::AttributePathParams(kTestEndpointId5, TestCluster::Id, Attr3);
+        attributePath[0] = app::AttributePathParams(kTestEndpointId5, Clusters::UnitTesting::Id, Attr1);
+        attributePath[1] = app::AttributePathParams(kTestEndpointId5, Clusters::UnitTesting::Id, Attr2);
+        attributePath[2] = app::AttributePathParams(kTestEndpointId5, Clusters::UnitTesting::Id, Attr3);
 
         readParams.mpAttributePathParamsList    = attributePath;
         readParams.mAttributePathParamsListSize = 3;
@@ -895,11 +902,11 @@ void TestCommandInteraction::TestSetDirtyBetweenChunks(nlTestSuite * apSuite, vo
 // clang-format off
 const nlTest sTests[] =
 {
-    NL_TEST_DEF("TestChunking", TestCommandInteraction::TestChunking),
-    NL_TEST_DEF("TestListChunking", TestCommandInteraction::TestListChunking),
-    NL_TEST_DEF("TestBadChunking", TestCommandInteraction::TestBadChunking),
-    NL_TEST_DEF("TestDynamicEndpoint", TestCommandInteraction::TestDynamicEndpoint),
-    NL_TEST_DEF("TestSetDirtyBetweenChunks", TestCommandInteraction::TestSetDirtyBetweenChunks),
+    NL_TEST_DEF("TestChunking", TestReadChunking::TestChunking),
+    NL_TEST_DEF("TestListChunking", TestReadChunking::TestListChunking),
+    NL_TEST_DEF("TestBadChunking", TestReadChunking::TestBadChunking),
+    NL_TEST_DEF("TestDynamicEndpoint", TestReadChunking::TestDynamicEndpoint),
+    NL_TEST_DEF("TestSetDirtyBetweenChunks", TestReadChunking::TestSetDirtyBetweenChunks),
     NL_TEST_SENTINEL()
 };
 

@@ -174,9 +174,6 @@ public:
     };
 
     virtual SessionType GetSessionType() const = 0;
-#if CHIP_PROGRESS_LOGGING
-    virtual const char * GetSessionTypeString() const = 0;
-#endif
 
     void AddHolder(SessionHolder & holder)
     {
@@ -202,7 +199,7 @@ public:
     virtual Access::SubjectDescriptor GetSubjectDescriptor() const           = 0;
     virtual bool RequireMRP() const                                          = 0;
     virtual const ReliableMessageProtocolConfig & GetRemoteMRPConfig() const = 0;
-    virtual System::Clock::Timestamp GetMRPBaseTimeout()                     = 0;
+    virtual System::Clock::Timestamp GetMRPBaseTimeout() const               = 0;
     virtual System::Clock::Milliseconds32 GetAckTimeout() const              = 0;
 
     // Returns a suggested timeout value based on the round-trip time it takes for the peer at the other end of the session to
@@ -225,6 +222,8 @@ public:
 
     bool IsSecureSession() const { return GetSessionType() == SessionType::kSecure; }
 
+    bool IsUnauthenticatedSession() const { return GetSessionType() == SessionType::kUnauthenticated; }
+
     void DispatchSessionEvent(SessionDelegate::Event event)
     {
         // Holders might remove themselves when notified.
@@ -236,6 +235,11 @@ public:
             cur->DispatchSessionEvent(event);
         }
     }
+
+    // Return a session id that is usable for logging. This is the local session
+    // id for secure unicast sessions, 0 for non-secure unicast sessions, and
+    // the group id for group sessions.
+    uint16_t SessionIdForLogging() const;
 
 protected:
     // This should be called by sub-classes at the very beginning of the destructor, before any data field is disposed, such that
@@ -251,11 +255,22 @@ protected:
 
     void SetFabricIndex(FabricIndex index) { mFabricIndex = index; }
 
+    const SecureSession * AsConstSecureSession() const;
+    const IncomingGroupSession * AsConstIncomingGroupSession() const;
+    const OutgoingGroupSession * AsConstOutgoingGroupSession() const;
+
     IntrusiveList<SessionHolder> mHolders;
 
 private:
     FabricIndex mFabricIndex = kUndefinedFabricIndex;
 };
+
+//
+// Return a string representation of the underlying session.
+//
+// Always returns a non-null pointer.
+//
+const char * GetSessionTypeString(const SessionHandle & session);
 
 } // namespace Transport
 } // namespace chip

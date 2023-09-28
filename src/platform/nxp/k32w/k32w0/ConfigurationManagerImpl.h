@@ -25,8 +25,8 @@
 
 #pragma once
 
-#include "K32W0Config.h"
 #include <platform/internal/GenericConfigurationManagerImpl.h>
+#include <platform/nxp/k32w/k32w0/K32W0Config.h>
 
 namespace chip {
 namespace DeviceLayer {
@@ -51,12 +51,13 @@ private:
     CHIP_ERROR WritePersistedStorageValue(::chip::Platform::PersistedStorage::Key key, uint32_t value) override;
     CHIP_ERROR GetRebootCount(uint32_t & rebootCount) override;
     CHIP_ERROR StoreRebootCount(uint32_t rebootCount) override;
-    CHIP_ERROR GetSoftwareVersion(uint32_t & softwareVer) override;
-    CHIP_ERROR StoreSoftwareVersion(uint32_t softwareVer) override;
     CHIP_ERROR GetTotalOperationalHours(uint32_t & totalOperationalHours) override;
     CHIP_ERROR StoreTotalOperationalHours(uint32_t totalOperationalHours) override;
     CHIP_ERROR GetBootReason(uint32_t & bootReasons) override;
     CHIP_ERROR StoreBootReason(uint32_t bootReasons) override;
+    CHIP_ERROR GetUniqueId(char * buf, size_t bufSize) override;
+    CHIP_ERROR StoreUniqueId(const char * uniqueId, size_t uniqueIdLen) override;
+    CHIP_ERROR GenerateUniqueId(char * buf, size_t bufSize) override;
 
     // NOTE: Other public interface methods are implemented by GenericConfigurationManagerImpl<>.
 

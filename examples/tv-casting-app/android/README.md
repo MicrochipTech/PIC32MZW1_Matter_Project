@@ -12,22 +12,18 @@ the TV.
 -   [Matter TV Casting Android App Example](#matter-tv-casting-android-app-example)
     -   [Requirements for building](#requirements-for-building)
         -   [ABIs and TARGET_CPU](#abis-and-target_cpu)
-        -   [Gradle & JDK Version](#gradle--jdk-version)
+        -   [Gradle \& JDK Version](#gradle--jdk-version)
     -   [Preparing for build](#preparing-for-build)
-    -   [Building & Installing the app](#building--installing-the-app)
+    -   [Building \& Installing the app](#building--installing-the-app)
 
 <hr>
 
-<a name="requirements"></a>
-
 ## Requirements for building
 
-You need Android SDK 21 & NDK downloaded to your machine. Set the
+You need Android SDK 21 & NDK 23.2.8568313 downloaded to your machine. Set the
 `$ANDROID_HOME` environment variable to where the SDK is downloaded and the
 `$ANDROID_NDK_HOME` environment variable to point to where the NDK package is
 downloaded.
-
-<a name="abi"></a>
 
 ### ABIs and TARGET_CPU
 
@@ -40,8 +36,6 @@ architecture:
 | arm64-v8a   | arm64      |
 | x86         | x86        |
 | x86_64      | x64        |
-
-<a name="jdk"></a>
 
 ### Gradle & JDK Version
 
@@ -57,8 +51,6 @@ export JAVA_HOME=/Applications/Android\ Studio.app/Contents/jre/Contents/Home/
 
 <hr>
 
-<a name="preparing"></a>
-
 ## Preparing for build
 
 Complete the following steps to prepare the Matter build:
@@ -71,8 +63,6 @@ Complete the following steps to prepare the Matter build:
     source scripts/bootstrap.sh
     ```
 
-<a name="building-installing"></a>
-
 ## Building & Installing the app
 
 This is the simplest option. In the command line, run the following command from
@@ -81,6 +71,9 @@ the top Matter directory:
 ```shell
 ./scripts/build/build_examples.py --target android-arm64-tv-casting-app build
 ```
+
+(To build this app with no debugging hooks, use the
+`android-arm64-tv-casting-app-no-debug` target)
 
 See the table above for other values of `TARGET_CPU`.
 

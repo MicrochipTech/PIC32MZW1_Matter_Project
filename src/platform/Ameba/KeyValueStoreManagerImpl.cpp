@@ -21,6 +21,7 @@
  *          Platform-specific key value storage implementation for Ameba
  */
 /* this file behaves like a config.h, comes first */
+#include "FreeRTOS.h"
 #include "chip_porting.h"
 #include <platform/KeyValueStoreManager.h>
 #include <support/CodeUtils.h>
@@ -88,6 +89,15 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
     if (!value)
     {
         return (err = CHIP_ERROR_INVALID_ARGUMENT);
+    }
+
+    if (checkExist(key, key))
+    {
+        ret = deleteKey(key, key);
+        if (ret != 0)
+        {
+            ChipLogError(DeviceLayer, "Warning, KVS leakage, failed to remove old kvs value");
+        }
     }
 
     ret = setPref_new(key, key, (uint8_t *) value, value_size);

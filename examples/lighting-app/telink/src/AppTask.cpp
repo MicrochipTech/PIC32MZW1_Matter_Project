@@ -1,6 +1,6 @@
 /*
  *
- *    Copyright (c) 2021 Project CHIP Authors
+ *    Copyright (c) 2022-2023 Project CHIP Authors
  *    All rights reserved.
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,321 +18,170 @@
 
 #include "AppTask.h"
 
-#include "AppConfig.h"
-#include "AppEvent.h"
-#include "ButtonManager.h"
-#include "LEDWidget.h"
-#include "LightingManager.h"
-#include <app/server/OnboardingCodesUtil.h>
-#include <app/server/Server.h>
+#include "ColorFormat.h"
+#include "PWMDevice.h"
 
-#include "ThreadUtil.h"
+#include <app-common/zap-generated/attributes/Accessors.h>
 
-#include <app-common/zap-generated/attribute-id.h>
-#include <app-common/zap-generated/attribute-type.h>
-#include <app-common/zap-generated/cluster-id.h>
-#include <app/util/attribute-storage.h>
-
-#include <credentials/DeviceAttestationCredsProvider.h>
-#include <credentials/examples/DeviceAttestationCredsExample.h>
-
-#include <platform/CHIPDeviceLayer.h>
-
-#include <lib/support/ErrorStr.h>
-#include <setup_payload/QRCodeSetupPayloadGenerator.h>
-#include <setup_payload/SetupPayload.h>
-#include <system/SystemClock.h>
-
-#include <logging/log.h>
-#include <zephyr.h>
-
-#include <algorithm>
-
-LOG_MODULE_DECLARE(app);
+LOG_MODULE_DECLARE(app, CONFIG_CHIP_APP_LOG_LEVEL);
 
 namespace {
+const struct pwm_dt_spec sPwmRgbSpecBlueLed = LIGHTING_PWM_SPEC_RGB_BLUE;
+#if USE_RGB_PWM
+const struct pwm_dt_spec sPwmRgbSpecGreenLed = LIGHTING_PWM_SPEC_RGB_GREEN;
+const struct pwm_dt_spec sPwmRgbSpecRedLed   = LIGHTING_PWM_SPEC_RGB_RED;
 
-constexpr int kAppEventQueueSize      = 10;
-constexpr uint8_t kButtonPushEvent    = 1;
-constexpr uint8_t kButtonReleaseEvent = 0;
-
-K_MSGQ_DEFINE(sAppEventQueue, sizeof(AppEvent), kAppEventQueueSize, alignof(AppEvent));
-
-LEDWidget sStatusLED;
-
-Button sFactoryResetButton;
-Button sLightingButton;
-Button sThreadStartButton;
-Button sBleAdvStartButton;
-
-bool sIsThreadProvisioned = false;
-bool sIsThreadEnabled     = false;
-bool sIsThreadAttached    = false;
-bool sHaveBLEConnections  = false;
-
+uint8_t sBrightness;
+PWMDevice::Action_t sColorAction = PWMDevice::INVALID_ACTION;
+XyColor_t sXY;
+HsvColor_t sHSV;
+CtColor_t sCT;
+#endif
 } // namespace
-
-using namespace ::chip::Credentials;
-using namespace ::chip::DeviceLayer;
-using namespace ::chip::DeviceLayer::Internal;
 
 AppTask AppTask::sAppTask;
 
-CHIP_ERROR AppTask::Init()
+CHIP_ERROR AppTask::Init(void)
 {
-    CHIP_ERROR ret;
-
-    // Initialize status LED
-    LEDWidget::InitGpio(SYSTEM_STATE_LED_PORT);
-    sStatusLED.Init(SYSTEM_STATE_LED_PIN);
-
-    UpdateStatusLED();
-
-    InitButtons();
-
     // Init lighting manager
-    ret = LightingMgr().Init(LIGHTING_PWM_DEVICE, LIGHTING_PWM_CHANNEL);
-    if (ret != CHIP_NO_ERROR)
+    uint8_t minLightLevel = kDefaultMinLevel;
+    Clusters::LevelControl::Attributes::MinLevel::Get(kExampleEndpointId, &minLightLevel);
+
+    uint8_t maxLightLevel = kDefaultMaxLevel;
+    Clusters::LevelControl::Attributes::MaxLevel::Get(kExampleEndpointId, &maxLightLevel);
+
+    CHIP_ERROR err = sAppTask.mPwmRgbBlueLed.Init(&sPwmRgbSpecBlueLed, minLightLevel, maxLightLevel, maxLightLevel);
+    if (err != CHIP_NO_ERROR)
     {
-        LOG_ERR("Failed to int lighting manager");
-        return ret;
+        LOG_ERR("Blue RGB PWM Device Init fail");
+        return err;
+    }
+#if USE_RGB_PWM
+    err = sAppTask.mPwmRgbRedLed.Init(&sPwmRgbSpecRedLed, minLightLevel, maxLightLevel, maxLightLevel);
+    if (err != CHIP_NO_ERROR)
+    {
+        LOG_ERR("Red RGB PWM Device Init fail");
+        return err;
     }
 
-    LightingMgr().SetCallbacks(ActionInitiated, ActionCompleted);
-
-    // Init ZCL Data Model and start server
-    static chip::CommonCaseDeviceServerInitParams initParams;
-    (void) initParams.InitializeStaticResourcesBeforeServerInit();
-    chip::Server::GetInstance().Init(initParams);
-
-    // Initialize device attestation config
-    SetDeviceAttestationCredentialsProvider(Examples::GetExampleDACProvider());
-
-    ConfigurationMgr().LogDeviceConfig();
-    PrintOnboardingCodes(chip::RendezvousInformationFlags(chip::RendezvousInformationFlag::kBLE));
-
-    // Add CHIP event handler and start CHIP thread.
-    // Note that all the initialization code should happen prior to this point to avoid data races
-    // between the main and the CHIP threads.
-    PlatformMgr().AddEventHandler(ChipEventHandler, 0);
-
-    ret = ConnectivityMgr().SetBLEDeviceName("TelinkLight");
-    if (ret != CHIP_NO_ERROR)
+    err = sAppTask.mPwmRgbGreenLed.Init(&sPwmRgbSpecGreenLed, minLightLevel, maxLightLevel, maxLightLevel);
+    if (err != CHIP_NO_ERROR)
     {
-        LOG_ERR("Fail to set BLE device name");
-        return ret;
+        LOG_ERR("Green RGB PWM Device Init fail");
+        return err;
+    }
+#endif
+    sAppTask.mPwmRgbBlueLed.SetCallbacks(ActionInitiated, ActionCompleted, nullptr);
+
+#if APP_USE_EXAMPLE_START_BUTTON
+    SetExampleButtonCallbacks(LightingActionEventHandler);
+#endif
+    InitCommonParts();
+
+    err = ConnectivityMgr().SetBLEDeviceName("TelinkLight");
+    if (err != CHIP_NO_ERROR)
+    {
+        LOG_ERR("SetBLEDeviceName fail");
+        return err;
     }
 
     return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR AppTask::StartApp()
-{
-    CHIP_ERROR err = Init();
-
-    if (err != CHIP_NO_ERROR)
-    {
-        LOG_ERR("AppTask.Init() failed");
-        return err;
-    }
-
-    AppEvent event = {};
-
-    while (true)
-    {
-        int ret = k_msgq_get(&sAppEventQueue, &event, K_MSEC(10));
-
-        while (!ret)
-        {
-            DispatchEvent(&event);
-            ret = k_msgq_get(&sAppEventQueue, &event, K_NO_WAIT);
-        }
-
-        sStatusLED.Animate();
-    }
-}
-
-void AppTask::LightingActionButtonEventHandler(void)
-{
-    AppEvent event;
-
-    event.Type               = AppEvent::kEventType_Button;
-    event.ButtonEvent.Action = kButtonPushEvent;
-    event.Handler            = LightingActionEventHandler;
-    sAppTask.PostEvent(&event);
-}
-
 void AppTask::LightingActionEventHandler(AppEvent * aEvent)
 {
-    LightingManager::Action_t action = LightingManager::INVALID_ACTION;
-    int32_t actor                    = 0;
+    PWMDevice::Action_t action = PWMDevice::INVALID_ACTION;
+    int32_t actor              = 0;
 
     if (aEvent->Type == AppEvent::kEventType_Lighting)
     {
-        action = static_cast<LightingManager::Action_t>(aEvent->LightingEvent.Action);
+        action = static_cast<PWMDevice::Action_t>(aEvent->LightingEvent.Action);
         actor  = aEvent->LightingEvent.Actor;
     }
     else if (aEvent->Type == AppEvent::kEventType_Button)
     {
-        action = LightingMgr().IsTurnedOn() ? LightingManager::OFF_ACTION : LightingManager::ON_ACTION;
-        actor  = AppEvent::kEventType_Button;
-    }
-
-    if (action != LightingManager::INVALID_ACTION && !LightingMgr().InitiateAction(action, actor, 0, NULL))
-        LOG_INF("Action is already in progress or active.");
-}
-
-void AppTask::FactoryResetButtonEventHandler(void)
-{
-    AppEvent event;
-
-    event.Type               = AppEvent::kEventType_Button;
-    event.ButtonEvent.Action = kButtonPushEvent;
-    event.Handler            = FactoryResetHandler;
-    sAppTask.PostEvent(&event);
-}
-
-void AppTask::FactoryResetHandler(AppEvent * aEvent)
-{
-    LOG_INF("Factory Reset triggered.");
-    chip::Server::GetInstance().ScheduleFactoryReset();
-}
-
-void AppTask::StartThreadButtonEventHandler(void)
-{
-    AppEvent event;
-
-    event.Type               = AppEvent::kEventType_Button;
-    event.ButtonEvent.Action = kButtonPushEvent;
-    event.Handler            = StartThreadHandler;
-    sAppTask.PostEvent(&event);
-}
-
-void AppTask::StartThreadHandler(AppEvent * aEvent)
-{
-
-    if (!chip::DeviceLayer::ConnectivityMgr().IsThreadProvisioned())
-    {
-        // Switch context from BLE to Thread
-        BLEManagerImpl sInstance;
-        sInstance.SwitchToIeee802154();
-        StartDefaultThreadNetwork();
-        LOG_INF("Device is not commissioned to a Thread network. Starting with the default configuration.");
-    }
-    else
-    {
-        LOG_INF("Device is commissioned to a Thread network.");
-    }
-}
-
-void AppTask::StartBleAdvButtonEventHandler(void)
-{
-    AppEvent event;
-
-    event.Type               = AppEvent::kEventType_Button;
-    event.ButtonEvent.Action = kButtonPushEvent;
-    event.Handler            = StartBleAdvHandler;
-    sAppTask.PostEvent(&event);
-}
-
-void AppTask::StartBleAdvHandler(AppEvent * aEvent)
-{
-    LOG_INF("BLE advertising start button pressed");
-
-    // Don't allow on starting Matter service BLE advertising after Thread provisioning.
-    if (ConnectivityMgr().IsThreadProvisioned())
-    {
-        LOG_INF("Matter service BLE advertising not started - device is commissioned to a Thread network.");
-        return;
-    }
-
-    if (ConnectivityMgr().IsBLEAdvertisingEnabled())
-    {
-        LOG_INF("BLE advertising is already enabled");
-        return;
-    }
-
-    if (chip::Server::GetInstance().GetCommissioningWindowManager().OpenBasicCommissioningWindow() != CHIP_NO_ERROR)
-    {
-        LOG_ERR("OpenBasicCommissioningWindow() failed");
-    }
-}
-
-void AppTask::UpdateStatusLED()
-{
-    if (sIsThreadProvisioned && sIsThreadEnabled)
-    {
-        if (sIsThreadAttached)
+#if USE_RGB_PWM
+        if (sAppTask.mPwmRgbRedLed.IsTurnedOn() || sAppTask.mPwmRgbGreenLed.IsTurnedOn() || sAppTask.mPwmRgbBlueLed.IsTurnedOn())
         {
-            sStatusLED.Blink(950, 50);
+            action = PWMDevice::OFF_ACTION;
         }
         else
         {
-            sStatusLED.Blink(100, 100);
+            action = PWMDevice::ON_ACTION;
         }
-    }
-    else
-    {
-        sStatusLED.Blink(50, 950);
-    }
-}
-
-void AppTask::ChipEventHandler(const ChipDeviceEvent * event, intptr_t /* arg */)
-{
-    switch (event->Type)
-    {
-    case DeviceEventType::kCHIPoBLEAdvertisingChange:
-        sHaveBLEConnections = ConnectivityMgr().NumBLEConnections() != 0;
-        UpdateStatusLED();
-        break;
-    case DeviceEventType::kThreadStateChange:
-        sIsThreadProvisioned = ConnectivityMgr().IsThreadProvisioned();
-        sIsThreadEnabled     = ConnectivityMgr().IsThreadEnabled();
-        sIsThreadAttached    = ConnectivityMgr().IsThreadAttached();
-        UpdateStatusLED();
-        break;
-    case DeviceEventType::kThreadConnectivityChange:
-#if CONFIG_CHIP_OTA_REQUESTOR
-        if (event->ThreadConnectivityChange.Result == kConnectivity_Established)
-        {
-            InitBasicOTARequestor();
-        }
+#else
+        action = sAppTask.mPwmRgbBlueLed.IsTurnedOn() ? PWMDevice::OFF_ACTION : PWMDevice::ON_ACTION;
 #endif
-        break;
-    default:
-        break;
+        actor = AppEvent::kEventType_Button;
+    }
+
+    if (action != PWMDevice::INVALID_ACTION &&
+        (
+#if USE_RGB_PWM
+            !sAppTask.mPwmRgbRedLed.InitiateAction(action, actor, NULL) ||
+            !sAppTask.mPwmRgbGreenLed.InitiateAction(action, actor, NULL) ||
+#endif
+            !sAppTask.mPwmRgbBlueLed.InitiateAction(action, actor, NULL)))
+    {
+        LOG_INF("Action is in progress or active");
     }
 }
 
-void AppTask::ActionInitiated(LightingManager::Action_t aAction, int32_t aActor)
+#ifdef CONFIG_CHIP_PW_RPC
+void AppTask::ButtonEventHandler(ButtonId_t btnId, bool btnPressed)
 {
-    if (aAction == LightingManager::ON_ACTION)
+    if (!btnPressed)
     {
-        LOG_INF("Turn On Action has been initiated");
+        return;
     }
-    else if (aAction == LightingManager::OFF_ACTION)
+
+    switch (btnId)
     {
-        LOG_INF("Turn Off Action has been initiated");
+    case kButtonId_LightingAction:
+        ExampleActionButtonEventHandler();
+        break;
+    case kButtonId_FactoryReset:
+        FactoryResetButtonEventHandler();
+        break;
+    case kButtonId_StartThread:
+        StartThreadButtonEventHandler();
+        break;
+    case kButtonId_StartBleAdv:
+        StartBleAdvButtonEventHandler();
+        break;
     }
-    else if (aAction == LightingManager::LEVEL_ACTION)
+}
+#endif
+
+void AppTask::ActionInitiated(PWMDevice::Action_t aAction, int32_t aActor)
+{
+    if (aAction == PWMDevice::ON_ACTION)
     {
-        LOG_INF("Level Action has been initiated");
+        LOG_DBG("ON_ACTION initiated");
+    }
+    else if (aAction == PWMDevice::OFF_ACTION)
+    {
+        LOG_DBG("OFF_ACTION initiated");
+    }
+    else if (aAction == PWMDevice::LEVEL_ACTION)
+    {
+        LOG_DBG("LEVEL_ACTION initiated");
     }
 }
 
-void AppTask::ActionCompleted(LightingManager::Action_t aAction, int32_t aActor)
+void AppTask::ActionCompleted(PWMDevice::Action_t aAction, int32_t aActor)
 {
-    if (aAction == LightingManager::ON_ACTION)
+    if (aAction == PWMDevice::ON_ACTION)
     {
-        LOG_INF("Turn On Action has been completed");
+        LOG_DBG("ON_ACTION completed");
     }
-    else if (aAction == LightingManager::OFF_ACTION)
+    else if (aAction == PWMDevice::OFF_ACTION)
     {
-        LOG_INF("Turn Off Action has been completed");
+        LOG_DBG("OFF_ACTION completed");
     }
-    else if (aAction == LightingManager::LEVEL_ACTION)
+    else if (aAction == PWMDevice::LEVEL_ACTION)
     {
-        LOG_INF("Level Action has been completed");
+        LOG_DBG("LEVEL_ACTION completed");
     }
 
     if (aActor == AppEvent::kEventType_Button)
@@ -341,67 +190,123 @@ void AppTask::ActionCompleted(LightingManager::Action_t aAction, int32_t aActor)
     }
 }
 
-void AppTask::PostLightingActionRequest(LightingManager::Action_t aAction)
+void AppTask::UpdateClusterState(void)
 {
-    AppEvent event;
-    event.Type                 = AppEvent::kEventType_Lighting;
-    event.LightingEvent.Action = aAction;
-    event.Handler              = LightingActionEventHandler;
-    PostEvent(&event);
-}
+#if USE_RGB_PWM
+    bool isTurnedOn =
+        sAppTask.mPwmRgbRedLed.IsTurnedOn() || sAppTask.mPwmRgbGreenLed.IsTurnedOn() || sAppTask.mPwmRgbBlueLed.IsTurnedOn();
+#else
+    bool isTurnedOn = sAppTask.mPwmRgbBlueLed.IsTurnedOn();
+#endif
+    // write the new on/off value
+    EmberAfStatus status = Clusters::OnOff::Attributes::OnOff::Set(kExampleEndpointId, isTurnedOn);
 
-void AppTask::PostEvent(AppEvent * aEvent)
-{
-    if (k_msgq_put(&sAppEventQueue, aEvent, K_NO_WAIT) != 0)
+    if (status != EMBER_ZCL_STATUS_SUCCESS)
     {
-        LOG_INF("Failed to post event to app task event queue");
+        LOG_ERR("Update OnOff fail: %x", status);
     }
-}
 
-void AppTask::DispatchEvent(AppEvent * aEvent)
-{
-    if (aEvent->Handler)
+#if USE_RGB_PWM
+    uint8_t setLevel;
+    if (sColorAction == PWMDevice::COLOR_ACTION_XY || sColorAction == PWMDevice::COLOR_ACTION_HSV ||
+        sColorAction == PWMDevice::COLOR_ACTION_CT)
     {
-        aEvent->Handler(aEvent);
+        setLevel = sBrightness;
     }
     else
     {
-        LOG_INF("Event received with no handler. Dropping event.");
+        setLevel = sAppTask.mPwmRgbBlueLed.GetLevel();
+    }
+#else
+    uint8_t setLevel = sAppTask.mPwmRgbBlueLed.GetLevel();
+#endif
+    status = Clusters::LevelControl::Attributes::CurrentLevel::Set(kExampleEndpointId, setLevel);
+    if (status != EMBER_ZCL_STATUS_SUCCESS)
+    {
+        LOG_ERR("Update CurrentLevel fail: %x", status);
     }
 }
 
-void AppTask::UpdateClusterState()
+void AppTask::SetInitiateAction(PWMDevice::Action_t aAction, int32_t aActor, uint8_t * value)
 {
-    uint8_t onoff = LightingMgr().IsTurnedOn();
+#if USE_RGB_PWM
+    bool setRgbAction = false;
+    RgbColor_t rgb;
+#endif
 
-    // write the new on/off value
-    EmberAfStatus status =
-        emberAfWriteAttribute(1, ZCL_ON_OFF_CLUSTER_ID, ZCL_ON_OFF_ATTRIBUTE_ID, &onoff, ZCL_BOOLEAN_ATTRIBUTE_TYPE);
-    if (status != EMBER_ZCL_STATUS_SUCCESS)
+    if (aAction == PWMDevice::ON_ACTION || aAction == PWMDevice::OFF_ACTION)
     {
-        LOG_ERR("Updating on/off cluster failed: %x", status);
+        sAppTask.mPwmRgbBlueLed.InitiateAction(aAction, aActor, value);
+#if USE_RGB_PWM
+        sAppTask.mPwmRgbRedLed.InitiateAction(aAction, aActor, value);
+        sAppTask.mPwmRgbGreenLed.InitiateAction(aAction, aActor, value);
+#endif
+    }
+    else if (aAction == PWMDevice::LEVEL_ACTION)
+    {
+#if USE_RGB_PWM
+        // Save a new brightness for ColorControl
+        sBrightness = *value;
+
+        if (sColorAction == PWMDevice::COLOR_ACTION_XY)
+        {
+            rgb = XYToRgb(sBrightness, sXY.x, sXY.y);
+        }
+        else if (sColorAction == PWMDevice::COLOR_ACTION_HSV)
+        {
+            sHSV.v = sBrightness;
+            rgb    = HsvToRgb(sHSV);
+        }
+        else
+        {
+            rgb.r = sBrightness;
+            rgb.g = sBrightness;
+            rgb.b = sBrightness;
+        }
+
+        ChipLogProgress(Zcl, "New brightness: %u | R: %u, G: %u, B: %u", sBrightness, rgb.r, rgb.g, rgb.b);
+        setRgbAction = true;
+#else
+        sAppTask.mPwmRgbBlueLed.InitiateAction(aAction, aActor, value);
+#endif
     }
 
-    uint8_t level = LightingMgr().GetLevel();
-
-    status =
-        emberAfWriteAttribute(1, ZCL_LEVEL_CONTROL_CLUSTER_ID, ZCL_CURRENT_LEVEL_ATTRIBUTE_ID, &level, ZCL_INT8U_ATTRIBUTE_TYPE);
-
-    if (status != EMBER_ZCL_STATUS_SUCCESS)
+#if USE_RGB_PWM
+    else if (aAction == PWMDevice::COLOR_ACTION_XY)
     {
-        LOG_ERR("Updating level cluster failed: %x", status);
+        sXY = *reinterpret_cast<XyColor_t *>(value);
+        rgb = XYToRgb(sBrightness, sXY.x, sXY.y);
+        ChipLogProgress(Zcl, "XY to RGB: X: %u, Y: %u, Level: %u | R: %u, G: %u, B: %u", sXY.x, sXY.y, sBrightness, rgb.r, rgb.g,
+                        rgb.b);
+        setRgbAction = true;
+        sColorAction = PWMDevice::COLOR_ACTION_XY;
     }
-}
+    else if (aAction == PWMDevice::COLOR_ACTION_HSV)
+    {
+        sHSV   = *reinterpret_cast<HsvColor_t *>(value);
+        sHSV.v = sBrightness;
+        rgb    = HsvToRgb(sHSV);
+        ChipLogProgress(Zcl, "HSV to RGB: H: %u, S: %u, V: %u | R: %u, G: %u, B: %u", sHSV.h, sHSV.s, sHSV.v, rgb.r, rgb.g, rgb.b);
+        setRgbAction = true;
+        sColorAction = PWMDevice::COLOR_ACTION_HSV;
+    }
+    else if (aAction == PWMDevice::COLOR_ACTION_CT)
+    {
+        sCT = *reinterpret_cast<CtColor_t *>(value);
+        if (sCT.ctMireds)
+        {
+            rgb = CTToRgb(sCT);
+            ChipLogProgress(Zcl, "ColorTemp to RGB: CT: %u | R: %u, G: %u, B: %u", sCT.ctMireds, rgb.r, rgb.g, rgb.b);
+            setRgbAction = true;
+            sColorAction = PWMDevice::COLOR_ACTION_CT;
+        }
+    }
 
-void AppTask::InitButtons(void)
-{
-    sFactoryResetButton.Configure(BUTTON_PORT, BUTTON_PIN_3, BUTTON_PIN_1, FactoryResetButtonEventHandler);
-    sLightingButton.Configure(BUTTON_PORT, BUTTON_PIN_4, BUTTON_PIN_1, LightingActionButtonEventHandler);
-    sThreadStartButton.Configure(BUTTON_PORT, BUTTON_PIN_3, BUTTON_PIN_2, StartThreadButtonEventHandler);
-    sBleAdvStartButton.Configure(BUTTON_PORT, BUTTON_PIN_4, BUTTON_PIN_2, StartBleAdvButtonEventHandler);
-
-    ButtonManagerInst().AddButton(sFactoryResetButton);
-    ButtonManagerInst().AddButton(sLightingButton);
-    ButtonManagerInst().AddButton(sThreadStartButton);
-    ButtonManagerInst().AddButton(sBleAdvStartButton);
+    if (setRgbAction)
+    {
+        sAppTask.mPwmRgbRedLed.InitiateAction(aAction, aActor, &rgb.r);
+        sAppTask.mPwmRgbGreenLed.InitiateAction(aAction, aActor, &rgb.g);
+        sAppTask.mPwmRgbBlueLed.InitiateAction(aAction, aActor, &rgb.b);
+    }
+#endif
 }
