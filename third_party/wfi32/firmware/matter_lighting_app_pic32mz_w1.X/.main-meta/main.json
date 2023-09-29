@@ -1,0 +1,67 @@
+{
+	"metaDataVersion": "1.0.0",
+	"category": "com.microchip.ide.project",
+	"content": {
+		"metaDataVersion": "1.3.0",
+		"name": "com.microchip.mcu32.mplabx.project.PIC32MZW1_Matter_Project",
+		"version": "3.6.1",
+		"displayName": "PIC32MZW1 with Matter protocol",
+		"projectName": "PIC32MZW1_Matter_Project",
+		"shortDescription": "This project include a Matter Lighting Example, which can be paired and controlled by Matter Commissioner devices ",
+		"ide": {
+			"name": "MPLABX",
+			"semverRange": ">=6.00"
+		},
+		"compiler": [
+			{
+				"name": "XC32",
+				"semverRange": ">=4.2.0"
+			}
+		],
+		"dfp": {
+			"name": "PIC32MZ-W_DFP",
+			"semverRange": "^1.5.203"
+		},
+		"configurator": {
+			"name": "MHC",
+			"semverRange": ">=3.8.2"
+		},
+		"device": {
+			"metaDataVersion": "1.0.0",
+			"category": "com.microchip.portal.contentRef",
+			"content": {
+				"metaDataVersion": "1.0.0",
+				"category": "com.microchip.device",
+				"name": "PIC32MZ1025W104132",
+				"versionRange": "*"
+			}
+		},
+		"author": "Microchip",
+		"peripherals": [
+			"Wi-Fi"
+		],
+		"keywords": [
+			"MHC",
+			"Harmony",
+			"PIC32MZ1025W104132",
+			"WFI32",
+			"WFI32E01",
+			"PIC32MZ W1 Family",
+			"wireless",
+            "matter",
+			"iot"
+			
+		],
+		"additionalData": {
+			"longDescription": {
+				"metaDataVersion": "1.0.0",
+				"category": "com.microchip.portal.fileRef",
+				"content": {
+					"metaDataVersion": "1.0.0",
+					"fileName": "./../../../../README.md",
+					"mimeType": "text/markdown"
+				}
+			}
+		}
+	}
+}

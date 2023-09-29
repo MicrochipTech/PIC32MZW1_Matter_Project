@@ -1,0 +1,13 @@
+configName: pic32mz_w1_curiosity
+folderName: ''
+format_version: v1.0
+frameworkPath: ../../../h3_official_gh
+processor: PIC32MZ1025W104132
+projectName: ''
+settings:
+  PackageFilter: aws_cloud;azure-rtos-threadx;bootloader;bsp;bt;classb_sam_e5x_d5x;core;core_apps_pic32mz_w1;core_apps_pic32mz_w1_dev;core_apps_sam_d5x_e5x;core_apps_sam_d5x_e5x_dev;crypto;cryptoauthlib;cryptoauthlib_apps;crypto_apps_encrypt_decrypt;csp;csp_apps_pic32mz_w1;dev_packs;ethercat;gfx;gfx_apps;harmony-services;micrium_ucos3;motor_control;MPLAB-Harmony-Reference-Apps;net;quick_docs;touch;usb;wireless_apps_pic32mzw1_wfi32e01;wireless_apps_winc1500;wireless_system_pic32mzw1_wfi32e01;wireless_wifi;x2c;_wireless_wifi_mac_issue
+  FORCE_OPTIMIZATION: 'false'
+  GENERATE_BACKUP: 'true'
+  CMSISPath: .\dev_packs\arm\CMSIS\5.8.0
+  MERGE_STRATEGY: USER_ALL
+  DFPPath: .\dev_packs\Microchip\PIC32MZ-W_DFP\1.6.217\atdf\PIC32MZ1025W104132.atdf

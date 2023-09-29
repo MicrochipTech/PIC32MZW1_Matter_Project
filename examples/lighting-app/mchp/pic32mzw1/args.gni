@@ -1,0 +1,52 @@
+# Copyright (c) 2021 Project CHIP Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/chip.gni")
+import("//build_overrides/lwip.gni")
+import("${chip_root}/config/mchp/args.gni")
+#import("${chip_root}/examples/platform/mchp/pic32mzw1/args.gni")
+#import("//build_overrides/pigweed.gni")
+
+
+chip_device_platform = "wfi32"
+
+
+chip_ble_platform_config_include = ""
+chip_project_config_include = ""
+chip_system_project_config_include = ""
+chip_ble_project_config_include = ""
+
+
+chip_config_network_layer_ble = false
+
+chip_system_config_use_lwip = true
+chip_build_tests = false
+chip_config_memory_management = "platform"
+
+#lwip_platform = "external"
+lwip_platform = "wfi32"
+
+#Enabling this causes some error
+#chip_inet_config_enable_tun_endpoint = false
+chip_inet_config_enable_tcp_endpoint = true
+chip_inet_config_enable_udp_endpoint = true
+
+#mbedtls_target = "${chip_root}/third_party/wfi32:mbedtls"
+
+custom_toolchain = "${chip_root}/config/mchp/toolchain:wfi32"
+
+print("${custom_toolchain}")
+
+#chip_project_config_include = "<include/CHIPProjectConfig.h>"
+#chip_system_project_config_include = "<include/CHIPProjectConfig.h>"
