@@ -1,215 +1,625 @@
-# Matter
+![https://www.microchip.com/](assets/microchip.png)
 
-[![Builds](https://github.com/project-chip/connectedhomeip/workflows/Builds/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/build.yaml)
+<a name="chiplightingexample"></a>
 
-**Examples:**
-[![Examples - EFR32](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20EFR32/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-efr32.yaml)
-[![Examples - ESP32](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20ESP32/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-esp32.yaml)
-[![Examples - i.MX Linux](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20i.MX%20Linux/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-linux-imx.yaml)
-[![Examples - K32W with SE051](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20K32W%20with%20SE051/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-k32w.yaml)
-[![Examples - Linux Standalone](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20Linux%20Standalone/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-linux-standalone.yaml)
-[![Examples - nRF Connect SDK](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20nRF%20Connect%20SDK/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-nrfconnect.yaml)
-[![Examples - QPG](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20QPG/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-qpg.yaml)
-[![Examples - TI CC26X2X7](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20TI%20CC26X2X7/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-cc13x2x7_26x2x7.yaml)
-[![Examples - TI CC32XX](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20TI%20CC32XX/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-cc32xx.yaml)
-[![Build example - Infineon](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-infineon.yaml/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-infineon.yaml)
-[![Build example - BouffaloLab](https://github.com/project-chip/connectedhomeip/workflows/Build%20example%20-%20BouffaloLab/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/examples-bouffalolab.yaml)
+# Matter PIC32MZW1 Lighting Example
 
-**Platforms:**
-[![Android](https://github.com/project-chip/connectedhomeip/workflows/Android/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/android.yaml)
+This MPLAB example demonstrates the use of Matter protocol over Microchip PIC32MZW1 based [WFI32-IoT board](https://ww1.microchip.com/downloads/aemDocuments/documents/WSG/ProductDocuments/UserGuides/EV36W50A-WFI32-IoT-Board-Users-Guide-DS50003262.pdf) and RNBD451 BLE Add On Board.
 
-**Tests:**
-[![Unit / Integration Tests](https://github.com/project-chip/connectedhomeip/workflows/Unit%20/%20Integration%20Tests/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/unit_integration_test.yaml)
-[![Cirque](https://github.com/project-chip/connectedhomeip/workflows/Cirque/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/cirque.yaml)
-[![QEMU](https://github.com/project-chip/connectedhomeip/workflows/QEMU/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/qemu.yaml)
+<hr>
 
-**Tools:**
-[![ZAP Templates](https://github.com/project-chip/connectedhomeip/workflows/ZAP/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/zap_templates.yaml)
+- [PIC32MZW1 Lighting Example](#chip-pic32mzw1-lighting-example)
 
-**Documentation:**
-[![Documentation Build](https://github.com/project-chip/connectedhomeip/actions/workflows/docbuild.yaml/badge.svg)](https://github.com/project-chip/connectedhomeip/actions/workflows/docbuild.yaml)
+  - [Introduction](#introduction)
+  - [Hardware Requirements](#hardware-requirements)
+  - [Software Requirements](#software-requirements)
+  - [Setup Environment - Install Prerequisites](#setup-chip-environment---install-prerequisites)
+  - [Setup Hardware Platform](#setup-hardware-platform)
+  - [Demo Introduction](#demo-introduction)
+  - [Features](#features)
+  - [Checking out Matter Repository](#checking-out-matter-repository)
+  - [Build and Flash the example](#build-and-flash-the-example)
+  - [Commissioning and Controlling Matter device](#commissioning-and-controlling-matter-device)
+    - [Option 1: For testing purpose, by using CHIPTool APP](#option-1-for-testing-purpose-using-chiptool-app)
+    - [Option 2: Google Ecosystem](#option-2-google-ecosystem)
+  - [Attestation Certificate Provisioning](#attestation-certificate-provisioning)
+  - [OTA Firmware Upgrade](#ota-firmware-upgrade)
+  - [Memory Consumption](#memory-consumption)
+  - [Limitations](#example-limitations)
+  - [Add or modify Harmony 3 components and re-generate the code using MPLAB X IDE](#add-or-modify-harmony-3-components-and-regenerate-code-using-mplab-x-ide)
+  - [Add or modify clusters](#add-or-modify-clusters)
+  - [Reference](#reference)
+  </hr>
 
--   [Matter SDK documentation page](https://project-chip.github.io/connectedhomeip-doc/index.html)
+<a name="intro"></a>
 
-# About
+## Introduction
 
-Matter (formerly Project CHIP) creates more connections between more objects,
-simplifying development for manufacturers and increasing compatibility for
-consumers, guided by the Connectivity Standards Alliance.
+This example is a starting point for Matter protocol demonstration over Microchip's PIC32MZW1 Wi-Fi MCU and RNBD451 BLE module platform and gives an idea to control the Yellow LED on WFI32-IoT board using Android CHIPTool app (Matter Controller). During the initial release (Phase-1) of this example, we use the example certificates provided in the matter's repo for device attestation and embedded the certifcates in the project code. We also have option to generate the certificates and store in the ECC608 secure elements instead. To launch products in the market, certificates approved by [CSA](https://csa-iot.org/) are need to be used. 
 
-# What is Matter?
+- Note: This example was developed and tested using MPLAB X IDE v6.15+, MPLAB XC32 compiler v4.30 on Ubuntu 20.04 LTS and 22.04 LTS and on Microsoft Windows 10 Pro.
 
-Matter is a unified, open-source application-layer connectivity standard built
-to enable developers and device manufacturers to connect and build reliable, and
-secure ecosystems and increase compatibility among connected home devices. It is
-built with market-proven technologies using Internet Protocol (IP) and is
-compatible with Thread and Wi-Fi network transports. Matter was developed by a
-Working Group within the Connectivity Standards Alliance (Alliance). This
-Working Group develops and promotes the adoption of the Matter standard, a
-royalty-free connectivity standard to increase compatibility among smart home
-products, with security as a fundamental design tenet. The vision that led major
-industry players to come together to build Matter is that smart connectivity
-should be simple, reliable, and interoperable.
 
-Matter simplifies development for manufacturers and increases compatibility for
-consumers.
+<a name="hwrequirements"></a>
 
-The standard was built around a shared belief that smart home devices should be
-secure, reliable, and seamless to use. By building upon Internet Protocol (IP),
-Matter enables communication across smart home devices, mobile apps, and cloud
-services and defines a specific set of IP-based networking technologies for
-device certification.
+## Hardware Requirements
 
-The Matter specification details everything necessary to implement a Matter
-application and transport layer stack. It is intended to be used by implementers
-as a complete specification.
+- [WFI32-IoT Board](https://www.microchip.com/en-us/development-tool/EV36W50A)
+- [RNBD451 Add On Board](https://www.microchip.com/en-us/development-tool/EV25F14A)
+- [ATECC608B TRUST board DT100104](https://www.microchip.com/en-us/development-tool/DT100104) (optional for test)
+- An Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk)
+- Router/AP
 
-The Alliance officially opened the Matter Working Group on January 17, 2020, and
-the specification is
-[available](https://csa-iot.org/developer-resource/specifications-download-request/)
-for adoption now.
+<a name="softwarereq"></a>
 
-Visit [buildwithmatter.com](https://buildwithmatter.com) to learn more and read
-the latest news and updates about the project.
+## Software Requirements
 
-# Project Overview
+- [MPLAB X IDE v6.15+](https://www.microchip.com/en-us/development-tools-tools-and-software/mplab-x-ide) and [follow the instructions to install IDE](https://microchipdeveloper.com/mplabx:installation). Also, select "MPLAB IPE" option during IDE installation.
+- Check if the DFP v1.6.220 is installed. In MPLAB X IDE, from Menu bar -> Tools -> Packs -> locate "PIC32MZ-W_DFP" as below
 
-## Development Goals
+</p>
+  <p align="center"><img width="450" src="assets/DFPver.png">
+  </p>
 
-Matter is developed with the following goals and principles in mind:
+- [MPLAB XC32 Compiler v4.30](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers/downloads-documentation#XC32) and [follow the instructions to install XC32 compiler](https://microchipdeveloper.com/xc32:installation).
+  Use XC32 professional compiler license. Please refer tab 'Internal Microchip Licenses' from [Compilers Latest Builds Page](https://compilers.microchip.com/latest_builds.php) for more details about Internal Microchip Employee License Generator.
 
-**Unifying:** Matter is built with and on top of market-tested, existing
-technologies.
+- [Open JDK v8](https://docs.datastax.com/en/jdk-install/doc/jdk-install/installOpenJdkDeb.html) for GN build system. Please note that, this is a strict requirement to use Open JDK v8
 
-**Interoperable:** The specification permits communication between any
-Matter-certified device, subject to users’ permission.
+  - Note:
+    - For Ubuntu, add PATHs for MPLAB X IDE and XC32 Compiler's installation directories at the end of '~/.profile' OR '~/.bashrc' file:
 
-**Secure:** The specification leverages modern security practices and protocols.
+    ```
+      PATH=$PATH:"/opt/microchip/xc32/v4.30/bin"
+      PATH=$PATH:"/opt/microchip/mplabx/v6.15/mplab_platform/mplab_ipe"
+    ```
 
-**User Control:** The end user controls authorization for interaction with
-devices.
+    - To continue using the same terminal, run `source ~/.profile` or `source ~/.bashrc`
 
-**Federated:** No single entity serves as a throttle or a single point of
-failure for root of trust.
 
-**Robust:** The set of protocols specifies a complete lifecycle of a device —
-starting with the seamless out-of-box experience, through operational protocols,
-to device and system management specifications required for proper function in
-the presence of change.
+<a name="environment"></a>
 
-**Low Overhead:** The protocols are practically implementable on low
-compute-resource devices, such as MCUs.
+## Setup CHIP Environment - Install Prerequisites
 
-**Pervasive:** The protocols are broadly deployable and accessible, by
-leveraging IP and being implementable on low-capability devices.
+The project can support GN build system and MPLAB X IDE build. If you build with MPLAB X IDE, you can run on Windows or Linux environment. If you build with GN build system, you can run on Linux Environment.  
+Below is the OS environment that you can use.
+- Microsoft Windows OR
+- [Linux](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md#installing-prerequisites-on-linux) (Ubuntu release version 20.04 LTS, 22.04 LTS is preferred)
 
-**Ecosystem-Flexible:** The protocol is flexible enough to accommodate
-deployment in ecosystems with differing policies.
 
-**Easy to Use:** The protocol provides smooth, cohesive, integrated provisioning
-and out-of-box experience.
 
-**Open:** The Project’s design and technical processes are open and transparent
-to the general public, including non-members wherever possible.
+## Setup Hardware Platform
+To prepare the hardware platform:
+1. Load the appropriate FW to the RNBD451 Add On Board (you can contact Microchip Support to know more about the details of loading correct fw to RNBD451)
+2. Connect J2 jumper to select MikroBus interface on RNBD451 Add On Board
+</p>
+  <p align="center"><img width="200" src="assets/rnbd451_conf.png">
+  </p>
+3. Turn on SW1 switch 2 or 3 or 4 for the use of ECC608A TrustFlex
+</p>
+  <p align="center"><img width="200" src="assets/ecc608a_conf.png">
+  </p>
+4. Plug the [ECC608A Trust board](https://www.microchip.com/en-us/development-tool/DT100104) to the MikroBus connecto of the [WFI32-IoT board](https://www.microchip.com/en-us/development-tool/EV36W50A), and then plug the [RNBD451 Add On Board](https://www.microchip.com/en-us/development-tool/EV25F14A) on top of ECC608A Trust board.  
+Below picture show the details:
 
-## Architecture Overview
+</p>
+  <p align="center"><img width="600" src="assets/tss_compones.png">
+  </p>
 
-Matter aims to build a universal IPv6-based communication protocol for smart
-home devices. The protocol defines the application layer that will be deployed
-on devices and the different link layers to help maintain interoperability. The
-following diagram illustrates the normal operational mode of the stack:
-![Matter Architecture Overview](docs/images/Matter_Arch_Overview.png)
+- **Notes:** ECC608A Trust board is optional for test, if you want to disable the use fo ECC608A. To disable the use of ECC608A, you can disable the definition of "CHIP_DEVICE_CONFIG_ECC_INTEGRATION" in src/platform/wfi32/CHIPDevicePlatformConfig.h
 
-The architecture is divided into layers to help separate the different
-responsibilities and introduce a good level of encapsulation among the various
-pieces of the protocol stack. The vast majority of interactions flow through the
-stack captured in the following Figure:
 
-![Matter Stack Architecture](docs/images/Matter_Layered_Arch.png)
+<a name="demosetup"></a>
+## Demo Introduction
 
-1. **Application:** High-order business logic of a device. For example, an
-   application that is focused on lighting might contain logic to handle turning
-   on/off the bulb as well as its color characteristics.
+The demo setup for Matter Lighting example includes an Android phone running [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk), WFI32-IoT board and Router/AP. The following diagram shows the demo setup for WFI32-IoT board.
 
-2) **Data Model:** The data layer corresponds to the data and verb elements that
-   help support the functionality of the application. The Application operates
-   on these data structures when there is an intent to interact with the device.
+</p>
+  <p align="center"><img width="600" src="assets/matterSetup.png">
+  </p>
 
-3. **Interaction Model:** The Interaction Model layer defines a set of
-   interactions that can be performed between a client and server device. For
-   example, reading or writing attributes on a server device would correspond to
-   application behavior on the device. These interactions operate on the
-   elements defined at the data model layer.
+<a name="exampfeatures"></a>
 
-4) **Action Framing:** Once an action is constructed using the Interaction
-   Model, it is serialized into a prescribed packed binary format to encode for
-   network transmission.
+## Features
 
-5. **Security:** An encoded action frame is then sent down to the Security Layer
-   to encrypt and sign the payload to ensure that data is secured and
-   authenticated by both sender and receiver of a packet.
+- This example supports OTA (Over-the-air) firmware upgrade feature
+- MPLAB X IDE can be used on Microsoft Windows to build and flash the example
+- Enables ON/OFF lighting cluster
+- Supports device discovery and Commission over BLE
+- Status LED (Blue color D403)
+  - Blinking at 500ms ON/OFF : Attempting to connect to AP
+  - Blinking at 200ms ON/OFF : Set as Soft-AP mode for network provisioning
+  - Turned ON (SOLID ON) : Success to connect to AP
+- Switch 1 (SW1)
+  - Short Press : Enables Soft-AP mode
+  - Long Press for 5 seconds : Factory Reset (Device can be re-commissioned to same AP)
+- Switch 2 (SW2)
+  - Short Press : Turns ON/OFF the Yellow LED, status is to sync to the cluster
 
-6. **Message Framing & Routing:** With an interaction encrypted and signed, the
-   Message Layer constructs the payload format with required and optional header
-   fields; which specify the message's properties and some routing information.
+<a name="checkoutchiprepo"></a>
 
-7) **IP Framing & Transport Management:** After the final payload has been
-   constructed, it is sent to the underlying transport protocol for IP
-   management of the data.
+## Checking out Matter Repository
 
-# Current Status of Matter
+- To check out the Matter repository:
 
-Matter’s design and technical processes are intended to be open and transparent
-to the general public, including to Working Group non-members wherever possible.
-The availability of this GitHub repository and its source code under an Apache
-v2 license is an important and demonstrable step to achieving this commitment.
-Matter endeavors to bring together the best aspects of market-tested
-technologies and redeploy them as a unified and cohesive whole-system solution.
-The overall goal of this approach is to bring the benefits of Matter to
-consumers and manufacturers as quickly as possible. As a result, what you
-observe in this repository is an implementation-first approach to the technical
-specification, vetting integrations in practice. The Matter repository is
-growing and evolving to implement the overall architecture. The repository
-currently contains the security foundations, message framing and dispatch, and
-an implementation of the interaction model and data model. The code examples
-show simple interactions, and are supported on multiple transports -- Wi-Fi and
-Thread -- starting with resource-constrained (i.e., memory, processing) silicon
-platforms to help ensure Matter’s scalability.
+```
+git clone https://github.com/MicrochipTech/PIC32MZW1_Matter_Project.git
+```
 
-# How to Contribute
+- Switch to branch "pic32mzw1_support_v1":
 
-We welcome your contributions to Matter. Read our contribution guidelines
-[here](./CONTRIBUTING.md).
+```
+cd PIC32MZW1_Matter_Project/
+git checkout pic32mzw1_support_v1
+```
 
-# Building and Developing in Matter
+- Update submodules:
 
-Instructions about how to build Matter can be found [here](./docs/README.md) .
+```
+git submodule update --progress --init --recursive -- "third_party/nlassert/repo"
+git submodule update --progress --init --recursive -- "third_party/nlio/repo"
+git submodule update --progress --init --recursive -- "third_party/mbedtls/repo"
+git submodule update --progress --init --recursive -- "examples/common/QRCode/repo"
+```
 
-# Directory Structure
+<a name="buildexample"></a>
 
-The Matter repository is structured as follows:
+## Build and Flash the example
 
-| File/Folder        | Content                                                                                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| build              | Build system support content and built output directories                                                                                             |
-| build_overrides    | Build system parameter customization for different platforms                                                                                          |
-| config             | Project configurations                                                                                                                                |
-| credentials        | Development and test credentials                                                                                                                      |
-| docs               | Documentation, including guides. Visit the [Matter SDK documentation page](https://project-chip.github.io/connectedhomeip-doc/index.html) to read it. |
-| examples           | Example firmware applications that demonstrate use of Matter                                                                                          |
-| integrations       | 3rd Party integrations                                                                                                                                |
-| scripts            | Scripts needed to work with the Matter repository                                                                                                     |
-| src                | Implementation of Matter                                                                                                                              |
-| third_party        | 3rd party code used by Matter                                                                                                                         |
-| zzz_generated      | zap generated template code - Revolving around cluster information                                                                                    |
-| BUILD.gn           | Build file for the gn build system                                                                                                                    |
-| CODE_OF_CONDUCT.md | Code of conduct for Matter and contribution to it                                                                                                     |
-| CONTRIBUTING.md    | Guidelines for contributing to Matter                                                                                                                 |
-| LICENSE            | Matter license file                                                                                                                                   |
-| REVIEWERS.md       | PR reviewers                                                                                                                                          |
-| gn_build.sh        | Build script for specific projects such as Android, EFR32, etc.                                                                                       |
-| README.md          | This File                                                                                                                                             |
+Update default Wi-Fi Access Point (AP) credentials in "/PIC32MZW1_Matter_Project/src/platform/wfi32/CHIPDevicePlatformConfig.h" file as below:
 
-# License
+```
+#define CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID "DEMO_AP"
+#define CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD "password"
+```
+  ### For GN buid system (Linux environment)
+   To build the example using GN build system on Ubuntu, execute following commands:
 
-Matter is released under the [Apache 2.0 license](./LICENSE).
+   ```
+   cd PIC32MZW1_Matter_Project/
+   ./scripts/examples/gn_wfi32_example.sh examples/lighting-app/mchp/pic32mzw1/ out/wfi32/
+   ```
+
+   To flash the example to WFI32-IoT board using CLI, run the following command:
+
+   ```
+   cd PIC32MZW1_Matter_Project/
+   ipecmd.sh -TPPKOB4 -P32MZ1025W104132 -M -Fout/wfi32/chip-wfi32-lighting-example.hex -OL
+   ```
+   </p>
+    <p align="center"><img width="450" src="assets/flashOutput.png" height="220">
+   </p>  
+
+  ### For MPLAB X IDE (Windows environment/ Linux environment)
+   To build and flash the example using MPLAB X IDE on Microsoft Windows/ Ubuntu, execute following commands:
+
+   ```
+   $ cd PIC32MZW1_Matter_Project\third_party\wfi32
+   $ Run the batch script - "mem_def_workaround.bat"
+   $ Use MPLAB X IDE to open the project "matter_lighting_app_pic32mz_w1.X", available at PIC32MZW1_Matter_Project\third_party\wfi32\firmware
+   $ Compile the project in MPLAB X IDE and program the flash
+   ```
+   The debug session can be started by referring to the steps mentioned [here.](https://microchipdeveloper.com/mplabx:start-a-debug-session) 
+
+
+<a name="commissioncontrol"></a>
+
+## Commissioning and Controlling Matter device
+
+Once the WFI32-IoT board is programmed with this example, you have 3 ways to perform the demo. You can use [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US)/ [Google Home Sample APP for Matter](https://developers.home.google.com/samples/matter-app)/ [CHIPTool app](assets/matterMicrochip.apk) to perform next steps in verifying the lighting example with Android device.
+
+If you need to test with Google Assistant, you can use the option 2 which use GHA to pair the Matter devices.
+
+<a name="option1"></a>
+### Option 1 For testing purpose using CHIPTool APP
+
+More information about building and installing Android CHIPTool application can be found [here](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/android_building.md#building-android)
+
+Alternatively, [follow the instructions to install](https://www.javatpoint.com/how-to-install-apk-on-android) Android CHIPTool app with generated Android debug package (.apk file) from your computer.
+
+- Note: The device running Android CHIPTool app, should be connected to the same AP ***(configured [here](#building-the-example))***
+
+  #### Step 1:
+
+  Connect your samrtphone to the target AP that the Matter device need to be connected to.
+  Enable Bluetooth in the setting page of your smartphone.
+    
+  #### Step 2:
+
+  Use "PROVISION CHIP DEVICE WITH WI-FI" -> "INPUT DEVICE ADDRESS" tabs to start commissioning WFI32-IoT board with IP address.
+
+
+  </p>
+    <p align="center"><img width="300" src="assets/provisionMenuSelect.png">
+    </p>
+
+  #### Step 3:
+
+  Scan the on-board payload QR code
+
+  </p>
+    <p align="center"><img width="300" src="assets/commissioningDeviceScanQR.png">
+    </p>
+  
+  #### Step 4:
+
+  Input the target AP SSID and password, click **SAVE NETWORK**
+
+  </p>
+    <p align="center"><img width="300" src="assets/commissioningDeviceAPCreds.png">
+    </p>
+
+  #### Step 5:
+
+  CHIPTool app notifies successful commissioning of Matter device with message "Commissioning completed with result: 0". To proceed with controlling device, use "LIGHT ON/OFF & LEVEL CLUSTER" tab.
+
+  </p>
+    <p align="center"><img width="300" src="assets/CommissionedControlMenu.png">
+    </p>
+
+  #### Step 6:
+
+  The Yellow LED on-board can be controlled - turned ON, OFF, toggled using respective tabs. The "READ" tab returns the On/Off command value.
+
+  User can also press SW2 on-board to control ON, OFF the Yellow LED locally. The "READ" tab on the APP returns the On/Off command value.
+
+  - Note: "Fabric ID" and "Device ID" fields will be auto populated.
+
+  </p>
+    <p align="center"><img width="300" src="assets/controlYellowLED.png">
+    </p>
+    <p align="center"><img width="300" src="assets/controllingDevice.png">
+    </p>
+
+  - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
+
+### Option 2 Google Ecosystem
+
+If you need to test the Matter devices with Google Home ecosystem (i.e. google assistant), you need to use Google Home APP (GHA) on android phone to pair the Matter devices. You also need to have a Google Nest devices function as Matter hubs in the Google Home ecosystem.
+The Google Nest device can be Google Nest Hub (2nd gen)/ Google Home Mini. You can also find other supported Google Nest devices in this [page](https://developers.home.google.com/matter/supported-devices)  
+Below picture show about the setup:  
+
+   </p>
+    <p align="center"><img width="600" src="assets/google_assistant_demo.png">
+   </p>  
+
+  #### Step 1:
+
+  Create a developer project, which include Matter integration, are managed on the new [Google Home Developer Console](https://console.home.google.com/projects) 
+  You can follow this [url](https://developers.home.google.com/matter/project/create) to create the project with Matter integration.
+  Select the Vendor ID be 0xfff1 and Product ID be 0x8001 when you create the Matter Integration:
+    </p>
+    <p align="center"><img width="600" src="assets/googleHomePrjSettings.png">
+    </p>
+
+  #### Step 2:
+
+  Set up the Google Nest devices (e.g. Google Nest Hub (2nd gen)) as the Matter Hubs and connect the devices to the same Wi-Fi network of the Matter devices (WFI32-IoT board) and the smartphone.
+
+  #### Step 3:
+
+  Install the [Google Home APP (GHA)](https://play.google.com/store/apps/details?id=com.google.android.apps.chromecast.app&hl=en_US&gl=US) to your Android smartphone which can be downloaded from Google Play Store
+
+  #### Step 4:
+
+  Verify the Matter Modules & Services on your smart phone by following this [guide](https://developers.home.google.com/matter/verify-services)
+
+  #### Step 5:
+
+  Connect your smartphone to the target AP that the Matter device need to be connected to.
+  Enable Bluetooth in the setting page of your smartphone.
+
+  #### Step 6:
+
+  Pair the Matter device (WFI32-IoT board) over BLE by following this [guide](https://developers.home.google.com/matter/integration/pair)   
+  The QR code string is printed in the serial console when it boots up. For example:
+  ```
+  CHIP:SVR: SetupQRCode: [MT:-24J0AFN00KA0648G00]
+  CHIP:SVR: Copy/paste the below URL in a browser to see the QR Code:
+  CHIP:SVR: https://project-chip.github.io/connectedhomeip/qrcode.html?data=MT%3A-24J0AFN00KA0648G00
+  CHIP:SVR: Manual pairing code: [34970112332]
+  ```
+
+  Open the link in a web browser to display the QR code.
+
+  #### Step 7:
+
+  Use the Google Home APP(GHA) or speak to Google Assistant to control the Matter device (WFI32-IoT board). Users can get more information from this [guide](https://developers.home.google.com/matter/integration/control)  
+  The Yellow LED on-board can be controlled - turned ON, OFF by toggle the device state from GHA or voice command with Google Assistant.
+
+  User can also press SW2 on-board to control ON, OFF the Yellow LED locally. The device state is updated to the GHA.  
+
+  </p>
+    <p align="center"><img width="700" src="assets/googleHomeControl.png">
+    </p>
+
+  - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
+
+<a name="otafwupgrade"></a>
+
+## Attestation Certificate Provisioning
+
+Matter Device Attestation Certificate (DAC) need to be provisioning to the ECC608A TrustFlex device for the commissioning process. It is used to proved that the device is certificed  and the manfacturer is the member of the Connectivity Standards Alliance (CSA).  
+In this project, the DAC and the keys are stored in the ECC608A TrustFlex (secure element) , users need to run scripts to generate the keypair in the ECC608A TrustFlex, create the Matter DAC and provision the certificate to the ECC608A TrustFlex.  
+
+### Environment Setup
+Before your prepare certificates, you need to perform below steps in the Linux Ubuntu to prepare the environment
+1. Go to the directory third_party/wfi32/utilities/cert_provision/ 
+2. Run command to install cmake
+    ```
+    sudo apt-get install cmake
+    ```
+3. Run command to install python libraries
+    ```
+    pip install -r requirements.txt
+    ```
+    - **Note:** In case it fail to run the python scripts, try re-install cryptoauthlib module by below commands:
+      ```
+        pip3 uninstall cryptoauthlib
+        pip3 install --no-cache cryptoauthlib
+      ```
+4. Run command to install libudev-dev
+    ```
+    sudo apt-get install libudev-dev
+    ```
+5. The Linux HID HAL files also require a udev rule to be added to change the permissions of the USB HID Devices. Please add a new udev rule for the Microchip CryptoAuth USB devices.
+    ```
+    cd /etc/udev/rules.d
+    sudo touch mchp-cryptoauth.rules
+    ```
+    Edit the mchp-cryptoauth.rules file and add the following line to the file:
+    ```
+      Edit the mchp-cryptoauth.rules file and add the following line to the file:
+    ```
+
+### Prepare chip-cert tool
+You need to compile the chip-cert tools on your Linux Ubuntu enviornment.  
+Below are the steps:
+
+1. Go to directory src/tools/chip-cert/
+2. Compile the chip-cert tool according to steps shown in the readme file of this directoy
+
+
+### Certificates Provisioning (For development and tests)
+For project development and tests, you can perform below steps:
+
+
+1. Go to the directory third_party/wfi32/utilities/cert_provision/
+2. Copy the chip-cert tool from directory src/tools/chip-cert/ to the current directory
+3. Copy files Matter-Development-PAI-noPID-Cert.pem and Matter-Development-PAI-noPID-Key.pem (Product Attestation Intermediate (PAI) certificate and key) from directory credentials/development/attestation/ to current directory
+4. Use MPLABX IDE to open the project at directory third_party/wfi32/utilities/pic32mzw1_kitprotocol/firmware/pic32mzw1_kitprotocol.X, program the firmware to the WFI32-IoT Board
+5. Connect WFi32-IoT board (with ECC608A Trust Board) to your PC
+6. Execute below script 
+    ```
+      ./cert_create_and_prov.sh Matter-Development-PAI-noPID-Cert.pem Matter-Development-PAI-noPID-Key.pem
+    ```  
+    - **Note:** The above scripts do the below tasks:  
+    1. Extract the public key from ECC608A TrustFlex
+    2. Prepare the Device Attestation Certificates (DAC) using chip-tool, the DAC is signed by the (PAI) certificate and key
+    3. Store store the DAC into the slot 10 of ECC608A TrustFlex
+ 
+
+### Certificates Provisioning (For production)
+For end product production , every device need to be installed a Device Attestation Certificates (DAC) that signed from the Matter certification authorities (CAs). Selected organzations get the authorization from Connectivity Standards Alliance (CSA) to be the Matter CA. When your product is certified, you can obtain the Product Attestation Intermediate (PAI) certificate and key from the Matter CA to sign the DAC of your prodcut.  
+If you need to provision your device with the certificate that signed by the PAI from Matter CA, you can perform sames steps in above section (Certificates Provsioning (For development and tests) ) except you need to input the correct PAI certificat and key in step 4 when you execute the scripts cert_create_and_prov.sh
+
+Another options for production is that you are setting up your own Public Key Infractructure (PKI) and create your own Attestation Authority (PAA) certificate and Product Attestation Intermediate (PAI) certificate. To do this, you need to get the authorization from CSA to be the Matter CA by following the Matter Certification Policy. 
+
+You can perform below steps to created your won PAA and PAI and provision the device with the correspond DAC:
+
+1. Go to the directory third_party/wfi32/utilities/cert_provision/
+2. Copy the chip-cert tool from directory src/tools/chip-cert/ to the current directory
+3. Execute below command to generate Product Attestation Authority (PAA) certificate and private key:
+    ```
+      ./chip-cert gen-att-cert --type a --subject-cn "Matter Development PAA 01" --valid-from "2020-10-15 14:23:43" --lifetime 7305 --out-key Chip-PAA-Key.pem --out Chip-PAA-Cert.pem
+    ```
+4. Execute below command to generate Product Attestation Authority (PAI) certificate and private key:
+    ```
+      ./chip-cert gen-att-cert --type i --subject-cn "Matter Development PAI 01" --subject-vid FFF1 --valid-from "2020-10-15 14:23:43" --lifetime 7305 --ca-key Chip-PAA-Key.pem --ca-cert Chip-PAA-Cert.pem --out-key Chip-PAI-Key.pem --out Chip-PAI-Cert.pem
+    ```
+5. Use MPLABX IDE to open the project at directory third_party/wfi32/utilities/pic32mzw1_kitprotocol/firmware/pic32mzw1_kitprotocol.X, program the firmware to the WFI32-IoT Board
+6. Connect WFi32-IoT board (with ECC608A Trust Board) to your PC 
+7. Execute below script to generate DAC and provisioin it to the ECC608A TrustFlex
+    ```
+      ./cert_create_and_prov.sh Chip-PAI-Cert.pem Chip-PAI-Key.pem
+    ```   
+
+## OTA Firmware Upgrade
+
+  ### Build Process
+   - The MPLAB X IDE based Example includes OTA and Bootloader features by default.
+
+   - For GN system based example, follow the steps:
+     - Navigate to "<MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/" directory
+
+   ```
+   Build the Bootloader:
+
+   $ /opt/microchip/mplabx/*/mplab_platform/bin/prjMakefilesGenerator.sh -v third_party/wfi32/bootloader/firmware/pic32mz_w1_curiosity.X@pic32mz_w1_curiosity
+ 
+   $ /opt/microchip/mplabx/*/mplab_platform/bin/make -j32 -C third_party/wfi32/bootloader/firmware/pic32mz_w1_curiosity.X
+   ```
+
+   ```
+   Build the Application example:
+
+   $ ./scripts/examples/gn_wfi32_example.sh examples/lighting-app/mchp/pic32mzw1/ out/wfi32 linker_file=\"app_mz.ld\" enable_ota="true"
+   ```
+
+   ```
+   Generate OTA image:
+
+   $ /opt/microchip/xc32/<COMPILER_VERSION>/bin/xc32-objcopy -I ihex -O binary out/wfi32/chip-wfi32-lighting-example.hex out/wfi32/chip-wfi32-lighting-example.bin
+
+   Note: <COMPILER_VER> is the compiler version installed/used, e.g. “v4.30”
+   ```
+
+   ```
+   Generate the unified image that includes both the bootloader and example images:
+
+   $ /opt/microchip/mplabx/*/mplab_platform/bin/hexmate --edf="/opt/microchip/mplabx/<MPLAB_VER>/mplab_platform/dat/en_msgs.txt" out/wfi32/chip-wfi32-lighting-example.hex third_party/wfi32/bootloader/firmware/pic32mz_w1_curiosity.X/dist/pic32mz_w1_curiosity/production/pic32mz_w1_curiosity.X.production.hex -oout/wfi32/chip-wfi32-lighting-example_unified.hex
+
+   Note: <MPLAB_VER> is the MPLAB version installed/used, e.g. “v6.05”
+   ```
+
+  ### OTA Test Setup
+
+   - Generate the OTA image
+     - The OTA image is generated at <MATTER_PROJECT_PATH>\PIC32MZW1_Matter_Project\third_party\wfi32\firmware\matter_lighting_app_pic32mz_w1.X\dist\pic32mz_w1_curiosity\production\matter_lighting_app_pic32mz_w1.X.production.bin
+
+     - Run below command to generate Matter OTA image that includes Matter specific header
+     
+  1. MPLAB X based build:
+
+  ```
+    $ python ./src/app/ota_image_tool.py create -v 0xDEAD -p 0xBEEF -vn 2 -vs "2.0" -da sha256 ./third_party/wfi32/firmware/matter_lighting_app_pic32mz_w1.X/dist/pic32mz_w1_curiosity/production/matter_lighting_app_pic32mz_w1.X.production.bin matter_lighting_app_pic32mz_w1.X.production.ota
+  ```
+  2. GN build:
+
+  ```
+    $ python ./src/app/ota_image_tool.py create -v 0xDEAD -p 0xBEEF -vn 2 -vs "2.0" -da sha256 out/wfi32/chip-wfi32-lighting-example.bin out/wfi32/chip-wfi32-lighting-example.ota
+  ```
+
+   - Set up OTA provider:
+     - To perform OTA firmware upgrade, PIC32MZW1 device acts as OTA requestor and retrieves the OTA image from the OTA provider. Raspberry Pi can be used as OTA provider. 
+       - Note: Guide to prepare Raspberry Pi as Matter device can be found [here](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md)
+
+     - Following two applications need to be run on Raspberry Pi, to verify working of Matter Lighting Example:
+       - ota-provider-app
+         [Build the application on Raspberry Pi](https://github.com/project-chip/connectedhomeip/tree/master/examples/ota-provider-app/linux)
+  
+       - chip-tool
+         [Build the application on Raspberry Pi](https://github.com/project-chip/connectedhomeip/tree/master/examples/chip-tool)
+
+   - Run the OTA tests on Raspberry Pi
+
+  ```
+    On Raspberry Pi (Terminal 1)
+    $ ./chip-ota-provider-app -f matter_lighting_app_pic32mz_w1.X.production.ota
+
+    On Raspberry Pi (Terminal 2)
+    $ ./chip-tool pairing onnetwork 1 20202021
+
+    $ ./chip-tool accesscontrol write acl '[{"fabricIndex": 1, "privilege": 5, "authMode": 2, "subjects": [112233], "targets": null}, {"fabricIndex": 1, "privilege": 3, "authMode": 2, "subjects": null, "targets": null}]' 1 0
+
+    $ ./chip-tool pairing onnetwork 2 20202021
+
+    $ ./chip-tool otasoftwareupdaterequestor announce-ota-provider 1 0 0 0 2 0
+  ```
+
+<a name="memconsumption"></a>
+
+## Memory Consumption
+
+As per latest memory usage analysis, this example consumes 892KB Program Memory and 238KB Data Memory.
+
+<a name="examplimitations"></a>
+
+## Example Limitations
+- Debug mode cannot be used with MPLAB X IDE on Microsoft Windows
+- It takes long loading time to start debug mode with MPLAB X IDE
+- Requires MPLAB XC32 compiler's PRO license
+
+<a name="addh3components"></a>
+
+## Add or modify Harmony 3 components and re-generate the code using MPLAB X IDE
+- If you need to customize the project, H3 services/libraries can be added or removed and peripherals or components such as GPIO, UART, SPI etc. can be configured through project graph option in MHC (MPLAB Harmony 3 Configurator). The source code can be re-generated to include necessary changes.
+
+  - MHC Project Configuration for PIC32MZW1 Lighting Example: 
+</p>
+  <p align="center"><img width="450" src="assets/projectGraph.png" height="220">
+  </p>
+
+  - To re-generate the code using MHC, select "USER_RECENT" as Merge Strategy:
+</p>
+  <p align="center"><img width="450" src="assets/mergeStrategy.png">
+  </p>
+
+  - Do not merge following code, if the prompt messages are shown:
+  </p>
+    <p align="center"><img width="450" src="assets/dnm1.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm2.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm3.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm4.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm5.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm6.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm7.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm8.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm9.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm10.png">
+    </p>
+    <p align="center"><img width="450" src="assets/dnm11.png">
+    </p>
+
+<a name="addmodclusters"></a>
+
+## Add or modify clusters
+
+To customize the proejct, user can configure/enable/disable different clusters using ZAP GUI tool for cluster configuration. More information is available [here.](https://github.com/project-chip/connectedhomeip/tree/master/src/app/zap-templates)  
+Application codes under directory PIC32MZW1_Matter_Project/examples/lighting-app/mchp/pic32mzw1/ need to be modified after the clusters configurations are changed.
+
+  ### Pre-requisite for Linux
+   - [Install node version 16.x for ZAP GUI tool](https://joshtronic.com/2021/05/09/how-to-install-nodejs-16-on-ubuntu-2004-lts/)
+
+  #### Launch GUI and Configure Clusters
+   - Execute the following commands:
+
+```
+$ cd PIC32MZW1_Matter_Project/
+$ ./scripts/tools/zap/run_zaptool.sh <ZAP_FILE>
+For example:
+$ ./scripts/tools/zap/run_zaptool.sh examples/lighting-app/lighting-common/lighting-app.zap
+
+$ ./scripts/tools/zap/generated.py <ZAP_FILE> -o <TEMPLATE_CODE_PATH>
+For example:
+$ ./scripts/tools/zap/generated.py examples/lighting-app/lighting-common/lighting-app.zap -o zzz_generated/lighting-app/zap-generated
+```
+
+  ### Pre-requisite for Windows
+   - [Download node](https://nodejs.org/download/release/v16.18.0/) and move the node folder to C:\Program Files. Add "path-to-node.exe" to the environment PATH variable.
+   - In command prompt, type: cd <MATTER_PROJECT_PATH>\PIC32MZW1_Matter_Project\third_party\zap\repo
+   - Type: npm install installed-check
+
+  #### Launch GUI and Configure Clusters
+   - Execute the following command:
+   
+   ```
+   $ node src-script/zap-start.js --logToStdout --gen  <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/app-templates.json --zcl  <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/zcl/zcl.json -I <ZAP_FILE_PATH>
+   
+   For example:
+   $ node src-script/zap-start.js --logToStdout --gen <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/app-templates.json --zcl <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/src/app/zap-templates/zcl/zcl.json -i <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project/examples/lighting-app/lighting-common/lighting-app.zap
+
+   $ npm install installed-check
+   ```
+
+  #### Generate the template code 
+   - Using command prompt, go to <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project directory
+
+</p>
+  <p align="center"><img width="450" src="assets/templcode.png">
+  </p>
+
+  - Execute the following command:
+
+   ```
+   $ python <ZAP_FILE> <TEMPLATE_CODE_PATH>
+   
+   For example:
+   $ python scripts/tools/zap/generate.py examples\lighting-app\lighting-common\lighting-app.zap -o zzz_generated\lighting-app\zap-generated
+   ```
+  - Note: Template codes are generated at <TEMPLATE_CODE_PATH>
+  
+<a name="reference"></a>
+
+## Reference
+- The official Matter (project CHIP) github repo can be found [here.](https://github.com/project-chip/connectedhomeip)
+- The official specification document can be downloaded by [submitting this request form](https://csa-iot.org/developer-resource/specifications-download-request/)
