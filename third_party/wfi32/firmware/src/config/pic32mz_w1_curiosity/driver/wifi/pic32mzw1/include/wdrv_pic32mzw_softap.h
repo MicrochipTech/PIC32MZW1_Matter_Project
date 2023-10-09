@@ -104,7 +104,8 @@ SUBSTITUTE GOODS, TECHNOLOGY, SERVICES, OR ANY CLAIMS BY THIRD PARTIES
     WDRV_PIC32MZW_STATUS_INVALID_CONTEXT - The BSS context is not valid.
 
   Remarks:
-    None.
+    If pBSSCtx and pAuthCtx are both NULL then no AP will be established, however the
+    pfNotifyCallback callback will still be accepted, even if an AP is active.
 
 */
 
@@ -190,47 +191,6 @@ WDRV_PIC32MZW_STATUS WDRV_PIC32MZW_APStop(DRV_HANDLE handle);
 WDRV_PIC32MZW_STATUS WDRV_PIC32MZW_APRekeyIntervalSet(
     DRV_HANDLE handle,
     const uint32_t interval
-);
-
-//*******************************************************************************
-/*
-  Function:
-    WDRV_PIC32MZW_STATUS WDRV_PIC32MZW_APSetCustIE
-    (
-        DRV_HANDLE handle,
-        const WDRV_PIC32MZW_CUST_IE_STORE_CONTEXT *const pCustIECtx
-    )
-
-  Summary:
-    Configures the custom IE.
-
-  Description:
-    Soft-AP beacons may contain an application provided custom IE. This function
-    associates a custom IE store context with the Soft-AP instance.
-
-  Precondition:
-    WDRV_PIC32MZW_Initialize should have been called.
-    WDRV_PIC32MZW_Open should have been called to obtain a valid handle.
-
-  Parameters:
-    handle     - Client handle obtained by a call to WDRV_PIC32MZW_Open.
-    pCustIECtx - Pointer to custom IE store context.
-
-  Returns:
-    WDRV_PIC32MZW_STATUS_OK            - The request has been accepted.
-    WDRV_PIC32MZW_STATUS_NOT_OPEN      - The driver instance is not open.
-    WDRV_PIC32MZW_STATUS_INVALID_ARG   - The parameters were incorrect.
-    WDRV_PIC32MZW_STATUS_REQUEST_ERROR - The request to the PIC32MZW was rejected.
-
-  Remarks:
-    None.
-
-*/
-
-WDRV_PIC32MZW_STATUS WDRV_PIC32MZW_APSetCustIE
-(
-    DRV_HANDLE handle,
-    const WDRV_PIC32MZW_CUST_IE_STORE_CONTEXT *const pCustIECtx
 );
 // DOM-IGNORE-BEGIN
 #ifdef __cplusplus

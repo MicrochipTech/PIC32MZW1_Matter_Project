@@ -36,9 +36,6 @@ masking and clearing memory logic.
 
 #include <wolfssl/wolfcrypt/misc.h>
 
-#define max(a,b) (((a)>(b)) ? (a):(b))
-#define min(a,b) (((a)<(b)) ? (a):(b))
-
 /* inlining these functions is a huge speed increase and a small size decrease,
    because the functions are smaller than function call setup/cleanup, e.g.,
    md5 benchmark is twice as fast with inline.  If you don't want it, then

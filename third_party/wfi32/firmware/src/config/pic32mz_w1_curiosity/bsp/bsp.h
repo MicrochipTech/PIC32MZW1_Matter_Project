@@ -61,33 +61,33 @@
 // *****************************************************************************
 // *****************************************************************************
 /*** LED Macros for LED_YELLOW ***/
-#define LED_YELLOW_Toggle() (LATKINV = (1<<13))
-#define LED_YELLOW_Get() ((PORTK >> 13) & 0x1)
-#define LED_YELLOW_On() (LATKCLR = (1<<13))
-#define LED_YELLOW_Off() (LATKSET = (1<<13))
+#define LED_YELLOW_Toggle() (LATKINV = (1U<<13))
+#define LED_YELLOW_Get() ((PORTK >> 13) & 0x1U)
+#define LED_YELLOW_On() (LATKCLR = (1U<<13))
+#define LED_YELLOW_Off() (LATKSET = (1U<<13))
 /*** LED Macros for LED_RED ***/
-#define LED_RED_Toggle() (LATKINV = (1<<12))
-#define LED_RED_Get() ((PORTK >> 12) & 0x1)
-#define LED_RED_On() (LATKCLR = (1<<12))
-#define LED_RED_Off() (LATKSET = (1<<12))
+#define LED_RED_Toggle() (LATKINV = (1U<<12))
+#define LED_RED_Get() ((PORTK >> 12) & 0x1U)
+#define LED_RED_On() (LATKCLR = (1U<<12))
+#define LED_RED_Off() (LATKSET = (1U<<12))
 /*** LED Macros for LED_GREEN ***/
-#define LED_GREEN_Toggle() (LATKINV = (1<<14))
-#define LED_GREEN_Get() ((PORTK >> 14) & 0x1)
-#define LED_GREEN_On() (LATKCLR = (1<<14))
-#define LED_GREEN_Off() (LATKSET = (1<<14))
+#define LED_GREEN_Toggle() (LATKINV = (1U<<14))
+#define LED_GREEN_Get() ((PORTK >> 14) & 0x1U)
+#define LED_GREEN_On() (LATKCLR = (1U<<14))
+#define LED_GREEN_Off() (LATKSET = (1U<<14))
 /*** LED Macros for LED_BLUE ***/
-#define LED_BLUE_Toggle() (LATCINV = (1<<9))
-#define LED_BLUE_Get() ((PORTC >> 9) & 0x1)
-#define LED_BLUE_On() (LATCCLR = (1<<9))
-#define LED_BLUE_Off() (LATCSET = (1<<9))
+#define LED_BLUE_Toggle() (LATCINV = (1U<<9))
+#define LED_BLUE_Get() ((PORTC >> 9) & 0x1U)
+#define LED_BLUE_On() (LATCCLR = (1U<<9))
+#define LED_BLUE_Off() (LATCSET = (1U<<9))
 /*** SWITCH Macros for SWITCH1 ***/
-#define SWITCH1_Get() ((PORTA >> 10) & 0x1)
-#define SWITCH1_STATE_PRESSED 0
-#define SWITCH1_STATE_RELEASED 1
+#define SWITCH1_Get() ((PORTA >> 10) & 0x1U)
+#define SWITCH1_STATE_PRESSED 0U
+#define SWITCH1_STATE_RELEASED 1U
 /*** SWITCH Macros for SWITCH2 ***/
-#define SWITCH2_Get() ((PORTB >> 8) & 0x1)
-#define SWITCH2_STATE_PRESSED 0
-#define SWITCH2_STATE_RELEASED 1
+#define SWITCH2_Get() ((PORTB >> 8) & 0x1U)
+#define SWITCH2_STATE_PRESSED 0U
+#define SWITCH2_STATE_RELEASED 1U
 
 
 

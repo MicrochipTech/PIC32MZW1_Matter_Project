@@ -53,8 +53,6 @@ This library contains implementation for the random number generator.
 #include <wolfssl/wolfcrypt/random.h>
 #include <wolfssl/wolfcrypt/cpuid.h>
 
-#define max(a,b) (((a)>(b)) ? (a):(b))
-#define min(a,b) (((a)<(b)) ? (a):(b))
 
 /* If building for old FIPS. */
 #if defined(HAVE_FIPS) && \

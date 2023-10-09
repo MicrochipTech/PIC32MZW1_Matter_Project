@@ -186,9 +186,10 @@ CHIP_ERROR PIC32MZW1Utils::pic32mzw1_wifi_set_config(char* ssid, char* password,
             }
             break;
         }
+        
+#endif
         default:
             break;
-#endif
     }
 
     return err;

@@ -178,7 +178,7 @@ void SYS_Tasks(void)
      /**********************************************************************
      * Create all Threads for APP Tasks before starting FreeRTOS Scheduler *
      ***********************************************************************/
-    ///vTaskStartScheduler(); /* This function never returns. */
+    //vTaskStartScheduler(); /* This function never returns. */
 
 }
 

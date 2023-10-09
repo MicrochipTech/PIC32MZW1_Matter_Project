@@ -44,6 +44,8 @@
                   <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/include/wdrv_pic32mzw_sta.h</itemPath>
                   <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/include/wdrv_pic32mzw_ps.h</itemPath>
                   <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/include/wdrv_pic32mzw_custie.h</itemPath>
+                  <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/include/drv_pic32mzw1_tls.h</itemPath>
+                  <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/include/wdrv_pic32mzw_ie.h</itemPath>
                 </logicalFolder>
               </logicalFolder>
             </logicalFolder>
@@ -197,6 +199,8 @@
                 <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/src/lldp_tlv.h</itemPath>
                 <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/src/tcpip_mac_bridge_manager.h</itemPath>
                 <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/src/tcpip_mac_bridge_private.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/src/dhcp_server_private.h</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/src/dhcp_server_manager.h</itemPath>
               </logicalFolder>
               <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/tcpip_common_ports.h</itemPath>
               <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/tcpip_mac.h</itemPath>
@@ -243,6 +247,7 @@
               <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/tcpip.h</itemPath>
               <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/tcpip_mac_bridge.h</itemPath>
               <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/tcpip_ethernet.h</itemPath>
+              <itemPath>../src/config/pic32mz_w1_curiosity/library/tcpip/dhcp_server.h</itemPath>
             </logicalFolder>
           </logicalFolder>
           <logicalFolder name="matter_gen_files"
@@ -644,6 +649,8 @@
                 <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/wdrv_pic32mzw_sta.c</itemPath>
                 <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/wdrv_pic32mzw_ps.c</itemPath>
                 <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/wdrv_pic32mzw_custie.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/drv_pic32mzw1_tls.c</itemPath>
+                <itemPath>../src/config/pic32mz_w1_curiosity/driver/wifi/pic32mzw1/wdrv_pic32mzw_ie.c</itemPath>
               </logicalFolder>
             </logicalFolder>
           </logicalFolder>

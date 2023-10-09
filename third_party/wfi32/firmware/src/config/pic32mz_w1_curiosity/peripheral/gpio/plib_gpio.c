@@ -63,39 +63,39 @@ uint8_t portNumCb[4 + 1] = { 0, 1, 2, 2, 2, };
 void GPIO_Initialize ( void )
 {
     /* Disable JTAG since at least one of its pins is configured for Non-JTAG function */
-    CFGCON0bits.JTAGEN = 0;
+    CFGCON0bits.JTAGEN = 0U;
 
     /* PORTA Initialization */
-    LATA = 0x2; /* Initial Latch Value */
-    TRISACLR = 0x2; /* Direction Control */
-    ANSELACLR = 0x400; /* Digital Mode Enable */
+    LATA = 0x2U; /* Initial Latch Value */
+    TRISACLR = 0x2U; /* Direction Control */
+    ANSELACLR = 0x400U; /* Digital Mode Enable */
 
     /* Change Notice Enable */
     CNCONASET = _CNCONA_ON_MASK;
     PORTA;
     IEC1SET = _IEC1_CNAIE_MASK;
     /* PORTB Initialization */
-    ANSELBCLR = 0x300; /* Digital Mode Enable */
+    ANSELBCLR = 0x300U; /* Digital Mode Enable */
 
     /* Change Notice Enable */
     CNCONBSET = _CNCONB_ON_MASK;
     PORTB;
     IEC1SET = _IEC1_CNBIE_MASK;
     /* PORTC Initialization */
-    ODCCSET = 0x200; /* Open Drain Enable */
-    LATC = 0x200; /* Initial Latch Value */
-    TRISCCLR = 0x1200; /* Direction Control */
+    ODCCSET = 0x200U; /* Open Drain Enable */
+    LATC = 0x200U; /* Initial Latch Value */
+    TRISCCLR = 0x1200U; /* Direction Control */
     /* PORTK Initialization */
-    ODCKSET = 0x7000; /* Open Drain Enable */
-    LATK = 0x7000; /* Initial Latch Value */
-    TRISKCLR = 0x7000; /* Direction Control */
+    ODCKSET = 0x7000U; /* Open Drain Enable */
+    LATK = 0x7000U; /* Initial Latch Value */
+    TRISKCLR = 0x7000U; /* Direction Control */
 
     /* Unlock system for PPS configuration */
-    SYSKEY = 0x00000000;
-    SYSKEY = 0xAA996655;
-    SYSKEY = 0x556699AA;
+    SYSKEY = 0x00000000U;
+    SYSKEY = 0xAA996655U;
+    SYSKEY = 0x556699AAU;
 
-    CFGCON0bits.IOLOCK = 0;
+    CFGCON0bits.IOLOCK = 0U;
 
     /* PPS Input Remapping */
     U3RXR = 10;
@@ -106,9 +106,9 @@ void GPIO_Initialize ( void )
     RPK7R = 2;
 
         /* Lock back the system after PPS configuration */
-    CFGCON0bits.IOLOCK = 1;
+    CFGCON0bits.IOLOCK = 1U;
 
-    SYSKEY = 0x00000000;
+    SYSKEY = 0x00000000U;
 
     uint32_t i;
     /* Initialize Interrupt Pin data structures */
@@ -116,7 +116,7 @@ void GPIO_Initialize ( void )
     
     portPinCbObj[1 + 0].pin = GPIO_PIN_RB8;
     
-    for(i=0; i<2; i++)
+    for(i=0U; i<2U; i++)
     {
         portPinCbObj[i].callback = NULL;
     }
@@ -152,7 +152,7 @@ void GPIO_Initialize ( void )
 */
 uint32_t GPIO_PortRead(GPIO_PORT port)
 {
-    return (*(volatile uint32_t *)(&PORTA + (port * 0x40)));
+    return (*(volatile uint32_t *)(&PORTA + (port * 0x40U)));
 }
 
 // *****************************************************************************
@@ -167,7 +167,7 @@ uint32_t GPIO_PortRead(GPIO_PORT port)
 */
 void GPIO_PortWrite(GPIO_PORT port, uint32_t mask, uint32_t value)
 {
-    *(volatile uint32_t *)(&LATA + (port * 0x40)) = (*(volatile uint32_t *)(&LATA + (port * 0x40)) & (~mask)) | (mask & value);
+    *(volatile uint32_t *)(&LATA + (port * 0x40U)) = (*(volatile uint32_t *)(&LATA + (port * 0x40U)) & (~mask)) | (mask & value);
 }
 
 // *****************************************************************************
@@ -182,7 +182,7 @@ void GPIO_PortWrite(GPIO_PORT port, uint32_t mask, uint32_t value)
 */
 uint32_t GPIO_PortLatchRead(GPIO_PORT port)
 {
-    return (*(volatile uint32_t *)(&LATA + (port * 0x40)));
+    return (*(volatile uint32_t *)(&LATA + (port * 0x40U)));
 }
 
 // *****************************************************************************
@@ -197,7 +197,7 @@ uint32_t GPIO_PortLatchRead(GPIO_PORT port)
 */
 void GPIO_PortSet(GPIO_PORT port, uint32_t mask)
 {
-    *(volatile uint32_t *)(&LATASET + (port * 0x40)) = mask;
+    *(volatile uint32_t *)(&LATASET + (port * 0x40U)) = mask;
 }
 
 // *****************************************************************************
@@ -212,7 +212,7 @@ void GPIO_PortSet(GPIO_PORT port, uint32_t mask)
 */
 void GPIO_PortClear(GPIO_PORT port, uint32_t mask)
 {
-    *(volatile uint32_t *)(&LATACLR + (port * 0x40)) = mask;
+    *(volatile uint32_t *)(&LATACLR + (port * 0x40U)) = mask;
 }
 
 // *****************************************************************************
@@ -227,7 +227,7 @@ void GPIO_PortClear(GPIO_PORT port, uint32_t mask)
 */
 void GPIO_PortToggle(GPIO_PORT port, uint32_t mask)
 {
-    *(volatile uint32_t *)(&LATAINV + (port * 0x40))= mask;
+    *(volatile uint32_t *)(&LATAINV + (port * 0x40U))= mask;
 }
 
 // *****************************************************************************
@@ -242,7 +242,7 @@ void GPIO_PortToggle(GPIO_PORT port, uint32_t mask)
 */
 void GPIO_PortInputEnable(GPIO_PORT port, uint32_t mask)
 {
-    *(volatile uint32_t *)(&TRISASET + (port * 0x40)) = mask;
+    *(volatile uint32_t *)(&TRISASET + (port * 0x40U)) = mask;
 }
 
 // *****************************************************************************
@@ -257,7 +257,7 @@ void GPIO_PortInputEnable(GPIO_PORT port, uint32_t mask)
 */
 void GPIO_PortOutputEnable(GPIO_PORT port, uint32_t mask)
 {
-    *(volatile uint32_t *)(&TRISACLR + (port * 0x40)) = mask;
+    *(volatile uint32_t *)(&TRISACLR + (port * 0x40U)) = mask;
 }
 
 // *****************************************************************************
@@ -272,7 +272,7 @@ void GPIO_PortOutputEnable(GPIO_PORT port, uint32_t mask)
 */
 void GPIO_PortInterruptEnable(GPIO_PORT port, uint32_t mask)
 {
-    *(volatile uint32_t *)(&CNENASET + (port * 0x40)) = mask;
+    *(volatile uint32_t *)(&CNENASET + (port * 0x40U)) = mask;
 }
 
 // *****************************************************************************
@@ -287,7 +287,7 @@ void GPIO_PortInterruptEnable(GPIO_PORT port, uint32_t mask)
 */
 void GPIO_PortInterruptDisable(GPIO_PORT port, uint32_t mask)
 {
-    *(volatile uint32_t *)(&CNENACLR + (port * 0x40)) = mask;
+    *(volatile uint32_t *)(&CNENACLR + (port * 0x40U)) = mask;
 }
 
 // *****************************************************************************
@@ -311,27 +311,27 @@ void GPIO_PinIntEnable(GPIO_PIN pin, GPIO_INTERRUPT_STYLE style)
     GPIO_PORT port;
     uint32_t mask;
 
-    port = (GPIO_PORT)(pin>>4);
-    mask =  0x1 << (pin & 0xF);
+    port = (GPIO_PORT)(pin>>4U);
+    mask =  0x1U << (pin & 0xFU);
 
     if (style == GPIO_INTERRUPT_ON_MISMATCH)
     {
-        *(volatile uint32_t *)(&CNENASET + (port * 0x40)) = mask;
+        *(volatile uint32_t *)(&CNENASET + (port * 0x40U)) = mask;
     }
     else if (style == GPIO_INTERRUPT_ON_RISING_EDGE)
     {
-        *(volatile uint32_t *)(&CNENASET + (port * 0x40)) = mask;
-        *(volatile uint32_t *)(&CNNEACLR + (port * 0x40)) = mask;
+        *(volatile uint32_t *)(&CNENASET + (port * 0x40U)) = mask;
+        *(volatile uint32_t *)(&CNNEACLR + (port * 0x40U)) = mask;
     }
     else if (style == GPIO_INTERRUPT_ON_FALLING_EDGE)
     {
-        *(volatile uint32_t *)(&CNENACLR + (port * 0x40)) = mask;
-        *(volatile uint32_t *)(&CNNEASET + (port * 0x40)) = mask;
+        *(volatile uint32_t *)(&CNENACLR + (port * 0x40U)) = mask;
+        *(volatile uint32_t *)(&CNNEASET + (port * 0x40U)) = mask;
     }
     else if (style == GPIO_INTERRUPT_ON_BOTH_EDGES)
     {
-        *(volatile uint32_t *)(&CNENASET + (port * 0x40)) = mask;
-        *(volatile uint32_t *)(&CNNEASET + (port * 0x40)) = mask;
+        *(volatile uint32_t *)(&CNENASET + (port * 0x40U)) = mask;
+        *(volatile uint32_t *)(&CNNEASET + (port * 0x40U)) = mask;
     }
 }
 
@@ -350,11 +350,11 @@ void GPIO_PinIntDisable(GPIO_PIN pin)
     GPIO_PORT port;
     uint32_t mask;
     
-    port = (GPIO_PORT)(pin>>4);
-    mask =  0x1 << (pin & 0xF);
+    port = (GPIO_PORT)(pin>>4U);
+    mask =  0x1U << (pin & 0xFU);
 
-    *(volatile uint32_t *)(&CNENACLR + (port * 0x40)) = mask;
-    *(volatile uint32_t *)(&CNNEACLR + (port * 0x40)) = mask;
+    *(volatile uint32_t *)(&CNENACLR + (port * 0x40U)) = mask;
+    *(volatile uint32_t *)(&CNNEACLR + (port * 0x40U)) = mask;
 }
 // *****************************************************************************
 /* Function:
@@ -379,7 +379,7 @@ bool GPIO_PinInterruptCallbackRegister(
     uint8_t i;
     uint8_t portIndex;
 
-    portIndex = pin >> 4;
+    portIndex = pin >> 4U;
 
     for(i = portNumCb[portIndex]; i < portNumCb[portIndex +1]; i++)
     {
@@ -425,7 +425,7 @@ void CHANGE_NOTICE_A_InterruptHandler(void)
     /* Check pending events and call callback if registered */
     for(i = 0; i < 1; i++)
     {
-        if((status & (1 << (portPinCbObj[i].pin & 0xF))) && (portPinCbObj[i].callback != NULL))
+        if((status & (1U << (portPinCbObj[i].pin & 0xFU))) && (portPinCbObj[i].callback != NULL))
         {
             portPinCbObj[i].callback (portPinCbObj[i].pin, portPinCbObj[i].context);
         }
@@ -457,7 +457,7 @@ void CHANGE_NOTICE_B_InterruptHandler(void)
     /* Check pending events and call callback if registered */
     for(i = 1; i < 2; i++)
     {
-        if((status & (1 << (portPinCbObj[i].pin & 0xF))) && (portPinCbObj[i].callback != NULL))
+        if((status & (1U << (portPinCbObj[i].pin & 0xFU))) && (portPinCbObj[i].callback != NULL))
         {
             portPinCbObj[i].callback (portPinCbObj[i].pin, portPinCbObj[i].context);
         }
