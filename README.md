@@ -64,24 +64,11 @@ This example is a starting point for Matter protocol demonstration over Microchi
 - [MPLAB XC32 Compiler v4.30](https://www.microchip.com/en-us/tools-resources/develop/mplab-xc-compilers/downloads-documentation#XC32) and [follow the instructions to install XC32 compiler](https://microchipdeveloper.com/xc32:installation).
   Use XC32 professional compiler license. Please refer tab 'Internal Microchip Licenses' from [Compilers Latest Builds Page](https://compilers.microchip.com/latest_builds.php) for more details about Internal Microchip Employee License Generator.
 
-- [Open JDK v8](https://docs.datastax.com/en/jdk-install/doc/jdk-install/installOpenJdkDeb.html) for GN build system. Please note that, this is a strict requirement to use Open JDK v8
-
-  - Note:
-    - For Ubuntu, add PATHs for MPLAB X IDE and XC32 Compiler's installation directories at the end of '~/.profile' OR '~/.bashrc' file:
-
-    ```
-      PATH=$PATH:"/opt/microchip/xc32/v4.30/bin"
-      PATH=$PATH:"/opt/microchip/mplabx/v6.15/mplab_platform/mplab_ipe"
-    ```
-
-    - To continue using the same terminal, run `source ~/.profile` or `source ~/.bashrc`
-
-
 <a name="environment"></a>
 
 ## Setup CHIP Environment - Install Prerequisites
 
-The project can support GN build system and MPLAB X IDE build. If you build with MPLAB X IDE, you can run on Windows or Linux environment. If you build with GN build system, you can run on Linux Environment.  
+The project can support to build with MPLAB X IDE. When you build with MPLAB X IDE, you can run on Windows or Linux environment.
 Below is the OS environment that you can use.
 - Microsoft Windows OR
 - [Linux](https://github.com/project-chip/connectedhomeip/blob/master/docs/guides/BUILDING.md#installing-prerequisites-on-linux) (Ubuntu release version 20.04 LTS, 22.04 LTS is preferred)
@@ -95,18 +82,18 @@ To prepare the hardware platform:
 </p>
   <p align="center"><img width="200" src="assets/rnbd451_conf.png">
   </p>
-3. Turn on SW1 switch 2 or 3 or 4 for the use of ECC608A TrustFlex
+3. Turn on SW1 switch 2 or 3 or 4 for the use of ECC608B TrustFlex
 </p>
   <p align="center"><img width="200" src="assets/ecc608a_conf.png">
   </p>
-4. Plug the [ECC608A Trust board](https://www.microchip.com/en-us/development-tool/DT100104) to the MikroBus connecto of the [WFI32-IoT board](https://www.microchip.com/en-us/development-tool/EV36W50A), and then plug the [RNBD451 Add On Board](https://www.microchip.com/en-us/development-tool/EV25F14A) on top of ECC608A Trust board.  
+4. Plug the [ECC608B Trust board](https://www.microchip.com/en-us/development-tool/DT100104) to the MikroBus connecto of the [WFI32-IoT board](https://www.microchip.com/en-us/development-tool/EV36W50A), and then plug the [RNBD451 Add On Board](https://www.microchip.com/en-us/development-tool/EV25F14A) on top of ECC608B Trust board.  
 Below picture show the details:
 
 </p>
   <p align="center"><img width="600" src="assets/tss_compones.png">
   </p>
 
-- **Notes:** ECC608A Trust board is optional for test, if you want to disable the use fo ECC608A. To disable the use of ECC608A, you can disable the definition of "CHIP_DEVICE_CONFIG_ECC_INTEGRATION" in src/platform/wfi32/CHIPDevicePlatformConfig.h
+- **Notes:** ECC608B Trust board is optional for test, if you want to disable the use fo ECC608B. To disable the use of ECC608B, you can disable the definition of "CHIP_DEVICE_CONFIG_ECC_INTEGRATION" in src/platform/wfi32/CHIPDevicePlatformConfig.h
 
 
 <a name="demosetup"></a>
@@ -172,25 +159,8 @@ Update default Wi-Fi Access Point (AP) credentials in "/PIC32MZW1_Matter_Project
 #define CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID "DEMO_AP"
 #define CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD "password"
 ```
-  ### For GN buid system (Linux environment)
-   To build the example using GN build system on Ubuntu, execute following commands:
 
-   ```
-   cd PIC32MZW1_Matter_Project/
-   ./scripts/examples/gn_wfi32_example.sh examples/lighting-app/mchp/pic32mzw1/ out/wfi32/
-   ```
-
-   To flash the example to WFI32-IoT board using CLI, run the following command:
-
-   ```
-   cd PIC32MZW1_Matter_Project/
-   ipecmd.sh -TPPKOB4 -P32MZ1025W104132 -M -Fout/wfi32/chip-wfi32-lighting-example.hex -OL
-   ```
-   </p>
-    <p align="center"><img width="450" src="assets/flashOutput.png" height="220">
-   </p>  
-
-  ### For MPLAB X IDE (Windows environment/ Linux environment)
+  ### Build with MPLAB X IDE (Windows environment/ Linux environment)
    To build and flash the example using MPLAB X IDE on Microsoft Windows/ Ubuntu, execute following commands:
 
    ```
@@ -339,8 +309,8 @@ Below picture show about the setup:
 
 ## Attestation Certificate Provisioning
 
-Matter Device Attestation Certificate (DAC) need to be provisioning to the ECC608A TrustFlex device for the commissioning process. It is used to proved that the device is certificed  and the manfacturer is the member of the Connectivity Standards Alliance (CSA).  
-In this project, the DAC and the keys are stored in the ECC608A TrustFlex (secure element) , users need to run scripts to generate the keypair in the ECC608A TrustFlex, create the Matter DAC and provision the certificate to the ECC608A TrustFlex.  
+Matter Device Attestation Certificate (DAC) need to be provisioning to the ECC608B TrustFlex device for the commissioning process. It is used to proved that the device is certificed  and the manfacturer is the member of the Connectivity Standards Alliance (CSA).  
+In this project, the DAC and the keys are stored in the ECC608B TrustFlex (secure element) , users need to run scripts to generate the keypair in the ECC608B TrustFlex, create the Matter DAC and provision the certificate to the ECC608B TrustFlex.  
 
 ### Environment Setup
 Before your prepare certificates, you need to perform below steps in the Linux Ubuntu to prepare the environment
@@ -388,15 +358,15 @@ For project development and tests, you can perform below steps:
 2. Copy the chip-cert tool from directory src/tools/chip-cert/ to the current directory
 3. Copy files Matter-Development-PAI-noPID-Cert.pem and Matter-Development-PAI-noPID-Key.pem (Product Attestation Intermediate (PAI) certificate and key) from directory credentials/development/attestation/ to current directory
 4. Use MPLABX IDE to open the project at directory third_party/wfi32/utilities/pic32mzw1_kitprotocol/firmware/pic32mzw1_kitprotocol.X, program the firmware to the WFI32-IoT Board
-5. Connect WFi32-IoT board (with ECC608A Trust Board) to your PC
+5. Connect WFi32-IoT board (with ECC608B Trust Board) to your PC
 6. Execute below script 
     ```
       ./cert_create_and_prov.sh Matter-Development-PAI-noPID-Cert.pem Matter-Development-PAI-noPID-Key.pem
     ```  
     - **Note:** The above scripts do the below tasks:  
-    1. Extract the public key from ECC608A TrustFlex
+    1. Extract the public key from ECC608B TrustFlex
     2. Prepare the Device Attestation Certificates (DAC) using chip-tool, the DAC is signed by the (PAI) certificate and key
-    3. Store store the DAC into the slot 10 of ECC608A TrustFlex
+    3. Store store the DAC into the slot 10 of ECC608B TrustFlex
  
 
 ### Certificates Provisioning (For production)
@@ -418,8 +388,8 @@ You can perform below steps to created your won PAA and PAI and provision the de
       ./chip-cert gen-att-cert --type i --subject-cn "Matter Development PAI 01" --subject-vid FFF1 --valid-from "2020-10-15 14:23:43" --lifetime 7305 --ca-key Chip-PAA-Key.pem --ca-cert Chip-PAA-Cert.pem --out-key Chip-PAI-Key.pem --out Chip-PAI-Cert.pem
     ```
 5. Use MPLABX IDE to open the project at directory third_party/wfi32/utilities/pic32mzw1_kitprotocol/firmware/pic32mzw1_kitprotocol.X, program the firmware to the WFI32-IoT Board
-6. Connect WFi32-IoT board (with ECC608A Trust Board) to your PC 
-7. Execute below script to generate DAC and provisioin it to the ECC608A TrustFlex
+6. Connect WFi32-IoT board (with ECC608B Trust Board) to your PC 
+7. Execute below script to generate DAC and provisioin it to the ECC608B TrustFlex
     ```
       ./cert_create_and_prov.sh Chip-PAI-Cert.pem Chip-PAI-Key.pem
     ```   
@@ -468,16 +438,9 @@ You can perform below steps to created your won PAA and PAI and provision the de
      - The OTA image is generated at <MATTER_PROJECT_PATH>\PIC32MZW1_Matter_Project\third_party\wfi32\firmware\matter_lighting_app_pic32mz_w1.X\dist\pic32mz_w1_curiosity\production\matter_lighting_app_pic32mz_w1.X.production.bin
 
      - Run below command to generate Matter OTA image that includes Matter specific header
-     
-  1. MPLAB X based build:
 
   ```
     $ python ./src/app/ota_image_tool.py create -v 0xDEAD -p 0xBEEF -vn 2 -vs "2.0" -da sha256 ./third_party/wfi32/firmware/matter_lighting_app_pic32mz_w1.X/dist/pic32mz_w1_curiosity/production/matter_lighting_app_pic32mz_w1.X.production.bin matter_lighting_app_pic32mz_w1.X.production.ota
-  ```
-  2. GN build:
-
-  ```
-    $ python ./src/app/ota_image_tool.py create -v 0xDEAD -p 0xBEEF -vn 2 -vs "2.0" -da sha256 out/wfi32/chip-wfi32-lighting-example.bin out/wfi32/chip-wfi32-lighting-example.ota
   ```
 
    - Set up OTA provider:
@@ -511,7 +474,7 @@ You can perform below steps to created your won PAA and PAI and provision the de
 
 ## Memory Consumption
 
-As per latest memory usage analysis, this example consumes 892KB Program Memory and 238KB Data Memory.
+As per latest memory usage analysis, this example consumes 943KB Program Memory and 238KB Data Memory.
 
 <a name="examplimitations"></a>
 
@@ -523,41 +486,51 @@ As per latest memory usage analysis, this example consumes 892KB Program Memory 
 <a name="addh3components"></a>
 
 ## Add or modify Harmony 3 components and re-generate the code using MPLAB X IDE
-- If you need to customize the project, H3 services/libraries can be added or removed and peripherals or components such as GPIO, UART, SPI etc. can be configured through project graph option in MHC (MPLAB Harmony 3 Configurator). The source code can be re-generated to include necessary changes.
+- If you need to customize the project, H3 services/libraries can be added or removed and peripherals or components such as GPIO, UART, SPI etc. can be configured through project graph option in MCC (MPLAB Code Configurator). The source code can be re-generated to include necessary changes.
 
-  - MHC Project Configuration for PIC32MZW1 Lighting Example: 
+  - MCC Project Configuration for PIC32MZW1 Lighting Example: 
 </p>
-  <p align="center"><img width="450" src="assets/projectGraph.png" height="220">
+  <p align="center"><img width="700" src="assets/projectGraph.png">
   </p>
 
-  - To re-generate the code using MHC, select "USER_RECENT" as Merge Strategy:
+  - To re-generate the code using MCC, right click "Generate" and select "Force Update on All" as Merge Strategy:
 </p>
   <p align="center"><img width="450" src="assets/mergeStrategy.png">
   </p>
 
   - Do not merge following code, if the prompt messages are shown:
   </p>
-    <p align="center"><img width="450" src="assets/dnm1.png">
+    <p align="center"><img width="700" src="assets/dnm1.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm2.png">
+    <p align="center"><img width="700" src="assets/dnm2.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm3.png">
+    <p align="center"><img width="700" src="assets/dnm3.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm4.png">
+    <p align="center"><img width="700" src="assets/dnm4.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm5.png">
+    <p align="center"><img width="700" src="assets/dnm5.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm6.png">
+    <p align="center"><img width="700" src="assets/dnm6.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm7.png">
+    <p align="center"><img width="700" src="assets/dnm7.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm8.png">
+    <p align="center"><img width="700" src="assets/dnm8.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm9.png">
+    <p align="center"><img width="700" src="assets/dnm9.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm10.png">
+    <p align="center"><img width="700" src="assets/dnm10.png">
     </p>
-    <p align="center"><img width="450" src="assets/dnm11.png">
+    <p align="center"><img width="700" src="assets/dnm11.png">
+    </p>
+    <p align="center"><img width="700" src="assets/dnm12.png">
+    </p>
+    <p align="center"><img width="700" src="assets/dnm13.png">
+    </p>
+    <p align="center"><img width="700" src="assets/dnm14.png">
+    </p>
+    <p align="center"><img width="700" src="assets/dnm15.png">
+    </p>
+    <p align="center"><img width="700" src="assets/dnm16.png">
     </p>
 
 <a name="addmodclusters"></a>
@@ -605,7 +578,7 @@ $ ./scripts/tools/zap/generated.py examples/lighting-app/lighting-common/lightin
    - Using command prompt, go to <MATTER_PROJECT_PATH>/PIC32MZW1_Matter_Project directory
 
 </p>
-  <p align="center"><img width="450" src="assets/templcode.png">
+  <p align="center"><img width="600" src="assets/templcode.png">
   </p>
 
   - Execute the following command:
