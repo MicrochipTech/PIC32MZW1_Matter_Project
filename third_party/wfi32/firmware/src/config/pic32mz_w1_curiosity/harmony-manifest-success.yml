@@ -4,14 +4,14 @@
 
 
 project: wfi32
-creation_date: 2023-06-29T14:10:20.408+08:00[Asia/Shanghai]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
+creation_date: 2023-10-09T08:50:53.250+08:00[Asia/Shanghai]    # ISO 8601 format: https://www.w3.org/TR/NOTE-datetime
 operating_system: Windows 10
 mcc_mode: IDE            # [IDE|Standalone|Headless]
-mcc_version: v5.3.0
-mcc_core_version: v5.5.0
-mplabx_version: v6.05        # if MPLAB X plugin only
-harmony_version: v1.2.0
-compiler: XC32 (v4.20) 
+mcc_version: v5.3.7
+mcc_core_version: v5.5.7
+mplabx_version: v6.15        # if MPLAB X plugin only
+harmony_version: v1.3.2
+compiler: XC32 (v4.30) 
 
 modules:
     - {name: "cryptoauthlib", version: "v3.3.2"}

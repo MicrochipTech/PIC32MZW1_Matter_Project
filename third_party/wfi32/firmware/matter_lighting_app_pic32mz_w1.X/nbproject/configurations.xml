@@ -5438,6 +5438,8 @@
       <C32>
         <property key="additional-warnings" value="false"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe"
+                  value="-Og -g1 -fno-common -ffunction-sections -fdata-sections -no-legacy-libc -Wno-sign-compare -Wno-conversion  -Os -mmicromips -minterlink-compressed -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -fdiagnostics-color -fno-strict-aliasing -Wall -Werror -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -Wno-unused -Wno-format -Wno-maybe-uninitialized -Wno-address -std=gnu11 -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -Wno-incompatible-pointer-types -Wno-unused-function -Wno-implicit-int -Wno-implicit-fallthrough -Wno-type-limits -Wno-implicit-function-declaration -Wno-shadow -Wno-old-style-declaration -Wno-psabi -Wno-cast-function-type -femit-struct-debug-reduced -femit-struct-debug-baseonly"/>
         <property key="enable-app-io" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-symbols" value="true"/>
@@ -5469,6 +5471,7 @@
         <property key="additional-options-chop-files" value="false"/>
       </C32-AR>
       <C32-AS>
+        <property key="appendMe" value=""/>
         <property key="assembler-symbols" value=""/>
         <property key="enable-symbols" value="false"/>
         <property key="exclude-floating-point-library" value="false"/>
@@ -5498,6 +5501,7 @@
         <property key="additional-options-use-response-files" value="true"/>
         <property key="additional-options-write-sla" value="false"/>
         <property key="allocate-dinit" value="false"/>
+        <property key="appendMe" value=""/>
         <property key="code-dinit" value="false"/>
         <property key="ebase-addr" value=""/>
         <property key="enable-check-sections" value="true"/>
@@ -5537,6 +5541,8 @@
       <C32CPP>
         <property key="additional-warnings" value="false"/>
         <property key="addresss-attribute-use" value="false"/>
+        <property key="appendMe"
+                  value="-Og -g1 -fno-common -ffunction-sections -fdata-sections -no-legacy-libc -Wno-sign-compare -Wno-conversion -Os -mmicromips -minterlink-compressed -fno-exceptions -fno-unwind-tables -fno-asynchronous-unwind-tables -Wall -Werror -Wextra -Wshadow -Wunreachable-code -Wvla -Wformat -Wformat-nonliteral -Wformat-security -Wno-deprecated-declarations -Wno-unknown-warning-option -Wno-maybe-uninitialized -Wno-missing-field-initializers -Wno-unused-parameter -Wno-psabi -Wno-cast-function-type -fdiagnostics-color -fno-strict-aliasing -std=gnu++14 -fno-rtti -Wnon-virtual-dtor -fno-check-new -Wno-sign-compare -Wno-conversion -Wno-maybe-uninitialized -Wno-uninitialized -Wno-error=format= -Wno-deprecated-declarations -Wno-missing-field-initializers -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-format-nonliteral -Wno-psabi -Wno-cast-function-type -femit-struct-debug-reduced -femit-struct-debug-baseonly"/>
         <property key="check-new" value="false"/>
         <property key="eh-specs" value="false"/>
         <property key="enable-app-io" value="false"/>
@@ -5546,7 +5552,7 @@
         <property key="exceptions" value="false"/>
         <property key="exclude-floating-point" value="false"/>
         <property key="extra-include-directories"
-                  value="../src;../src/config/pic32mz_w1_curiosity;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ;..\..\..\..\examples\common\QRCode\repo\c;..\..\..\..\examples\lighting-app\mchp\pic32mzw1\include;..\..\..\..\examples\platform\mchp\pic32mzw1;..\..\..\..\examples\providers;..\..\..\..\src;..\..\..\..\src\include;..\..\..\..\src\include\platform\internal;..\..\..\..\src\lib;..\..\..\..\src\lib\dnssd\minimal_mdns\responders;..\..\..\..\src\lwip\freertos;..\..\..\..\src\lwip\wfi32;..\..\..\..\src\platform\wfi32;..\..\..\..\src\setup_payload;..\..\..\..\zzz_generated;..\..\..\..\zzz_generated\app-common;..\..\..\lwip\repo\lwip\src\include;..\..\..\mbedtls\repo\include;..\..\..\nlassert\repo;..\..\..\nlassert\repo\include;..\..\..\nlfaultinjection\repo;..\..\..\nlio\repo;..\..\..\nlio\repo\include;..\..\..\nlunit-test\repo;..\src\ble_app;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1\include;..\src\config\pic32mz_w1_curiosity\library;..\src\config\pic32mz_w1_curiosity\library\tcpip\src\common;..\src\config\pic32mz_w1_curiosity\matter_gen_files\include;..\src\rnHostLib;..\src\third_party\rtos\FreeRTOS\Source\include;..\src\third_party\rtos\FreeRTOS\Source\portable\MPLAB\PIC32MZ;..\src\third_party\wolfssl;..\..\..\..\src\crypto;..\src\config\pic32mz_w1_curiosity\library\cryptoauthlib;..\src\config\pic32mz_w1_curiosity\library\cryptoauthlib\mbedtls;..\src\config\pic32mz_w1_curiosity\matter_gen_files\third_party\connectedhomeip\examples\lighting-app\lighting-common;..\src\config\pic32mz_w1_curiosity\matter_gen_files\third_party\connectedhomeip\examples\lighting-app\lighting-common\zapgen;..\src\config\pic32mz_w1_curiosity\matter_gen_files\third_party"/>
+                  value="../src;../src/config/pic32mz_w1_curiosity;../src/third_party/rtos/FreeRTOS/Source/include;../src/third_party/rtos/FreeRTOS/Source/portable/MPLAB/PIC32MZ;..\..\..\..\examples\common\QRCode\repo\c;..\..\..\..\examples\lighting-app\mchp\pic32mzw1\include;..\..\..\..\examples\platform\mchp\pic32mzw1;..\..\..\..\examples\providers;..\..\..\..\src;..\..\..\..\src\crypto;..\..\..\..\src\include;..\..\..\..\src\include\platform\internal;..\..\..\..\src\lib;..\..\..\..\src\lib\dnssd\minimal_mdns\responders;..\..\..\..\src\lwip\freertos;..\..\..\..\src\lwip\wfi32;..\..\..\..\src\platform\wfi32;..\..\..\..\src\setup_payload;..\..\..\..\zzz_generated;..\..\..\..\zzz_generated\app-common;..\..\..\lwip\repo\lwip\src\include;..\..\..\mbedtls\repo\include;..\..\..\nlassert\repo;..\..\..\nlassert\repo\include;..\..\..\nlfaultinjection\repo;..\..\..\nlio\repo;..\..\..\nlio\repo\include;..\..\..\nlunit-test\repo;..\src\ble_app;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1;..\src\config\pic32mz_w1_curiosity\driver\wifi\pic32mzw1\include;..\src\config\pic32mz_w1_curiosity\library;..\src\config\pic32mz_w1_curiosity\library\cryptoauthlib;..\src\config\pic32mz_w1_curiosity\library\cryptoauthlib\mbedtls;..\src\config\pic32mz_w1_curiosity\library\tcpip\src\common;..\src\config\pic32mz_w1_curiosity\matter_gen_files\include;..\src\config\pic32mz_w1_curiosity\matter_gen_files\third_party;..\src\config\pic32mz_w1_curiosity\matter_gen_files\third_party\connectedhomeip\examples\lighting-app\lighting-common;..\src\config\pic32mz_w1_curiosity\matter_gen_files\third_party\connectedhomeip\examples\lighting-app\lighting-common\zapgen;..\src\rnHostLib;..\src\third_party\rtos\FreeRTOS\Source\include;..\src\third_party\rtos\FreeRTOS\Source\portable\MPLAB\PIC32MZ;..\src\third_party\wolfssl"/>
         <property key="generate-16-bit-code" value="false"/>
         <property key="generate-micro-compressed-code" value="true"/>
         <property key="isolate-each-function" value="true"/>

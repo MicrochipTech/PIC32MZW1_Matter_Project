@@ -332,15 +332,6 @@ SYS_MODULE_OBJ TCPIP_STACK_Init(void)
 // Section: System Initialization
 // *****************************************************************************
 // *****************************************************************************
-
-const SYS_DEBUG_INIT debugInit =
-{
-    .moduleInit = {0},
-    .errorLevel = SYS_DEBUG_GLOBAL_ERROR_LEVEL,
-    .consoleIndex = 0,
-};
-
-
 // <editor-fold defaultstate="collapsed" desc="SYS_TIME Initialization Data">
 
 const SYS_TIME_PLIB_INTERFACE sysTimePlibAPI = {
@@ -391,6 +382,15 @@ const SYS_CONSOLE_INIT sysConsole0Init =
 
 
 // </editor-fold>
+
+
+const SYS_DEBUG_INIT debugInit =
+{
+    .moduleInit = {0},
+    .errorLevel = SYS_DEBUG_GLOBAL_ERROR_LEVEL,
+    .consoleIndex = 0,
+};
+
 
 
 
@@ -455,14 +455,14 @@ void SYS_Initialize ( void* data )
 
     NVM_Initialize();
 
-    CORETIMER_Initialize();
 	UART3_Initialize();
 
+    CORETIMER_Initialize();
 	UART1_Initialize();
 
 	BSP_Initialize();
 	UART2_Initialize();
-	
+
 	RNG_Initialize();
 
 	SPI1_Initialize();
