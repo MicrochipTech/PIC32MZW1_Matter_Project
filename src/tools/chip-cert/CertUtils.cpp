@@ -340,7 +340,7 @@ bool SetValidityTime(X509 * cert, const struct tm & validFrom, uint32_t validDay
     {
         validTo = validFrom;
         validTo.tm_mday += validDays;
-        validTo.tm_sec -= 1; // Ensure validity period is exactly a multiple of a day.
+        //validTo.tm_sec -= 1; // Ensure validity period is exactly a multiple of a day.
         validTo.tm_isdst = -1;
         validToTime      = mktime(&validTo);
 
