@@ -23,11 +23,11 @@
 
 #define KVS_KEY_SIZE    64
 #define KVS_VALUE_SIZE  320
-#define MAX_KEY_NUM     60
+#define MAX_KEY_NUM     80
 #define KEY_NUM_PER_PAGE    10
 #define NUM_OF_PAGE_KVS     MAX_KEY_NUM / KEY_NUM_PER_PAGE    
-#define KVS_KEY_ADDRESS 0x900FA000//0x900FC000
-#define KVS_VALUE_ADDRESS 0x900FF000
+#define KVS_KEY_ADDRESS     0x900F8000
+#define KVS_VALUE_ADDRESS   0x900FF000
 
 static SemaphoreHandle_t storage_mutex = NULL;
 

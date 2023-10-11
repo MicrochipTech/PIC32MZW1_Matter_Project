@@ -240,23 +240,19 @@ CHIP_ERROR BLEManagerImpl::_Init()
     RNBD_RegisterCallbackFunc(BLEManagerCallback);
 
     RNBD_Example_Initialized();
-    ChipLogProgress(DeviceLayer, "BLEManagerImpl::_Init, log1");
+
     RNBD_SetServiceUUID(Matter_Service_UUID);
     RNBD_SetCharacteristic(Matter_Char_TX_UUID, 0x08, 0xFF);
     RNBD_SetCharacteristic(Matter_Char_RX_UUID, 0x22, 0xFF);
     RNBD_SetCharacteristic(Matter_Char_ADDITIONAL_DATA_UUID, 0x02, 0xFF);
 
-    
     //xSemaphoreTake(cmd_mode_bin_sem, portMAX_DELAY);
 
-    ChipLogProgress(DeviceLayer, "BLEManagerImpl::_Init, log2");
-
-
     xSemaphoreTake(rnbd_read_bin_sem, portMAX_DELAY);
-    ChipLogProgress(DeviceLayer, "BLEManagerImpl::_Init, log3");
+    
     RNBD_ListCustomizeService(&ble_service_info);
     xSemaphoreGive(rnbd_read_bin_sem);
-    ChipLogProgress(DeviceLayer, "BLEManagerImpl::_Init, log4");
+    
     ChipLogProgress(DeviceLayer, "ble service info: char uuid = %s", ble_service_info.characteristics[0].uuid);
     ChipLogProgress(DeviceLayer, "ble service info: char uuid = 0x%x", ble_service_info.characteristics[0].handle);
     ChipLogProgress(DeviceLayer, "ble service info: char uuid = 0x%x", ble_service_info.characteristics[0].properties);

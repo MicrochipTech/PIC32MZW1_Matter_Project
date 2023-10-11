@@ -173,9 +173,10 @@ void CLK_Initialize( void )
 
     if(((DEVID & 0x0FF00000) >> 20) == PIC32MZW1_B0)
     {
-        if((!CLKSTATbits.SPLLRDY && RCONbits.POR == 1 && RCONbits.EXTR == 1)
-            || (1 == CLKSTATbits.SPLLRDY && 0 == RCONbits.POR &&
-            ((1 == RCONbits.EXTR) || (1 == RCONbits.SWR))))
+        //if((!CLKSTATbits.SPLLRDY && RCONbits.POR == 1 && RCONbits.EXTR == 1)
+        //    || (1 == CLKSTATbits.SPLLRDY && 0 == RCONbits.POR &&
+        //    ((1 == RCONbits.EXTR) || (1 == RCONbits.SWR))))
+        if(0xc0000808 == SPLLCON)
 		{
 			EWPLLCON = 0x808; // Start with PWR-OFF PLL
 			SPLLCON  = 0x808; // Start with PWR-OFF PLL

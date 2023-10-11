@@ -482,6 +482,7 @@ As per latest memory usage analysis, this example consumes 943KB Program Memory 
 - Debug mode cannot be used with MPLAB X IDE on Microsoft Windows
 - It takes long loading time to start debug mode with MPLAB X IDE
 - Requires MPLAB XC32 compiler's PRO license
+- Device Commissioning over BLE with iPhone is not supported
 
 <a name="addh3components"></a>
 
@@ -490,7 +491,7 @@ As per latest memory usage analysis, this example consumes 943KB Program Memory 
 
   - MCC Project Configuration for PIC32MZW1 Lighting Example: 
 </p>
-  <p align="center"><img width="800" src="assets/projectGraph.png">
+  <p align="center"><img width="900" src="assets/projectGraph.png">
   </p>
 
   - To re-generate the code using MCC, right click "Generate" and select "Force Update on All" as Merge Strategy:
@@ -500,37 +501,37 @@ As per latest memory usage analysis, this example consumes 943KB Program Memory 
 
   - Do not merge following code, if the prompt messages are shown:
   </p>
-    <p align="center"><img width="800" src="assets/dnm1.png">
+    <p align="center"><img width="900" src="assets/dnm1.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm2.png">
+    <p align="center"><img width="900" src="assets/dnm2.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm3.png">
+    <p align="center"><img width="900" src="assets/dnm3.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm4.png">
+    <p align="center"><img width="900" src="assets/dnm4.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm5.png">
+    <p align="center"><img width="900" src="assets/dnm5.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm6.png">
+    <p align="center"><img width="900" src="assets/dnm6.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm7.png">
+    <p align="center"><img width="900" src="assets/dnm7.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm8.png">
+    <p align="center"><img width="900" src="assets/dnm8.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm9.png">
+    <p align="center"><img width="900" src="assets/dnm9.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm10.png">
+    <p align="center"><img width="900" src="assets/dnm10.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm11.png">
+    <p align="center"><img width="900" src="assets/dnm11.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm12.png">
+    <p align="center"><img width="900" src="assets/dnm12.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm13.png">
+    <p align="center"><img width="900" src="assets/dnm13.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm14.png">
+    <p align="center"><img width="900" src="assets/dnm14.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm15.png">
+    <p align="center"><img width="900" src="assets/dnm15.png">
     </p>
-    <p align="center"><img width="800" src="assets/dnm16.png">
+    <p align="center"><img width="900" src="assets/dnm16.png">
     </p>
 
 <a name="addmodclusters"></a>

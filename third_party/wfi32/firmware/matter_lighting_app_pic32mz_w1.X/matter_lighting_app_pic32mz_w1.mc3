@@ -8329,7 +8329,7 @@
       </entry>
       <entry>
          <file>..\src\config\pic32mz_w1_curiosity\initialization.c</file>
-         <hash>e777fad2c1718ec633c2ca7846b48fcbabea4b611c7a5fa61f19ba350fb2a28f</hash>
+         <hash>8378970bb7a97fb9794cdc70c8347e21e96ed1459f43c07ed9cd5518b6a47e1d</hash>
       </entry>
       <entry>
          <file>..\src\config\pic32mz_w1_curiosity\tasks.c</file>
@@ -8373,7 +8373,7 @@
       </entry>
       <entry>
          <file>..\src\config\pic32mz_w1_curiosity\definitions.h</file>
-         <hash>fa4e7eb8ea1695b1d97aaad8197c36dc23122f1a30ad8432ab0f7dbeb03df8f6</hash>
+         <hash>11714afa84bcc954f567c492c1be423daa5509d1b4ff59c936d54de89a6d1dad</hash>
       </entry>
       <entry>
          <file>..\src\third_party\rtos\FreeRTOS\Source\portable\MPLAB\PIC32MZ\port.c</file>
