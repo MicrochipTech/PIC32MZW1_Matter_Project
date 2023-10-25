@@ -60,7 +60,7 @@
 #define BTL_TRIGGER_PATTERN (0x5048434DUL)
 
 #define FLASH_SECTOR_SIZE 4096
-#define KVS_SIZE    0x3000
+#define KVS_SIZE    0x8000
 #define IMAGE_SIZE 1024 * 1024 - KVS_SIZE
 #define BOOT_DESCRIPTOR_SIZE FLASH_SECTOR_SIZE
 #define INTERNAL_FLASH_SIZE 1024 * 1024
@@ -80,7 +80,7 @@
 #define IMAGE_TYPE_FACTORY 0xFE
 #define IMAGE_TYPE_OTA 0xFD
 
-#define APP_KVS_STORE_ADDRESS         ((volatile const uint8_t *)0xb00FD000)
+#define APP_KVS_STORE_ADDRESS         ((volatile const uint8_t *)0xb00F8000)
 
 #define TEXT_FACTORY_RESET  "Factory Reset ...\r\n"
 #define TEXT_INTERNAL_FLASH_ERASE   "Int Flash Erase..\r\n"

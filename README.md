@@ -133,11 +133,11 @@ The demo setup for Matter Lighting example includes an Android phone running [Go
 git clone https://github.com/MicrochipTech/PIC32MZW1_Matter_Project.git
 ```
 
-- Switch to branch "pic32mzw1_support_v1":
+- Switch to branch "pic32mzw1_support_v1.1.0.1":
 
 ```
 cd PIC32MZW1_Matter_Project/
-git checkout pic32mzw1_support_v1
+git checkout pic32mzw1_support_v1.1.0.1
 ```
 
 - Update submodules:
