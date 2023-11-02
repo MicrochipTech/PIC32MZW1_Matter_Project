@@ -431,7 +431,7 @@ bool BLEManagerImpl::SendIndication(BLE_CONNECTION_OBJECT conId, const ChipBleUU
     RNBD_WriteLocalCharacteristic(4100, data_buf, dataLen*2);
 
     vPortFree(data_buf);
-#if 1
+#if 0
     //xSemaphoreTake(rnbd_shw_bin_sem, 0);
     send_ind_flag = false;
     while (1)
@@ -448,7 +448,6 @@ bool BLEManagerImpl::SendIndication(BLE_CONNECTION_OBJECT conId, const ChipBleUU
 #else
     vTaskDelay( 300 );  /* To Do: temperary workaround the missing of the indication ack event issue*/
 #endif
-    //vTaskDelay( 300 );  /* To Do: temperary workaround the missing of the indication ack event issue*/
 
     ChipDeviceEvent _event;
     _event.Type                          = DeviceEventType::kCHIPoBLEIndicateConfirm;

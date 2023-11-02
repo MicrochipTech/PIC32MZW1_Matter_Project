@@ -22,6 +22,7 @@ This MPLAB example demonstrates the use of Matter protocol over Microchip PIC32M
   - [Commissioning and Controlling Matter device](#commissioning-and-controlling-matter-device)
     - [Option 1: For testing purpose, by using CHIPTool APP](#option-1-for-testing-purpose-using-chiptool-app)
     - [Option 2: Google Ecosystem](#option-2-google-ecosystem)
+    - [Option 3: Google Home Sample APP](#option-3-google-home-sample-app)
   - [Attestation Certificate Provisioning](#attestation-certificate-provisioning)
   - [OTA Firmware Upgrade](#ota-firmware-upgrade)
   - [Memory Consumption](#memory-consumption)
@@ -93,7 +94,7 @@ Below picture show the details:
   <p align="center"><img width="600" src="assets/tss_compones.png">
   </p>
 
-- **Notes:** ECC608B Trust board is optional for test, if you want to disable the use fo ECC608B. To disable the use of ECC608B, you can disable the definition of "CHIP_DEVICE_CONFIG_ECC_INTEGRATION" in src/platform/wfi32/CHIPDevicePlatformConfig.h
+- **Notes:** ECC608B Trust board is optional for test, default settng is disable. To enable the use of ECC608B, you can enable the definition of "CHIP_DEVICE_CONFIG_ECC_INTEGRATION" in src/platform/wfi32/CHIPDevicePlatformConfig.h
 
 
 <a name="demosetup"></a>
@@ -133,11 +134,11 @@ The demo setup for Matter Lighting example includes an Android phone running [Go
 git clone https://github.com/MicrochipTech/PIC32MZW1_Matter_Project.git
 ```
 
-- Switch to branch "pic32mzw1_support_v1":
+- Switch to branch "pic32mzw1_support_v1.1.0.1":
 
 ```
 cd PIC32MZW1_Matter_Project/
-git checkout pic32mzw1_support_v1
+git checkout pic32mzw1_support_v1.1.0.1
 ```
 
 - Update submodules:
@@ -153,12 +154,8 @@ git submodule update --progress --init --recursive -- "examples/common/QRCode/re
 
 ## Build and Flash the example
 
-Update default Wi-Fi Access Point (AP) credentials in "/PIC32MZW1_Matter_Project/src/platform/wfi32/CHIPDevicePlatformConfig.h" file as below:
-
-```
-#define CHIP_DEVICE_CONFIG_DEFAULT_STA_SSID "DEMO_AP"
-#define CHIP_DEVICE_CONFIG_DEFAULT_STA_PASSWORD "password"
-```
+For evaulation, you can just download the hex file *matter_lighting_app_pic32mz_w1.X.production.hex* from the release package. Use MPLAB IPE to program the hex image to the WFI32-IoT board for test.
+If you want to build the project, you can read below section.
 
   ### Build with MPLAB X IDE (Windows environment/ Linux environment)
    To build and flash the example using MPLAB X IDE on Microsoft Windows/ Ubuntu, execute following commands:
@@ -305,12 +302,49 @@ Below picture show about the setup:
 
   - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.  
 
+  ### Option 3 Google Home Sample APP
+
+The Google Home Sample App for Matter uses the [Google Home Mobile SDK](https://developers.home.google.com/matter/apis/home) to create an Android app that's similar to Google Home app (GHA) . This sample app support to commission the Matter devices to the Matter fabric and control the Matter devices.  
+
+  #### Step 1:
+
+  Download and Install the [Google Home Sample APP](https://developers.home.google.com/samples/matter-app) to your Android smartphone
+
+  #### Step 2:
+
+  Connect your samrtphone to the target AP that the Matter deice need to be connected to.
+
+  #### Step 3:
+
+  Follow the [link](https://developers.home.google.com/samples/matter-app) to commission the matter devices over BLE.
+  Pair the Matter device (WFI32-IoT board) by following this [guide](https://developers.home.google.com/matter/integration/pair)   
+  The QR code string is printed in the serial console when it boots up. For example:
+  
+  ```
+  CHIP:SVR: SetupQRCode: [MT:-24J0AFN00KA0648G00]
+  CHIP:SVR: Copy/paste the below URL in a browser to see the QR Code:
+  CHIP:SVR: https://project-chip.github.io/connectedhomeip/qrcode.html?data=MT%3A-24J0AFN00KA0648G00
+  CHIP:SVR: Manual pairing code: [34970112332]
+  ```
+
+  Open the link in a web browser to display the QR code.
+
+  #### Step 4:
+
+  Control the Matter device by toggle your device On or Off on the APP.
+
+  </p>
+    <p align="center"><img width="300" src="assets/googleHomeSampleAPP.png"><img width="300" src="assets/controlYellowLED.png">
+    </p>
+
+   - Note: If you need to re-commission the device, you can long press Switch 1 (SW1) for 5 sec to factory reset the device.
+
 <a name="otafwupgrade"></a>
 
 ## Attestation Certificate Provisioning
 
-Matter Device Attestation Certificate (DAC) need to be provisioning to the ECC608B TrustFlex device for the commissioning process. It is used to proved that the device is certificed  and the manfacturer is the member of the Connectivity Standards Alliance (CSA).  
-In this project, the DAC and the keys are stored in the ECC608B TrustFlex (secure element) , users need to run scripts to generate the keypair in the ECC608B TrustFlex, create the Matter DAC and provision the certificate to the ECC608B TrustFlex.  
+If "CHIP_DEVICE_CONFIG_ECC_INTEGRATION" in src/platform/wfi32/CHIPDevicePlatformConfig.h is defined, Matter Device Attestation Certificate (DAC) need to be provisioning to the ECC608B TrustFlex device for the commissioning process. It is used to proved that the device is certificed  and the manfacturer is the member of the Connectivity Standards Alliance (CSA).  
+The DAC and the keys are stored in the ECC608B TrustFlex (secure element) , users need to run scripts to generate the keypair in the ECC608B TrustFlex, create the Matter DAC and provision the certificate to the ECC608B TrustFlex.  
 
 ### Environment Setup
 Before your prepare certificates, you need to perform below steps in the Linux Ubuntu to prepare the environment
@@ -370,7 +404,7 @@ For project development and tests, you can perform below steps:
  
 
 ### Certificates Provisioning (For production)
-For end product production , every device need to be installed a Device Attestation Certificates (DAC) that signed from the Matter certification authorities (CAs). Selected organzations get the authorization from Connectivity Standards Alliance (CSA) to be the Matter CA. When your product is certified, you can obtain the Product Attestation Intermediate (PAI) certificate and key from the Matter CA to sign the DAC of your prodcut.  
+For end product production , every device need to be installed a Device Attestation Certificates (DAC) that signed from the Matter certification authorities (CAs). Selected organzations get the authorization from Connectivity Standards Alliance (CSA) to be the Matter CA. When your product is certified, you can obtain the Product Attestation Intermediate (PAI) certificate from the Matter CA to sign the DAC of your prodcut.  
 If you need to provision your device with the certificate that signed by the PAI from Matter CA, you can perform sames steps in above section (Certificates Provsioning (For development and tests) ) except you need to input the correct PAI certificat and key in step 4 when you execute the scripts cert_create_and_prov.sh
 
 Another options for production is that you are setting up your own Public Key Infractructure (PKI) and create your own Attestation Authority (PAA) certificate and Product Attestation Intermediate (PAI) certificate. To do this, you need to get the authorization from CSA to be the Matter CA by following the Matter Certification Policy. 

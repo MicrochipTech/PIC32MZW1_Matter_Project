@@ -152,6 +152,7 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Get(const char * key, void * value, size_t
     
     if (found == 0)
     {
+        //ChipLogProgress(DeviceLayer, "_Get... Not Found");
         return CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND;
     }
     else
@@ -290,7 +291,7 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Put(const char * key, const void * value, 
 
 CHIP_ERROR KeyValueStoreManagerImpl::_Delete(const char * key) 
 { 
-    //ChipLogProgress(DeviceLayer, "ToDo: eyValueStoreManagerImpl:: _Delete... key = %s", key);
+    //ChipLogProgress(DeviceLayer, "KeyValueStoreManagerImpl:: _Delete... key = %s", key);
 
     bool found = 0;
     int i,j;
@@ -309,13 +310,13 @@ CHIP_ERROR KeyValueStoreManagerImpl::_Delete(const char * key)
         
         xSemaphoreGive(storage_mutex);  
         
-        for (i=0; i< KEY_NUM_PER_PAGE; i++)
+        for (j=0; j< KEY_NUM_PER_PAGE; j++)
         {
-            if (0 == strcmp(dvs_data[i].key, key))
+            if (0 == strcmp(dvs_data[j].key, key))
             {
                 ChipLogProgress(DeviceLayer, "KeyValueStoreManagerImpl::_Delete, done.."); 
                 found = 1;
-                memset(&dvs_data[i],0, sizeof(dvs_data[0]));
+                memset(&dvs_data[j],0, sizeof(dvs_data[0]));
                 break;
             }
         }
