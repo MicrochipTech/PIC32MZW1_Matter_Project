@@ -75,7 +75,7 @@ jobs:
         timeout-minutes: 25
         run: scripts/build/gn_bootstrap.sh
       - name: Uploading bootstrap logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ always() && !env.ACT }}
         with:
           name: bootstrap-logs
@@ -132,7 +132,7 @@ jobs:
       - name: Clean out build output
         run: rm -rf ./out
       - name: Uploading Size Reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: ${{ !env.ACT }}
         with:
           name: Size,EFR32-Examples,${{ env.GH_EVENT_PR }},${{ env.GH_EVENT_HASH }},${{ env.GH_EVENT_PARENT }},${{ github.event_name }}

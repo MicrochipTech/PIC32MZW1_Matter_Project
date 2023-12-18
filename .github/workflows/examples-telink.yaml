@@ -254,7 +254,7 @@ jobs:
               run: rm -rf ./out
 
             - name: Uploading Size Reports
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               if: ${{ !env.ACT }}
               with:
                   name: Size,Telink-Examples,${{ env.GH_EVENT_PR }},${{ env.GH_EVENT_HASH }},${{ env.GH_EVENT_PARENT }},${{ github.event_name }}
